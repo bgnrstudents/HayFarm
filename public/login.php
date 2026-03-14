@@ -1,5 +1,5 @@
 <?php
-require('koneksi.php');
+require('../config/database.php');
 //inisialisasi session
 session_start();
 $error = '';
