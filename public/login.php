@@ -24,7 +24,8 @@ if( isset($_POST['submit']) ){
                 if(password_verify($password, $hash)){
                     $_SESSION['username'] = $username;
             
-                    header('Location: absensi1.php');
+                    header('Location: ../index.php');
+                    exit();
                 }
                             
             //jika gagal maka akan menampilkan pesan error
