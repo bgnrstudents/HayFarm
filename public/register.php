@@ -202,7 +202,7 @@ button{
                 
                     <div class="form-group text-left">
                         <label for="nama">Username</label>
-                        <input type="text" class="form-control" id="usernama" name="usernama" placeholder="Masukkan Username">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan Username">
                     </div>
                     <div class="form-group text-left">
                         <label for="no_telp">No Telepon</label>
