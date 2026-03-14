@@ -1,13 +1,70 @@
 # HayFarm
-Sistem Informasi Peternakan Hay Farm
-# HayFarm Project Structure
 
-Dokumen ini menjelaskan struktur folder pada project **HayFarm** agar semua anggota tim memahami fungsi setiap bagian dari project.
+**Sistem Informasi Pendataan dan E-Commerce Tefa Produksi Ternak**
 
-Project ini menggunakan konsep **MVC (Model - View - Controller)** supaya kode lebih rapi, mudah dibaca, dan mudah dikerjakan secara tim.
+HayFarm adalah sistem informasi berbasis web yang digunakan untuk membantu pengelolaan data ternak serta penjualan produk ternak secara digital.
 
-----------------------------
-# Penjelasaan Gambaran Struktur Folder
+Project ini dikembangkan sebagai **project tim** menggunakan:
+
+* PHP Native
+* MySQL
+* Git
+* GitHub
+
+Karena project ini dikerjakan oleh beberapa developer dalam satu tim, maka digunakan **Git dan GitHub** untuk mengelola kode secara kolaboratif.
+
+Dokumen ini bertujuan untuk membantu seluruh anggota tim memahami:
+
+* struktur project
+* cara kerja sistem
+* workflow kolaborasi menggunakan Git
+
+---
+
+# Konsep Arsitektur Project
+
+Project ini menggunakan konsep **MVC (Model - View - Controller)**.
+
+Tujuan penggunaan MVC:
+
+* membuat struktur kode lebih rapi
+* memisahkan logika program dengan tampilan
+* memudahkan kerja tim
+* memudahkan pengembangan di masa depan
+
+Alur kerja MVC secara sederhana:
+
+```
+User membuka website
+        │
+        ▼
+index.php
+        │
+        ▼
+routes
+        │
+        ▼
+Controller
+        │
+        ▼
+Model mengambil data dari database
+        │
+        ▼
+View menampilkan halaman ke user
+```
+
+Dengan struktur ini project menjadi:
+
+* lebih rapi
+* mudah dipahami
+* mudah dikembangkan
+* mudah dikerjakan secara tim
+
+---
+
+# Struktur Folder Project
+
+Berikut struktur utama folder pada project **HayFarm**:
 
 ```
 HayFarm
@@ -34,11 +91,13 @@ HayFarm
 
 ---
 
-# 1. Folder `app`
+# Penjelasan Struktur Folder
+
+## 1. Folder `app`
 
 Folder **app** adalah tempat semua kode utama aplikasi berada.
 
-Di dalamnya ada tiga bagian utama:
+Di dalamnya terdapat tiga bagian utama:
 
 ```
 app
@@ -47,17 +106,17 @@ app
  └ views
 ```
 
-Ketiga folder ini mengikuti konsep **MVC**.
+Ketiga bagian ini mengikuti konsep **MVC**.
 
 ---
 
-# 2. Folder `controllers`
+## 2. Folder `controllers`
 
 Folder ini berisi file yang mengatur **alur program**.
 
-Controller menerima request dari user, lalu menentukan data apa yang diambil dan halaman apa yang ditampilkan.
+Controller menerima request dari user, kemudian menentukan data apa yang harus diambil dan halaman apa yang ditampilkan.
 
-Contoh isi folder:
+Contoh file controller:
 
 ```
 AuthController.php
@@ -66,26 +125,25 @@ ProdukController.php
 TransaksiController.php
 ```
 
-Contoh tugas controller:
+Tugas controller antara lain:
 
 * memproses login
-* mengambil data ternak
-* menampilkan halaman dashboard
+* mengambil data dari model
+* mengirim data ke view
+* menampilkan halaman
 
 ---
 
-# 3. Folder `models`
+## 3. Folder `models`
 
 Folder **models** berisi kode yang berhubungan langsung dengan **database**.
 
-Semua query seperti:
+Semua query database ditulis di dalam folder ini, seperti:
 
 * SELECT
 * INSERT
 * UPDATE
 * DELETE
-
-ditulis di dalam folder ini.
 
 Contoh file model:
 
@@ -100,7 +158,7 @@ Model bertugas mengambil dan mengolah data dari database.
 
 ---
 
-# 4. Folder `views`
+## 4. Folder `views`
 
 Folder **views** berisi tampilan yang dilihat oleh user.
 
@@ -110,7 +168,7 @@ Biasanya berisi:
 * sedikit kode PHP
 * layout halaman
 
-Contoh isi folder:
+Contoh struktur:
 
 ```
 views
@@ -130,9 +188,9 @@ View hanya bertugas **menampilkan data**, bukan mengolah data.
 
 ---
 
-# 5. Folder `config`
+## 5. Folder `config`
 
-Folder ini berisi **pengaturan sistem**.
+Folder ini berisi **konfigurasi sistem**.
 
 Contoh file:
 
@@ -140,11 +198,11 @@ Contoh file:
 database.php
 ```
 
-File ini digunakan untuk membuat koneksi ke database.
+File ini digunakan untuk mengatur koneksi ke database.
 
 ---
 
-# 6. Folder `database`
+## 6. Folder `database`
 
 Folder ini berisi file database project.
 
@@ -154,13 +212,13 @@ Contoh:
 hayfarm.sql
 ```
 
-File ini digunakan agar anggota tim lain bisa meng-import database dengan struktur yang sama.
+File ini digunakan agar anggota tim lain dapat meng-import database dengan struktur yang sama.
 
 ---
 
-# 7. Folder `public`
+## 7. Folder `public`
 
-Folder **public** berisi file untuk tampilan website.
+Folder **public** berisi file yang digunakan oleh tampilan website.
 
 Contoh isi:
 
@@ -175,13 +233,13 @@ Penjelasan:
 
 * **css** → file styling website
 * **js** → file javascript
-* **images** → gambar yang digunakan di website
+* **images** → gambar yang digunakan dalam website
 
 ---
 
-# 8. Folder `routes`
+## 8. Folder `routes`
 
-Folder ini berisi file yang mengatur **alamat URL website**.
+Folder ini berisi pengaturan **routing URL website**.
 
 Contoh file:
 
@@ -193,89 +251,39 @@ Contoh routing:
 
 ```
 /login → AuthController
-/ternak → TernakController
 /dashboard → DashboardController
+/ternak → TernakController
 ```
 
-Routing membantu menentukan halaman mana yang harus ditampilkan ketika user membuka URL tertentu.
+Routing digunakan untuk menentukan halaman yang harus ditampilkan ketika user membuka URL tertentu.
 
 ---
 
-# 9. File `index.php`
+## 9. File `index.php`
 
-File **index.php** adalah pintu masuk utama aplikasi.
+File **index.php** adalah **pintu masuk utama aplikasi**.
 
-Semua request dari browser akan masuk terlebih dahulu ke file ini, lalu diarahkan ke controller yang sesuai.
-
----
-
-# 10. File `README.md`
-
-File ini berisi dokumentasi project seperti:
-
-* penjelasan struktur folder
-* cara menjalankan project
-* cara meng-import database
-
-README membantu anggota tim memahami project dengan lebih cepat.
-
-------------------------------------------------------------------
-# penjelasan konsep → cara clone → branch workflow → aturan tim → workflow developer
-# Alur Kerja Sistem
-Cara kerja aplikasi secara sederhana:
-
-```
-User membuka website
-        │
-        ▼
-index.php
-        │
-        ▼
-routes
-        │
-        ▼
-Controller
-        │
-        ▼
-Model mengambil data dari database
-        │
-        ▼
-View menampilkan halaman ke user
-```
-
-Dengan struktur ini, project menjadi:
-
-* lebih rapi
-* mudah dipahami
-* mudah dikerjakan secara tim
-* mudah dikembangkan ke depan.
-# HAY FARM
-
-Sistem Informasi Pendataan dan E-Commerce Tefa Produksi Ternak
-
-Project ini dibuat sebagai project tim menggunakan **PHP Native** dan **MySQL** untuk membantu pengelolaan data ternak serta penjualan produk ternak secara digital.
-
-Karena project ini dikerjakan oleh **beberapa developer dalam satu tim**, maka kita menggunakan **Git** dan **GitHub** untuk mengelola kode secara kolaboratif.
+Semua request dari browser akan masuk terlebih dahulu ke file ini, kemudian diarahkan ke controller yang sesuai.
 
 ---
 
-# Kenapa Kita Menggunakan Git?
+# Kolaborasi Tim Menggunakan Git
 
-Git digunakan untuk membantu tim dalam mengelola kode program.
+Karena project ini dikerjakan oleh beberapa developer, maka digunakan **Git** untuk mengelola perubahan kode.
 
-Manfaat Git dalam project tim:
+Manfaat Git:
 
-* Menyimpan riwayat perubahan kode
-* Memudahkan kerja sama tim
-* Menghindari file saling tertimpa
-* Memudahkan melihat siapa yang mengubah kode
-* Memungkinkan kita kembali ke versi sebelumnya jika terjadi error
+* menyimpan riwayat perubahan kode
+* memudahkan kerja sama tim
+* menghindari file tertimpa
+* mengetahui siapa yang mengubah kode
+* memungkinkan kembali ke versi sebelumnya jika terjadi error
 
-Tanpa Git biasanya project tim akan mengalami masalah seperti:
+Tanpa Git, project tim biasanya mengalami masalah seperti:
 
-* file tertimpa oleh developer lain
-* sulit mengetahui perubahan kode
-* sulit menggabungkan kode dari beberapa developer
+* file tertimpa
+* konflik kode
+* sulit menggabungkan perubahan dari beberapa developer
 
 ---
 
@@ -290,7 +298,7 @@ GitHub digunakan untuk:
 * mengelola perubahan kode
 * melakukan review kode
 
-Dengan GitHub semua anggota tim bisa mengakses repository yang sama.
+Dengan GitHub semua anggota tim dapat mengakses repository yang sama.
 
 ---
 
@@ -312,15 +320,15 @@ Masuk ke folder project:
 cd HayFarm
 ```
 
-Sekarang project sudah ada di komputer kalian.
-
 ---
 
-# Apa itu Branch?
+# Konsep Branch pada Git
 
 Branch adalah **cabang dari project utama**.
 
-Bayangkan project seperti pohon.
+Branch memungkinkan developer mengerjakan fitur masing-masing tanpa mengganggu kode utama.
+
+Contoh konsep branch:
 
 ```
         main
@@ -330,40 +338,32 @@ Bayangkan project seperti pohon.
  login  ui   produk
 ```
 
-Branch digunakan agar setiap developer bisa mengerjakan fitur masing-masing **tanpa mengganggu kode utama**.
-
-Contoh branch:
+Contoh branch fitur:
 
 * feature-login
 * feature-ui
 * feature-ternak
 * feature-produk
 
-Dengan branch, setiap developer bisa bekerja secara terpisah.
-
 ---
 
 # Apa itu Branch Main?
 
-Branch **main** adalah cabang utama dari project.
+Branch **main** adalah cabang utama project.
 
 Branch ini berisi:
 
 * kode yang sudah stabil
-* kode yang sudah selesai
+* fitur yang sudah selesai
 * versi project yang siap digunakan
 
-Karena itu developer **tidak boleh langsung coding di branch main**.
-
-Branch main harus dijaga agar selalu stabil.
+Karena itu developer **tidak diperbolehkan langsung coding di branch main**.
 
 ---
 
-# Apa itu Branch Workflow?
+# Branch Workflow yang Digunakan
 
-Branch workflow adalah **cara kerja tim dalam menggunakan branch**.
-
-Workflow yang kita gunakan adalah:
+Workflow yang digunakan dalam project ini:
 
 1. mengambil update project
 2. membuat branch fitur
@@ -385,53 +385,25 @@ main
  |---- feature-produk
 ```
 
-Setiap developer bekerja di branch masing-masing.
-
----
-
-# Kenapa Harus Menggunakan Branch?
-
-Branch digunakan untuk:
-
-* memisahkan pekerjaan developer
-* menghindari konflik kode
-* menjaga branch main tetap stabil
-* memudahkan penggabungan fitur
-
-Jika semua developer coding di branch main maka:
-
-* kode bisa rusak
-* file bisa tertimpa
-* sulit mengetahui perubahan
-
 ---
 
 # Kenapa Harus `git pull origin main` Sebelum Coding?
 
 Perintah ini digunakan untuk **mengambil update terbaru dari repository**.
 
-Contoh kasus:
+Jika developer lain sudah menambahkan fitur baru, maka kita harus mengambil update tersebut agar kode tetap sinkron.
 
-Developer A menambahkan fitur login.
-
-Jika developer B tidak melakukan `git pull`, maka:
-
-* developer B tidak mendapatkan update terbaru
-* bisa terjadi konflik saat menggabungkan kode
-
-Karena itu **sebelum mulai coding selalu jalankan:**
+Jalankan perintah berikut sebelum mulai coding:
 
 ```
 git pull origin main
 ```
 
-Tujuannya agar kita bekerja pada **versi kode terbaru**.
-
 ---
 
 # Alur Kerja Developer
 
-Setiap developer harus mengikuti langkah berikut.
+Berikut langkah kerja yang harus diikuti setiap developer.
 
 ## 1. Ambil update terbaru
 
@@ -439,19 +411,11 @@ Setiap developer harus mengikuti langkah berikut.
 git pull origin main
 ```
 
----
-
 ## 2. Buat branch fitur
-
-Contoh membuat branch login:
 
 ```
 git checkout -b feature-login
 ```
-
-Sekarang kalian bekerja di branch tersebut.
-
----
 
 ## 3. Mulai coding
 
@@ -459,31 +423,18 @@ Kerjakan fitur sesuai tugas masing-masing.
 
 Contoh:
 
-* halaman login
+* login
 * dashboard
 * CRUD ternak
 * produk
 * transaksi
 
----
-
 ## 4. Simpan perubahan
-
-Tambahkan perubahan:
 
 ```
 git add .
-```
-
-Commit perubahan:
-
-```
 git commit -m "Menambahkan fitur login"
 ```
-
-Commit berfungsi untuk menyimpan perubahan kode ke dalam Git.
-
----
 
 ## 5. Kirim perubahan ke GitHub
 
@@ -491,23 +442,17 @@ Commit berfungsi untuk menyimpan perubahan kode ke dalam Git.
 git push origin feature-login
 ```
 
-Branch akan muncul di repository.
-
 ---
 
-# Apa itu Pull Request?
+# Pull Request
 
 Pull Request adalah proses **menggabungkan branch fitur ke branch main**.
 
-Sebelum digabung biasanya kode akan diperiksa terlebih dahulu.
+Sebelum digabung biasanya kode akan diperiksa terlebih dahulu untuk memastikan:
 
-Tujuan Pull Request:
-
-* memastikan kode berjalan dengan baik
-* menghindari bug
-* memastikan fitur sudah selesai
-
-Setelah disetujui, branch fitur akan digabungkan ke branch main.
+* fitur berjalan dengan baik
+* tidak ada bug
+* kode siap digabungkan
 
 ---
 
@@ -530,33 +475,29 @@ Produk dan e-commerce
 Developer 5
 Transaksi dan integrasi sistem
 
-Dengan pembagian ini setiap developer fokus pada fitur masing-masing.
-
 ---
 
 # Catatan Penting untuk Semua Anggota Tim
 
-Selalu lakukan:
+Sebelum mulai coding selalu jalankan:
 
 ```
 git pull origin main
 ```
 
-sebelum mulai coding.
-
 Dan **jangan pernah langsung coding di branch main**.
 
-Gunakan branch fitur masing-masing.
+Gunakan branch fitur masing-masing agar development tetap rapi.
 
 ---
 
 # Penutup
 
-Project ini dibuat sebagai latihan kolaborasi software development menggunakan:
+Project HayFarm dibuat sebagai latihan kolaborasi software development menggunakan:
 
 * PHP Native
 * MySQL
 * Git
 * GitHub
 
-Dengan workflow ini diharapkan semua anggota tim dapat bekerja sama dengan rapi dan project dapat selesai tepat waktu.
+Dengan workflow ini diharapkan seluruh anggota tim dapat bekerja sama dengan lebih terstruktur sehingga project dapat selesai dengan baik.
