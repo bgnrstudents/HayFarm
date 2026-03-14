@@ -202,12 +202,12 @@ CREATE TABLE `transaksi` (
   `no_telp` varchar(20) NOT NULL,
   `alamat` text NOT NULL,
   `kode_pos` varchar(5) NOT NULL,
-  `metode_pembayaran` enum('cod','transfer','','') NOT NULL,
+  `metode_pembayaran` enum('cod','transfer') NOT NULL,
   `jumlah_pembelian` float NOT NULL,
   `bukti_pembayaran` varchar(255) NOT NULL,
   `tgl_transaksi` date NOT NULL,
   `total_tagihan` float NOT NULL,
-  `status_transaksi` enum('menunggu_verifikasi','telah_dikonfirmasi','dibatalkan','') NOT NULL
+  `status_transaksi` enum('menunggu_verifikasi','telah_dikonfirmasi','dibatalkan') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
