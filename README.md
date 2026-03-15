@@ -1,269 +1,253 @@
-# HayFarm
+# HAYFARM
 
 **Sistem Informasi Pendataan dan E-Commerce Tefa Produksi Ternak**
 
-HayFarm adalah sistem informasi berbasis web yang digunakan untuk membantu pengelolaan data ternak serta penjualan produk ternak secara digital.
+HayFarm adalah sistem berbasis web yang dirancang untuk membantu pengelolaan produksi ternak sekaligus menyediakan fitur penjualan produk hasil ternak secara online. Sistem ini memiliki tiga jenis pengguna utama yaitu **Admin**, **User**, dan **Manager**.
 
-Project ini dikembangkan sebagai **project tim** menggunakan:
+Setiap peran memiliki fitur yang berbeda sesuai kebutuhan operasional peternakan.
+----
+# Teknologi yang Digunakan
 
 * PHP Native
 * MySQL
-* Git
-* GitHub
-
-Karena project ini dikerjakan oleh beberapa developer dalam satu tim, maka digunakan **Git dan GitHub** untuk mengelola kode secara kolaboratif.
-
-Dokumen ini bertujuan untuk membantu seluruh anggota tim memahami:
-
-* struktur project
-* cara kerja sistem
-* workflow kolaborasi menggunakan Git
+* HTML
+* CSS
+* JavaScript
 
 ---
 
-# Konsep Arsitektur Project
+# Tujuan Project
 
-Project ini menggunakan konsep **MVC (Model - View - Controller)**.
+Project ini dikembangkan sebagai **Sistem Informasi Pendataan dan E-Commerce Tefa Produksi Ternak** yang dapat membantu:
 
-Tujuan penggunaan MVC:
+* Pengelolaan data ternak
+* Monitoring kesehatan hewan
+* Penjualan produk hasil ternak
+* Penyajian laporan bagi manajemen
 
-* membuat struktur kode lebih rapi
-* memisahkan logika program dengan tampilan
-* memudahkan kerja tim
-* memudahkan pengembangan di masa depan
-
-Alur kerja MVC secara sederhana:
-
-```
-User membuka website
-        │
-        ▼
-index.php
-        │
-        ▼
-routes
-        │
-        ▼
-Controller
-        │
-        ▼
-Model mengambil data dari database
-        │
-        ▼
-View menampilkan halaman ke user
-```
-
-Dengan struktur ini project menjadi:
-
-* lebih rapi
-* mudah dipahami
-* mudah dikembangkan
-* mudah dikerjakan secara tim
 
 ---
 
 # Struktur Folder Project
 
-Berikut struktur utama folder pada project **HayFarm**:
+Struktur folder pada project ini dirancang agar mudah dipahami oleh developer pemula dan memudahkan pengembangan secara kolaboratif.
 
 ```
-HayFarm
+HAYFARM
 │
-├ app
-│ ├ controllers
-│ ├ models
-│ └ views
+├── components
+├── config
+├── pages
+│   ├── admin
+│   ├── manager
+│   └── user
 │
-├ config
+├── process
+├── public
+│   ├── css
+│   ├── images
+│   └── js
 │
-├ database
-│
-├ public
-│ ├ css
-│ ├ js
-│ └ images
-│
-├ routes
-│
-├ index.php
-└ README.md
+├── index.php
+├── login.php
+├── register.php
+├── logout.php
+└── README.md
 ```
 
 ---
 
-# Penjelasan Struktur Folder
+# Penjelasan Setiap Folder
 
-## 1. Folder `app`
+## 1. components
 
-Folder **app** adalah tempat semua kode utama aplikasi berada.
+Folder ini berisi komponen tampilan yang digunakan berulang pada berbagai halaman website.
 
-Di dalamnya terdapat tiga bagian utama:
+Contoh isi folder:
 
-```
-app
- ├ controllers
- ├ models
- └ views
-```
+* `navbar.php` → navigasi utama website
+* `footer.php` → bagian footer halaman
+* `sidebar_admin.php` → sidebar untuk dashboard admin
+* `sidebar_manager.php` → sidebar untuk dashboard manager
 
-Ketiga bagian ini mengikuti konsep **MVC**.
+Tujuan penggunaan folder ini adalah agar kode tampilan tidak perlu ditulis berulang pada setiap halaman.
 
 ---
 
-## 2. Folder `controllers`
+# 2. config
 
-Folder ini berisi file yang mengatur **alur program**.
+Folder ini berisi konfigurasi sistem.
 
-Controller menerima request dari user, kemudian menentukan data apa yang harus diambil dan halaman apa yang ditampilkan.
+Contoh:
 
-Contoh file controller:
+* `database/` → konfigurasi koneksi database MySQL.
 
-```
-AuthController.php
-TernakController.php
-ProdukController.php
-TransaksiController.php
-```
-
-Tugas controller antara lain:
-
-* memproses login
-* mengambil data dari model
-* mengirim data ke view
-* menampilkan halaman
+File pada folder ini biasanya dipanggil oleh halaman lain ketika membutuhkan koneksi ke database.
 
 ---
 
-## 3. Folder `models`
+# 3. pages
 
-Folder **models** berisi kode yang berhubungan langsung dengan **database**.
+Folder ini berisi **halaman tampilan utama sistem** yang akan diakses oleh pengguna.
+Folder ini dibagi berdasarkan **role pengguna**.
 
-Semua query database ditulis di dalam folder ini, seperti:
+## pages/admin
 
-* SELECT
-* INSERT
-* UPDATE
-* DELETE
+Berisi halaman yang dapat diakses oleh Admin.
 
-Contoh file model:
+Fitur Admin:
+
+* Dashboard
+* Manajemen Produk
+
+  * Hewan
+  * Susu
+  * Rumput
+* Verifikasi Penjualan
+* Data Hewan
+* Data Kesehatan Hewan
+
+Contoh file:
 
 ```
-UserModel.php
-TernakModel.php
-ProdukModel.php
-TransaksiModel.php
+dashboard.php
+verifikasi_penjualan.php
 ```
 
-Model bertugas mengambil dan mengolah data dari database.
+Subfolder yang digunakan:
+
+```
+data_hewan/
+kesehatan_hewan/
+produk/
+```
 
 ---
 
-## 4. Folder `views`
+## pages/manager
 
-Folder **views** berisi tampilan yang dilihat oleh user.
+Berisi halaman yang digunakan oleh Manager untuk melihat laporan dan monitoring data.
 
-Biasanya berisi:
+Fitur Manager:
 
-* HTML
-* sedikit kode PHP
-* layout halaman
+* Dashboard
+* Laporan Populasi
+* Laporan Kesehatan
+* Laporan Transaksi
+
+Contoh file:
+
+```
+dashboard.php
+lap_populasi.php
+lap_kesehatan.php
+lap_transaksi.php
+```
+
+---
+
+## pages/user
+
+Berisi halaman yang dapat diakses oleh pengguna atau pembeli.
+
+Fitur User:
+
+* Home
+* Tentang Kami
+* Produk
+* Keranjang
+* Checkout
+* Riwayat Transaksi
+
+Contoh file:
+
+```
+home.php
+produk.php
+keranjang.php
+checkout.php
+riwayat_pesanan.php
+tentang_kami.php
+```
+
+---
+
+# 4. process
+
+Folder ini berisi **logika proses sistem (backend)** seperti proses tambah data, edit data, hapus data, login, transaksi, dan lain-lain.
+
+Folder ini dibagi berdasarkan jenis proses.
 
 Contoh struktur:
 
 ```
-views
- ├ auth
- │ ├ login.php
- │ └ register.php
- │
- ├ ternak
- │ ├ index.php
- │ ├ create.php
- │ └ edit.php
- │
- └ dashboard.php
+process
+│
+├── auth
+├── data_hewan
+├── kesehatan_hewan
+├── penjualan
+├── produk
+│   ├── hewan
+│   ├── rumput
+│   └── susu
+└── transaksi
 ```
 
-View hanya bertugas **menampilkan data**, bukan mengolah data.
+Contoh fungsi proses:
+
+* `login_proses.php` → proses login pengguna
+* `register_proses.php` → proses registrasi
+* `tambah_hewan_proses.php` → menambahkan data hewan
+* `verifikasi_penjualan_proses.php` → memverifikasi transaksi penjualan
+* `checkout_proses.php` → proses checkout pembelian
+
+Folder ini tidak berisi tampilan, hanya berisi logika program.
 
 ---
 
-## 5. Folder `config`
+# 5. public
 
-Folder ini berisi **konfigurasi sistem**.
+Folder ini berisi aset statis yang digunakan oleh website.
 
-Contoh file:
-
-```
-database.php
-```
-
-File ini digunakan untuk mengatur koneksi ke database.
-
----
-
-## 6. Folder `database`
-
-Folder ini berisi file database project.
-
-Contoh:
-
-```
-hayfarm.sql
-```
-
-File ini digunakan agar anggota tim lain dapat meng-import database dengan struktur yang sama.
-
----
-
-## 7. Folder `public`
-
-Folder **public** berisi file yang digunakan oleh tampilan website.
-
-Contoh isi:
+Struktur:
 
 ```
 public
- ├ css
- ├ js
- └ images
+│
+├── css
+├── js
+└── images
 ```
 
 Penjelasan:
 
-* **css** → file styling website
-* **js** → file javascript
-* **images** → gambar yang digunakan dalam website
+* `css` → file stylesheet website
+* `js` → file JavaScript
+* `images` → gambar yang digunakan dalam tampilan website
 
 ---
 
-## 8. Folder `routes`
+# Alur Dasar Sistem
 
-Folder ini berisi pengaturan **routing URL website**.
+Berikut alur sederhana cara sistem bekerja:
 
-Contoh file:
-
-```
-web.php
-```
-
-Contoh routing:
-
-```
-/login → AuthController
-/dashboard → DashboardController
-/ternak → TernakController
-```
-
-Routing digunakan untuk menentukan halaman yang harus ditampilkan ketika user membuka URL tertentu.
+1. User membuka halaman pada folder **pages**
+2. Halaman tersebut memanggil **components** untuk layout
+3. Jika ada aksi (submit form), maka data dikirim ke folder **process**
+4. Folder **process** akan memproses data dan berinteraksi dengan **database**
+5. Setelah proses selesai, pengguna diarahkan kembali ke halaman tertentu
 
 ---
+# Developer Notes
 
-## 9. File `index.php`
+Struktur project dibuat agar:
 
-File **index.php** adalah **pintu masuk utama aplikasi**.
+* Mudah dipahami developer pemula
+* Mendukung pengembangan tim
+* Memisahkan tampilan dan logika proses
+* Mempermudah pengelolaan fitur berdasarkan role pengguna
 
-Semua request dari browser akan masuk terlebih dahulu ke file ini, kemudian diarahkan ke controller yang sesuai.
 
 ---
 
