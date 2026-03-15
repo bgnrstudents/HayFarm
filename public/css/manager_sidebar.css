@@ -1,0 +1,101 @@
+*{
+    margin:0;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:250px;
+    height:100vh;
+    position:fixed;
+    left:0;
+    top:0;
+}
+
+.logo{
+    width:120px;
+    margin:10px 46px;
+}
+
+.menu{
+    list-style:none;
+    padding:0;
+}
+
+.menu li{
+    padding:10px 20px;
+}
+
+.menu li a{
+    text-decoration:none;
+    color:#333;
+    display:block;
+}
+
+.menu li.active{
+    background:#1c5f36;
+    border-radius:6px;
+    margin:10px;
+}
+
+.menu li.active a{
+    color:white;
+}
+
+.menu-title{
+    font-size:12px;
+    color:#777;
+    padding:15px 20px 5px;
+}
+
+.logout{
+    margin-top:20px;
+}
+
+
+/* MAIN CONTENT */
+
+.main-content{
+    margin-left:250px;
+    height:100vh;
+    width: calc(100% - 250px);
+    background:rgba(221, 237, 226, 1);
+}
+
+
+/* TOPBAR */
+
+.topbar{
+    background:white;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.right-topbar{
+    display:flex;
+    align-items:center;
+    margin-left: auto;
+    gap:20px;
+}
+.notif{
+    position:relative;
+    font-size: 1.25rem;
+}
+
+.badge{
+    position: absolute;
+    background:red;
+    color:white;
+    border-radius:50%;
+    padding:3px 6px;
+    font-size:12px;
+    right: 123px;
+    top: 20px;
+}
+
+.user{
+    text-align:right;
+}
