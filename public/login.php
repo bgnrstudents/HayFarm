@@ -55,7 +55,7 @@ if( isset($_POST['submit']) ){
 body {
     margin: 0;
     padding: 0;
-    background: url('bg_login.png') no-repeat center center fixed;
+    background: url('images/bg_login.png') no-repeat center center fixed;
     background-size: cover;
 }
 section{

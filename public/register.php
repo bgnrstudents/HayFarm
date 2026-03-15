@@ -66,7 +66,7 @@ if( isset($_POST['submit']) ){
 body {
     margin: 0;
     padding: 0;
-    background: url('bg_login.png') no-repeat center center fixed;
+    background: url('images/bg_login.png') no-repeat center center fixed;
     background-size: cover;
 }
 section{
@@ -192,7 +192,7 @@ button{
         <section class="container-fluid mb-4">
             <!-- justify-content-center untuk mengatur posisi form agar berada di tengah-tengah -->
             <section class="row justify-content-center">
-            <section class="col-12 col-sm-6 col-md-4">
+            <section class="col-12 col-sm-6 col-md-4 col-lg-5">
                 <form class="form-container" action="register.php" method="POST">
                     <h4 class="text-center font-weight-bold"> Registerasi Akun Baru </h4>
                     <p> Buat akun baru untuk melanjutkan </p>
