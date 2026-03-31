@@ -33,6 +33,7 @@
                 <a href="#" class="btn-home">
                     Lihat Produk <i class="fa-solid fa-arrow-right"></i>
                </a>
+               <h1>DAFFI COBA</h1>
             </div>
         </div>
 
