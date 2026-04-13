@@ -42,7 +42,7 @@
             </span>
             <span class="badge">3</span>
             <div class="user">
-                <strong>Fatimah</strong><br>
+                <strong>FarelDwi</strong><br>
                 <small>Admin</small>
             </div>
         </div>
