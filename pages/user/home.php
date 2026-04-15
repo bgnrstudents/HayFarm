@@ -18,8 +18,7 @@
 
 <body>
     <!-- NAVBAR -->
-    <?php include 'components/navbar.php'; ?>
-
+<?php include '../../components/navbar.php'; ?>
 
     <!-- HOME -->
     <section id="home" class="home-section">
@@ -62,7 +61,7 @@
 
 
     <!-- FOOTER -->
-    <?php include 'components/footer.php'; ?>
+   <?php include '../../components/footer.php'; ?>
     <!-- BOOTSTRAP JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- MAIN JS -->
