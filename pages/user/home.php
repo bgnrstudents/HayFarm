@@ -35,7 +35,29 @@
                </a>
             </div>
         </div>
+
+        <div class="container mx-auto d-flex justify-content-center align-items-center bg-dark rounded-4"> 
+            <div class="quality d-flex justify-content-center align-items-start gap-3 p-4">
+                <div class="icon-4 text-center">
+                    <i class="fa-solid fa-check text-white"></i>
+                    <p class="text-white">Ternak Sehat & Terawat</p>
+                </div>
+                <div class="icon-4 text-center">
+                    <i class="fa-solid fa-check text-white"></i>
+                    <p class="text-white">Ternak Sehat & Terawat</p>
+                </div>
+                <div class="icon-4 text-center">
+                    <i class="fa-solid fa-check text-white"></i>
+                    <p class="text-white">Ternak Sehat & Terawat</p>
+                </div>
+                <div class="icon-4 text-center">
+                    <i class="fa-solid fa-check text-white"></i>
+                    <p class="text-white">Ternak Sehat & Terawat</p>
+                </div>
+            </div>
+        </div>
     </section>
+    
 
 
     <!-- FOOTER -->
