@@ -20,13 +20,15 @@
 .main-content {
     margin-left: 250px;
     padding: 20px;
-    min-height: 100vh;
+    min-height: 150vh;
 
     background: linear-gradient(
         to bottom,
-        #dbe7df 0%,   
+        #ffffff 0px,     
+        #ffffff 80px,  
+        #dbe7df 80px,    
         #c9d8cf 40%,
-        #b8c8be 100%  
+        #b8c8be 100%
     );
 }
 /* SIDEBAR */
