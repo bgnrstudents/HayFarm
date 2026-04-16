@@ -15,13 +15,13 @@
       <!-- MENU -->
       <ul class="navbar-nav mx-auto text-center gap-3 gap-lg-1 mb-lg-0 mb-3">
         <li class="nav-item">
-          <a class="nav-link active" href="/index.php">Home</a>
+          <a class="nav-link active" href="../HayFarm/index.php">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/pages/user/tentang_kami.php">Tentang Kami</a>
+          <a class="nav-link" href="pages/user/tentang_kami.php">Tentang Kami</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/pages/user/produk.php">Produk</a>
+          <a class="nav-link" href="pages/user/produk.php">Produk</a>
         </li>
       </ul>
 
