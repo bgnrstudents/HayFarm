@@ -245,7 +245,7 @@ body {
   cursor: pointer;
 }
 
-/* HIJAU */
+/* notifikasi */
 .notif-1 {
   background: #ffffff;
   color: #333;
@@ -288,6 +288,7 @@ body {
   font-size: 20px;
   opacity: 0.5;
 }
+
 </style>
 </head>
 
