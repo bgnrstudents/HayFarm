@@ -25,8 +25,8 @@
     background: linear-gradient(
         to bottom,
         #ffffff 0px,     
-        #ffffff 80px,  
-        #dbe7df 80px,    
+        #ffffff 80px,    
+        #dbe7df 80px,  
         #c9d8cf 40%,
         #b8c8be 100%
     );
@@ -107,7 +107,6 @@
     width: 300px;
 }
 
-/* ICON DI DALAM INPUT */
 .search-box i {
     position: absolute;
     left: 12px;
@@ -121,7 +120,8 @@
 /* INPUT */
 .search-box input {
     width: 100%;
-    padding: 8px 12px 8px 35px; 
+    padding: 8px 12px 8px 35px;
+    border-radius: 20px;
     border: none;
     outline: none;
     background: #f1f3f5;
@@ -220,11 +220,11 @@ p {
             <a href="#"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
         </li>
 
-        <li>
+        <li class="active">
             <a href="#"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
         </li>
 
-        <li class="active">
+        <li>
             <a href="#"><i class="fa-solid fa-file-circle-check"></i> Verifikasi Penjualan</a>
         </li>
 
@@ -251,7 +251,7 @@ p {
     <div class="topbar">
     
     <!-- SEARCH -->
- <div class="search-box">
+<div class="search-box">
     <i class="fa-solid fa-magnifying-glass"></i>
     <input type="text" placeholder="Pencarian">
 </div>
