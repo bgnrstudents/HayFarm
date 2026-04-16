@@ -216,7 +216,7 @@ body {
       background: white;
       border-radius: 15px;
       padding: 20px;
-      width: 90%;
+      width: 97%;
       margin: 30px auto;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
