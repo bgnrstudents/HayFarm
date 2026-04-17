@@ -25,8 +25,8 @@
     background: linear-gradient(
         to bottom,
         #ffffff 0px,     
-        #ffffff 80px,  
-        #dbe7df 80px,    
+        #ffffff 80px,    
+        #dbe7df 80px,  
         #c9d8cf 40%,
         #b8c8be 100%
     );
@@ -96,8 +96,7 @@
     justify-content: space-between;
     align-items: center;
     background: #ffffff; 
-    padding: 10px 20px;
-    border-bottom: 1px solid #eee; 
+    padding: 10px 20px; 
     
 }
 
@@ -107,7 +106,6 @@
     width: 300px;
 }
 
-/* ICON DI DALAM INPUT */
 .search-box i {
     position: absolute;
     left: 12px;
@@ -121,7 +119,8 @@
 /* INPUT */
 .search-box input {
     width: 100%;
-    padding: 8px 12px 8px 35px; 
+    padding: 8px 12px 8px 35px;
+    border-radius: 20px;
     border: none;
     outline: none;
     background: #f1f3f5;
@@ -170,42 +169,7 @@
 .user strong {
     font-size: 13px;
 }
-/* DASHBOARD */
-h4 {
-    margin-top: 15px;
-    font-weight: bold;
-}
 
-p {
-    color: #777;
-}
-
-/* CARDS */
-.cards {
-    display: flex;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.card-box {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    width: 250px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.card-box h6 {
-    color: #777;
-}
-
-.card-box h2 {
-    margin: 10px 0;
-}
-
-.card-box small {
-    color: #777;
-}
 </style>
 </head>
 
@@ -220,11 +184,11 @@ p {
             <a href="#"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
         </li>
 
-        <li>
+        <li class="active">
             <a href="#"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
         </li>
 
-        <li class="active">
+        <li>
             <a href="#"><i class="fa-solid fa-file-circle-check"></i> Verifikasi Penjualan</a>
         </li>
 
@@ -251,7 +215,7 @@ p {
     <div class="topbar">
     
     <!-- SEARCH -->
- <div class="search-box">
+<div class="search-box">
     <i class="fa-solid fa-magnifying-glass"></i>
     <input type="text" placeholder="Pencarian">
 </div>
@@ -261,40 +225,13 @@ p {
         <span id="currentDate"></span>
 
         <div class="notif">
-            <i class="fa-solid fa-bell"></i>
+            <i class="fa-solid fa-bell"style="color: rgb(25, 108, 51); size: 1.25rem;"></i>
             <span class="badge">6</span>
         </div>
 
         <div class="user">
             <strong>Farel</strong>
             <small>Admin</small>
-        </div>
-    </div>
-
-</div>
-
-    <!-- TITLE -->
-    <h4>Dashboard</h4>
-    <p>Selamat datang di panel kontrol administrasi peternakan</p>
-
-    <!-- CARDS -->
-    <div class="cards">
-        <div class="card-box">
-            <h6>Jumlah Hewan</h6>
-            <h2>10.243</h2>
-            <small>📈 8 Dari kemarin</small>
-        </div>
-
-        <div class="card-box">
-            <h6>Hewan Sakit per Hari</h6>
-            <h2>12</h2>
-            <small>📉 2 Dari kemarin</small>
-        </div>
-
-        <div class="card-box">
-            <h6>Jumlah Pembeli</h6>
-            <h2>345</h2>
-            <small>📈 7 Dari kemarin</small>
         </div>
     </div>
 
