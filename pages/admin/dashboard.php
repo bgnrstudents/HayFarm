@@ -250,6 +250,7 @@ body {
   padding: 20px;
   background-color: #f5f5f5;
   margin-top: 30px;
+  border-radius: 8px;
 }
 
 .notification-title {
