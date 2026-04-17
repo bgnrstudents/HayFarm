@@ -540,13 +540,12 @@
                                 <option value="sapi">Sapi</option>
                                 <option value="kambing">Kambing</option>
                                 <option value="domba">Domba</option>
-                                <option value="kerbau">Kerbau</option>
-                                <option value="ayam">Ayam</option>
+
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Nama Produk <span class="required">*</span></label>
-                            <input type="text" class="form-control-custom" placeholder="Rumput Gajah" id="namaProdukHewan">
+                            <input type="text" class="form-control-custom" placeholder="Jenis Hewan" id="namaProdukHewan">
                         </div>
                     </div>
 

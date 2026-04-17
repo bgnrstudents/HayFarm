@@ -408,6 +408,111 @@
 .action-btn:hover {
     transform: scale(1.1);
 }
+
+/* FILTER MODAL */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.filter-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.filter-modal h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.filter-group {
+    margin-bottom: 20px;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+}
+
+.filter-group select:focus {
+    border-color: #175D2B;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.filter-buttons button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-filter-apply {
+    background: #175D2B;
+    color: white;
+}
+
+.btn-filter-apply:hover {
+    background: #145024;
+}
+
+.btn-filter-reset {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-filter-reset:hover {
+    background: #d0d0d0;
+}
+
+.btn-filter-close {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.btn-filter-close:hover {
+    background: #e0e0e0;
+}
 </style>
 </head>
 
@@ -419,11 +524,11 @@
 
     <ul class="menu">
         <li>
-            <a href="#"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+            <a href="dashboard.php"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
         </li>
 
         <li class="active">
-            <a href="#"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
+            <a href="manajemen_produk.php"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
         </li>
 
         <li>
@@ -535,11 +640,11 @@
                 <i class="fa-solid fa-filter"></i>
                 Filter
             </button>
-            <button class="btn-export">
+            <button class="btn-export" onclick="exportTableToCSV('produk_data.csv')">
                 <i class="fa-solid fa-download"></i>
                 Export
             </button>
-            <button class="btn-add">
+            <button class="btn-add" onclick="window.location.href='produk/hewan/tambah_hewan.php'">
                 <i class="fa-solid fa-plus"></i>
                 Tambah Produk
             </button>
@@ -673,6 +778,38 @@
         </tbody>
     </table>
 </div>
+
+<!-- FILTER MODAL -->
+<div class="modal-overlay" id="filterModal">
+    <div class="filter-modal">
+        <h3>Filter Produk</h3>
+        
+        <div class="filter-group">
+            <label for="filterJenis">Jenis Produk</label>
+            <select id="filterJenis">
+                <option value="">Semua Jenis</option>
+                <option value="Rumput">Rumput</option>
+                <option value="Hewan">Hewan</option>
+                <option value="Susu">Susu</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filterStatus">Status</label>
+            <select id="filterStatus">
+                <option value="">Semua Status</option>
+                <option value="Tersedia">Tersedia</option>
+            </select>
+        </div>
+
+        <div class="filter-buttons">
+            <button class="btn-filter-apply" onclick="applyFilter()">Terapkan</button>
+            <button class="btn-filter-reset" onclick="resetFilter()">Reset</button>
+            <button class="btn-filter-close" onclick="closeFilterModal()">Tutup</button>
+        </div>
+    </div>
+</div>
+
 <script>
 const dateEl = document.getElementById('currentDate');
 const now = new Date();
@@ -682,6 +819,106 @@ dateEl.textContent = now.toLocaleDateString('id-ID', {
     month: 'long',
     day: 'numeric'
 });
+
+// Fungsi untuk membuka filter modal
+function openFilterModal() {
+    document.getElementById('filterModal').classList.add('active');
+}
+
+// Fungsi untuk menutup filter modal
+function closeFilterModal() {
+    document.getElementById('filterModal').classList.remove('active');
+}
+
+// Fungsi untuk menerapkan filter
+function applyFilter() {
+    const filterJenis = document.getElementById('filterJenis').value;
+    const filterStatus = document.getElementById('filterStatus').value;
+    
+    const table = document.querySelector('.product-table');
+    const rows = table.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        let show = true;
+        
+        // Filter berdasarkan Jenis Produk (kolom ke-2)
+        if (filterJenis) {
+            const jenisProduk = row.querySelector('td:nth-child(2)').innerText;
+            if (jenisProduk !== filterJenis) {
+                show = false;
+            }
+        }
+        
+        // Filter berdasarkan Status (kolom ke-7)
+        if (filterStatus && show) {
+            const status = row.querySelector('td:nth-child(7)').innerText.trim();
+            if (!status.includes(filterStatus)) {
+                show = false;
+            }
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+    
+    closeFilterModal();
+}
+
+// Fungsi untuk reset filter
+function resetFilter() {
+    document.getElementById('filterJenis').value = '';
+    document.getElementById('filterStatus').value = '';
+    
+    const table = document.querySelector('.product-table');
+    const rows = table.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        row.style.display = '';
+    });
+    
+    closeFilterModal();
+}
+
+// Tambahkan event listener ke tombol filter
+document.querySelector('.btn-filter').addEventListener('click', openFilterModal);
+
+// Tutup modal ketika klik di luar modal
+document.getElementById('filterModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeFilterModal();
+    }
+});
+
+// Fungsi export tabel ke CSV
+function exportTableToCSV(filename) {
+    const table = document.querySelector('.product-table');
+    let csv = [];
+    let rows = table.querySelectorAll('tr');
+    
+    // Loop melalui setiap baris
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll('td, th');
+        
+        // Loop melalui setiap kolom
+        for (let j = 0; j < cols.length - 1; j++) { // Abaikan kolom Aksi (terakhir)
+            let text = cols[j].innerText.replace(/"/g, '""');
+            row.push('"' + text + '"');
+        }
+        csv.push(row.join(','));
+    }
+    
+    // Buat blob dan download
+    let csvFile = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement('a');
+    let url = URL.createObjectURL(csvFile);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 </script>
 
 </body>
