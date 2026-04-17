@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin | Dashboard</title>
+<title>Admin | Manajemen Penjualan</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -169,7 +169,245 @@
 .user strong {
     font-size: 13px;
 }
+/* STATS CARDS */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
 
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-info h3 {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.stat-info .number {
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.stat-icon.produk {
+    background: #e8f5e9;
+    color: #175D2B;
+}
+
+.stat-icon.rumput {
+    background: #e8f5e9;
+    color: #4CAF50;
+}
+
+.stat-icon.susu {
+    background: #e3f2fd;
+    color: #2196F3;
+}
+
+.stat-icon.hewan {
+    background: #fff3e0;
+    color: #FF9800;
+}
+
+/* PRODUCT LIST SECTION */
+.product-section {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.section-header {
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.section-header p {
+    font-size: 13px;
+    color: #888;
+}
+
+/* TABLE CONTROLS */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.table-search {
+    flex: 1;
+    max-width: 300px;
+    position: relative;
+}
+
+.table-search input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+}
+
+.table-search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.table-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-filter, .btn-export {
+    padding: 10px 20px;
+    border: 1px solid #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.btn-filter:hover, .btn-export:hover {
+    background: #f5f5f5;
+}
+
+.btn-add {
+    padding: 10px 20px;
+    background: #175D2B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-add:hover {
+    background: #145024;
+}
+
+/* TABLE */
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.product-table thead {
+    background: #f8f9fa;
+}
+
+.product-table th {
+    padding: 12px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.product-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    color: #333;
+}
+
+.product-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-tersedia {
+    background: #e8f5e9;
+    color: #175D2B;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.action-btn.view {
+    background: #e3f2fd;
+    color: #2196F3;
+}
+
+.action-btn.edit {
+    background: #fff3e0;
+    color: #FF9800;
+}
+
+.action-btn.delete {
+    background: #ffebee;
+    color: #f44336;
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+}
 </style>
 </head>
 
@@ -236,7 +474,205 @@
     </div>
 
 </div>
+<!-- STATS CARDS -->
+<div class="stats-container">
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Produk</h3>
+            <div class="number">12</div>
+        </div>
+        <div class="stat-icon produk">
+            <i class="fa-solid fa-box"></i>
+        </div>
+    </div>
 
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Produk Rumput</h3>
+            <div class="number">1</div>
+        </div>
+        <div class="stat-icon rumput">
+            <i class="fa-solid fa-seedling"></i>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Produk Susu</h3>
+            <div class="number">56</div>
+        </div>
+        <div class="stat-icon susu">
+            <i class="fa-solid fa-bottle-water"></i>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Produk Hewan</h3>
+            <div class="number">4</div>
+        </div>
+        <div class="stat-icon hewan">
+            <i class="fa-solid fa-cow"></i>
+        </div>
+    </div>
+</div>
+
+<!-- PRODUCT LIST SECTION -->
+<div class="product-section">
+    <div class="section-header">
+        <h2>Daftar Produk</h2>
+        <p>Manajemen data produk</p>
+    </div>
+
+    <div class="table-controls">
+        <div class="table-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari produk...">
+        </div>
+        
+        <div class="table-actions">
+            <button class="btn-filter">
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+            <button class="btn-export">
+                <i class="fa-solid fa-download"></i>
+                Export
+            </button>
+            <button class="btn-add">
+                <i class="fa-solid fa-plus"></i>
+                Tambah Produk
+            </button>
+        </div>
+    </div>
+
+    <table class="product-table">
+        <thead>
+            <tr>
+                <th>NO</th>
+                <th>Jenis Produk</th>
+                <th>Nama Produk</th>
+                <th>Tanggal</th>
+                <th>Harga</th>
+                <th>Stok</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>00002</td>
+                <td>Rumput</td>
+                <td>Rumput</td>
+                <td>22/12/2025</td>
+                <td>2.000</td>
+                <td>1 Ton</td>
+                <td><span class="status-badge status-tersedia">Tersedia</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn view">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="action-btn delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>00003</td>
+                <td>Hewan</td>
+                <td>Sapi Perah</td>
+                <td>24/12/2025</td>
+                <td>20.000.000</td>
+                <td>1 Ekor</td>
+                <td><span class="status-badge status-tersedia">Tersedia</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn view">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="action-btn delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>00004</td>
+                <td>Hewan</td>
+                <td>Kambing</td>
+                <td>22/03/2025</td>
+                <td>2.000.000</td>
+                <td>1 Ekor</td>
+                <td><span class="status-badge status-tersedia">Tersedia</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn view">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="action-btn delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>00005</td>
+                <td>Susu</td>
+                <td>Susu</td>
+                <td>22/01/2025</td>
+                <td>2.000</td>
+                <td>1 Liter</td>
+                <td><span class="status-badge status-tersedia">Tersedia</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn view">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="action-btn delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>00006</td>
+                <td>Rumput</td>
+                <td>Rumput</td>
+                <td>22/12/2025</td>
+                <td>2.000</td>
+                <td>1 Ton</td>
+                <td><span class="status-badge status-tersedia">Tersedia</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn view">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="action-btn delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 <script>
 const dateEl = document.getElementById('currentDate');
 const now = new Date();
