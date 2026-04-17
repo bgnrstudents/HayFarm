@@ -1,0 +1,77 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=DM+Serif+Text:ital@0;1&family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,68;1,17..18,400..700,68&display=swap");
+
+:root {
+  --color-primary: #ffffff;
+  --color-secondary2: #175d2b;
+  --color-secondary: #196c33;
+  --font-poppins: "Poppins", sans-serif;
+  --font-amatic: "Amatic SC", sans-serif;
+  --font-googlesans: "DM Serif Text", serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-poppins);
+}
+
+/* PRODOK.PHP */
+
+/* Perbaiki: harus pakai titik untuk class */
+.banner-container {
+  margin: auto;
+  /* border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 50px rgba(0,0,0,0.5); */
+}
+
+.farm-green-bg {
+  background-color: var(--color-secondary2);
+}
+.main-title {
+  color: var(--color-primary);
+  font-family: var(--font-googlesans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-style: italic;
+  letter-spacing: 2px;
+}
+
+.blend-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Gunakan warna hijau dari variabel yang sudah ada */
+  background: linear-gradient(
+    to right,
+    var(--color-secondary2) 0%,
+    rgba(25, 108, 51, 0.8) 15%,
+    rgba(25, 108, 51, 0) 60%
+  );
+  z-index: 10;
+}
+/* Responsive mobile */
+@media (max-width: 767px) {
+  .blend-mask {
+    background: linear-gradient(
+      to bottom,
+      var(--color-secondary2) 0%,
+      rgba(25, 108, 51, 0.7) 20%,
+      rgba(25, 108, 51, 0) 50%
+    );
+  }
+  .main-title {
+    text-align: center;
+  }
+  .farm-green-bg {
+    padding-bottom: 2rem !important;
+  }
+}
