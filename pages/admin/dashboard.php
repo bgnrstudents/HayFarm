@@ -412,11 +412,11 @@ body {
 
     <ul class="menu">
         <li class="active">
-            <a href="#"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+            <a href="dashboard.php"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
         </li>
 
         <li>
-            <a href="#"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
+            <a href="manajemen_produk.php"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
         </li>
 
         <li>
