@@ -96,8 +96,7 @@
     justify-content: space-between;
     align-items: center;
     background: #ffffff; 
-    padding: 10px 20px;
-    border-bottom: 1px solid #eee; 
+    padding: 10px 20px; 
     
 }
 
@@ -170,42 +169,7 @@
 .user strong {
     font-size: 13px;
 }
-/* DASHBOARD */
-h4 {
-    margin-top: 15px;
-    font-weight: bold;
-}
 
-p {
-    color: #777;
-}
-
-/* CARDS */
-.cards {
-    display: flex;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.card-box {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    width: 250px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.card-box h6 {
-    color: #777;
-}
-
-.card-box h2 {
-    margin: 10px 0;
-}
-
-.card-box small {
-    color: #777;
-}
 </style>
 </head>
 
@@ -220,7 +184,7 @@ p {
             <a href="#"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
         </li>
 
-        <li>
+        <li class="active">
             <a href="#"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
         </li>
 
@@ -230,7 +194,7 @@ p {
 
         <p class="menu-title">DATA</p>
 
-        <li class="active">
+        <li>
             <a href="#"><i class="fa-solid fa-square-poll-vertical"></i> Data Hewan</a>
         </li>
 
@@ -261,40 +225,13 @@ p {
         <span id="currentDate"></span>
 
         <div class="notif">
-            <i class="fa-solid fa-bell"></i>
+            <i class="fa-solid fa-bell"style="color: rgb(25, 108, 51); size: 1.25rem;"></i>
             <span class="badge">6</span>
         </div>
 
         <div class="user">
             <strong>Farel</strong>
             <small>Admin</small>
-        </div>
-    </div>
-
-</div>
-
-    <!-- TITLE -->
-    <h4>Dashboard</h4>
-    <p>Selamat datang di panel kontrol administrasi peternakan</p>
-
-    <!-- CARDS -->
-    <div class="cards">
-        <div class="card-box">
-            <h6>Jumlah Hewan</h6>
-            <h2>10.243</h2>
-            <small>📈 8 Dari kemarin</small>
-        </div>
-
-        <div class="card-box">
-            <h6>Hewan Sakit per Hari</h6>
-            <h2>12</h2>
-            <small>📉 2 Dari kemarin</small>
-        </div>
-
-        <div class="card-box">
-            <h6>Jumlah Pembeli</h6>
-            <h2>345</h2>
-            <small>📈 7 Dari kemarin</small>
         </div>
     </div>
 

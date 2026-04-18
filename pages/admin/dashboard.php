@@ -216,77 +216,189 @@ body {
       background: white;
       border-radius: 15px;
       padding: 20px;
-      width: 97%;
       margin: 30px auto;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .row.g-4 > .col-md-4 {
+      display: flex;
+    }
+
+    .row.g-4 > .col-md-4 .card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .row.g-4 > .col-md-4 .card-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 180px;
+    }
+
+    .notif-card {
+      min-height: 140px;
     }
 
     h3 {
       margin-bottom: 20px;
     }
- /*notif*/
-    .notif-section h2 {
-  margin-bottom: 15px;
+  /* Notifikasi */
+.notification-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f5f5f5;
+  margin-top: 30px;
+  border-radius: 8px;
 }
 
-.notif-grid {
+.notification-title {
+  color: #2d5016;
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.notification-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 }
 
-.notif-card {
+.notification-card {
+  padding: 15px;
+  border-radius: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  border-radius: 12px;
-  position: relative;
-  cursor: pointer;
+  gap: 12px;
 }
 
-/* notifikasi */
-.notif-1 {
-  background: #ffffff;
-  color: #333;
-  border: 1px solid #e0e0e0;
+.notification-card > div:first-child {
+  flex: 1;
+  min-width: 0;
 }
 
-/* ABU */
-.notif-gray {
-  background: #ffffff;
-  color: #000;
+.card-number {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  width: 70px;
+  flex-shrink: 0;
 }
 
-.notif-card h4 {
-  margin: 0;
+.card-number-value,
+.card-number-label {
+  width: 100%;
+}
+
+.card-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.card-vaksinasi {
+  background-color: #1b7b3e;
+  color: white;
+}
+
+.card-default {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  font-weight: bold;
   font-size: 16px;
 }
 
-.notif-card p {
-  margin: 5px 0 0;
-  font-size: 12px;
-  opacity: 0.8;
+.card-vaksinasi .card-title {
+  color: white;
 }
 
-.notif-card .right {
+.card-default .card-title {
+  color: #333;
+}
+
+.card-description {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.card-vaksinasi .card-description {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.card-default .card-description {
+  color: #666;
+}
+
+.card-number {
   text-align: right;
 }
 
-.red h2 {
-  color: #dc3545;
+.card-number-value {
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.orange h2 {
-  color: #f59e0b;
+.card-vaksinasi .card-number-value {
+  color: white;
 }
 
-.notif-card::after {
-  content: "›";
-  position: absolute;
-  right: 15px;
-  font-size: 20px;
-  opacity: 0.5;
+.card-number-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.card-vaksinasi .card-number-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.card-default .card-number-label {
+  color: #666;
+}
+
+.text-red {
+  color: #e74c3c !important;
+}
+
+.text-green {
+  color: #2d5016 !important;
+}
+
+.text-orange {
+  color: #f39c12 !important;
+}
+
+.card-arrow {
+  margin-left: 10px;
+  font-size: 18px;
+}
+
+.card-vaksinasi .card-arrow {
+  color: white;
+}
+
+.card-default .card-arrow {
+  color: #666;
+}
+
+.icon-alert {
+  font-size: 14px;
+}
+
+.icon-small {
+  font-size: 12px;
 }
 
 </style>
@@ -300,11 +412,11 @@ body {
 
     <ul class="menu">
         <li class="active">
-            <a href="#"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+            <a href="dashboard.php"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
         </li>
 
         <li>
-            <a href="#"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
+            <a href="manajemen_produk.php"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
         </li>
 
         <li>
@@ -344,7 +456,7 @@ body {
         <span id="currentDate"></span>
 
         <div class="notif">
-            <i class="fa-solid fa-bell"></i>
+            <i class="fa-solid fa-bell"style="color: rgb(25, 108, 51); size: 1.25rem;"></i>
             <span class="badge">6</span>
         </div>
 
@@ -397,7 +509,7 @@ body {
 <div class="card">
 
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <h3 style="margin:0;">Grafik Penjualan / Bulan</h3>
+    <h3 style="margin:0;">Grafik Penjualan </h3>
 
     <select style="
       padding:5px 10px;
@@ -411,57 +523,76 @@ body {
   </div>
 
   <div id="chart"></div>
-
 </div>
-<div class="notif-section">
-  <h2>Notifikasi</h2>
 
-  <div class="notif-grid">
-
-    <div class="notif-card notif-1">
+<!-- Notifikasi -->
+<div class="notification-container">
+  <h2 class="notification-title">Notifikasi</h2>
+  
+  <div class="notification-grid">
+    <!-- Card 1 - Vaksinasi -->
+    <div class="notification-card card-vaksinasi">
       <div>
-        <h4>Vaksinasi diperlukan</h4>
-        <p>Hewan perlu vaksinasi segera</p>
+        <div class="card-title">
+          <span>Vaksinasi diperlukan segera</span>
+          <span class="icon-small"></span>
+        </div>
+        <div class="card-description">Hewan perlu vaksinasi segera</div>
       </div>
-      <div class="right">
-        <h2>9</h2>
-        <small>Hewan</small>
+      <div class="card-number">
+        <div class="card-number-value">9</div>
+        <div class="card-number-label">Hewan </div>
       </div>
+      <div class="card-arrow">›</div>
     </div>
 
-    <div class="notif-card notif-gray">
+    <!-- Card 2 - Produk Kedaluwarsa -->
+    <div class="notification-card card-default">
       <div>
-        <h4>Produk Kedaluwarsa ⚠️</h4>
-        <p>Perlu cek inventaris</p>
+        <div class="card-title">
+          <span>Produk Kedaluwarsa</span>
+          <span class="icon-alert"></span>
+        </div>
+        <div class="card-description">Perlu cek inventaris </div>
       </div>
-      <div class="right red">
-        <h2>5</h2>
-        <small>Produk</small>
+      <div class="card-number">
+        <div class="card-number-value text-red">5</div>
+        <div class="card-number-label">Produk </div>
       </div>
+      <div class="card-arrow">›</div>
     </div>
 
-    <div class="notif-card notif-gray">
+    <!-- Card 3 - Kelahiran -->
+    <div class="notification-card card-default">
       <div>
-        <h4>Kelahiran bulan ini 🐣</h4>
-        <p>Hewan baru lahir</p>
+        <div class="card-title">
+          <span>Kelahiran bulan ini</span>
+          <span class="icon-alert"></span>
+        </div>
+        <div class="card-description">Hewan baru lahir </div>
       </div>
-      <div class="right">
-        <h2>7</h2>
-        <small>Hewan</small>
+      <div class="card-number">
+        <div class="card-number-value text-green">7</div>
+        <div class="card-number-label">Hewan </div>
       </div>
+      <div class="card-arrow">›</div>
     </div>
 
-    <div class="notif-card notif-gray">
+    <!-- Card 4 - Perlu Verifikasi -->
+    <div class="notification-card card-default">
       <div>
-        <h4>Perlu verifikasi ✔️</h4>
-        <p>Menunggu konfirmasi admin</p>
+        <div class="card-title">
+          <span>Perlu verifikasi</span>
+          <span class="icon-alert">✓</span>
+        </div>
+        <div class="card-description">Menunggu konfirmasi admin </div>
       </div>
-      <div class="right orange">
-        <h2>3</h2>
-        <small>Orang</small>
+      <div class="card-number">
+        <div class="card-number-value text-orange">3</div>
+        <div class="card-number-label">Orang </div>
       </div>
+      <div class="card-arrow">›</div>
     </div>
-
   </div>
 </div>
 <script>
@@ -536,4 +667,5 @@ setInterval(() => {
 
 }, 10000);
 </script>
+</body>
 </html>
