@@ -1,16 +1,5 @@
 <?php
 ?>
-
-<!-- HOME HERO -->
-<?php
-// pages/user/home.php
-?>
-
-<!-- HERO SECTION - SESUAI FIGMA -->
-<?php
-// pages/user/home.php
-?>
-
 <!-- HERO SECTION -->
 <section id="hero" class="hero-section">
     <div class="hero-content">
@@ -60,7 +49,7 @@
 <section class="home2-section py-5">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6 text-center text-lg-start">
+            <div class="col-lg-6 col-12 text-center text-lg-start">
                 <img src="public/images/bghome.png" alt="About" class="about-image">
             </div>
             <div class="col-lg-6 about-text">

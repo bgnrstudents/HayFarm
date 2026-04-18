@@ -6,7 +6,7 @@
             <!-- Kiri -->
             <div class="col-lg-3 col-md-5">
                 <img src="public/images/logo/logo1.png" alt="HayFarm" style="height: 60px;">
-                <p class="footer-desc mt-3">Tentang Kami
+                <p class="footer-desc mt-3 text-sm-center text-md-start text-lg-start">
                    Membantu Anda Untuk Memilih Ternak Terbaik dan Peternak Terpercaya
                 </p>
             </div>

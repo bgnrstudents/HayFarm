@@ -187,7 +187,6 @@ nav.navbar {
   color: var(--color-secondary);
   font-size: 15px;
   line-height: 1.6;
-  max-width: 300px;
 }
 .footer-links a,
 .footer-contact li {
