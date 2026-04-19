@@ -1,13 +1,6 @@
+<?php include '../../components/header_manager.php'; ?>
 <?php include '../../components/sidebar_manager.php'; ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager || Dashboard</title>
-</head>
-<body>
-    
-</body>
-</html>
+<div class="main-content-dashboard">
+    <h1 class="h3 mb-0">Dashboard</h1>
+</div>
+<?php include '../../components/footer_manager.php'; ?>
