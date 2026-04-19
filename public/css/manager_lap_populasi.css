@@ -8,6 +8,14 @@ select {
     cursor: pointer;
 }
 
+.export-pdf {
+    background: #0f7b32;
+}
+
+.export-excel {
+    background: #0a8f3d;
+}
+
 .btn {
     border: none;
     padding: 12px 18px;
@@ -18,14 +26,48 @@ select {
     transition: 0.3s;
 }
 
-.export-pdf {
-    background: #0f7b32;
-}
-
-.export-excel {
-    background: #0a8f3d;
-}
-
 .btn:hover {
     opacity: 0.9;
+}
+
+.card-akumulasi {
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: 0.2s;
+}
+
+.card-akumulasi:hover .icon {
+    transform: scale(1.1);
+    transition: 0.2s;
+}
+
+.icon {
+    width: 60px;
+    height: 60px;
+    background: #e6f0ea;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.chart-box {
+    width: 435px;   
+    height: 265px;
+    margin: auto;   
+}
+
+td{
+    font-size: 18px;
+}
+
+.btn-detail {
+    background: rgba(148, 180, 157, 1);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
 }

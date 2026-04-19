@@ -1,8 +1,12 @@
-<?php include '../../components/header_manager.php'; ?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/HAYFARM-1/public/js/kesehatan_manager.js"></script>
 
 <script>
-    // Set current date in Indonesian format
+    // Set current date
     const dateEl = document.getElementById('currentDate');
     if (dateEl) {
         const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -25,7 +29,38 @@
 
         alert(`Export Excel:\nBulan: ${month}\nTahun: ${year}\nKategori: ${animal}`);
     }
+
+    // script Chart.js
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Aktif', 'Bunting', 'Terjual'],
+            datasets: [{
+                data: [10, 5, 3]
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('reproChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Tidak Produktif', 'Bunting'],
+            datasets: [{
+                data: [4, 6]
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar'],
+            datasets: [{
+                data: [50, 60, 55]
+            }]
+        }
+    });
 </script>
-</div>
+
 </body>
 </html>
