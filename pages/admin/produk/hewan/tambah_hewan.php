@@ -248,12 +248,11 @@
                     </div>
                 </div>
                 <div class="form-group" style="margin-top: 16px;">
-                    
-                    <label>Tambah Foto Produk/Hewan</label>
                     <div class="form-group">
                         <label>Tanggal Produksi <span class="required">*</span></label>
                         <input type="date" class="form-control-custom" id="tanggalProduksiSusu">
                     </div>
+                    <label>Tambah Foto Produk/Hewan</label>
                     <div class="upload-area" onclick="document.getElementById('fotoHewan').click()">
                         <div class="upload-icon"><i class="fas fa-camera"></i></div>
                         <div class="upload-text">Klik atau seret gambar ke sini</div>
