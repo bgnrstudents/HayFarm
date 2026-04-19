@@ -21,21 +21,12 @@
 </head>
 
 <body>
-    <div id="preloader">
+    <!-- <div id="preloader">
         <div class="loader"></div>
-    </div>
+    </div> -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="public/js/script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggler = document.querySelector('.navbar-toggler');
-            if (toggler) {
-                toggler.addEventListener('click', function() {
-                    this.classList.toggle('active');
-                });
-            }
-        });
-    </script>
 </body>
+
 </html>

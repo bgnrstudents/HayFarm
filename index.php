@@ -12,7 +12,7 @@ $allowed_pages = [
 
     // User — TANPA navbar & footer (layout sendiri)
     'user/keranjang',
-    'user/riwayat',
+    'user/riwayat_pesanan',
     'user/chekout',
     'user/detail_produk',
 
@@ -41,6 +41,7 @@ $page_css = match(true) {
     str_starts_with($page, 'user/produk')    => 'produk.css',
     str_starts_with($page, 'user/keranjang') => 'keranjang.css',
     str_starts_with($page, 'user/tentang')   => 'tentangkami.css',
+    str_starts_with($page, 'user/riwayat_pesanan') => 'riwayat_pesanan.css',
     str_starts_with($page, 'admin/')         => 'admin.css',
     str_starts_with($page, 'manager/')       => 'manager_sidebar.css',
     default                                  => 'style.css',
@@ -50,7 +51,7 @@ $page_css = match(true) {
 // User yang TIDAK pakai navbar & footer
 $user_no_layout_pages = [
     'user/keranjang',
-    'user/riwayat',
+    'user/riwayat_pesanan',
     'user/chekout',
     'user/detail_produk',
 ];

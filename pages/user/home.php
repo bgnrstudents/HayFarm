@@ -102,7 +102,7 @@
         </div>
 
         <div class="text-center mt-5">
-            <a href="index.php?page=user/produk" class="btn-produk">
+            <a href="index.php?page=user/riwayat_pesanan" class="btn-produk">
                 Lihat Selengkapnya <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>

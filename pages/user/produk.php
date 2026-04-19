@@ -41,8 +41,7 @@
                     data-bs-toggle="collapse"
                     data-bs-target="#filterSidebar"
                     aria-expanded="false"
-                    aria-controls="filterSidebar"
-                >
+                    aria-controls="filterSidebar">
                     <i class="fas fa-sliders-h me-2"></i>
                     Filter Produk
                     <i class="fas fa-chevron-down ms-auto filter-chevron"></i>
@@ -113,57 +112,17 @@
             </div>
 
             <!-- ===== PRODUCT GRID ===== -->
-            <div class="col-lg-9 col-md-12">
-                <div class="row row-cols-2 row-cols-md-2 row-cols-lg-3 g-3 g-md-4">
+            <div class="col-lg-9 col-md-12 col-12">
+
+                <!-- Satu row, semua card di dalamnya -->
+                <div class="row row-cols-2 row-cols-md-2 row-cols-lg-3 g-3 g-md-4" id="product-grid">
 
                     <!-- Card 1 -->
                     <div class="col">
                         <div class="produk-card h-100">
                             <div class="card-img-wrap position-relative">
-                                <img src="public/images/bgheader_produk.png" alt="Sapi Perah" class="card-img-top">
-                                <a href="#" class="detail-badge text-decoration-none">Detail</a>
-                            </div>
-                            <div class="card-body-custom">
-                                <h5 class="card-product-name">Sapi Perah</h5>
-                                <p class="card-price">Rp 10.000.000</p>
-                                <p class="card-desc">Sapi perah terbaik sepanjang masa karena diproduksi di POLIJE</p>
-                            </div>
-                            <div class="card-footer-custom d-flex align-items-center gap-2">
-                                <button class="btn btn-beli flex-grow-1">Beli</button>
-                                <a href="#" class="cart-icon" title="Tambah ke keranjang">
-                                    <i class="fas fa-cart-plus"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div class="col">
-                        <div class="produk-card h-100">
-                            <div class="card-img-wrap position-relative">
-                                <img src="public/images/bgheader_produk.png" alt="Sapi PO" class="card-img-top">
-                                <a href="#" class="detail-badge text-decoration-none">Detail</a>
-                            </div>
-                            <div class="card-body-custom">
-                                <h5 class="card-product-name">Sapi PO</h5>
-                                <p class="card-price">Rp 8.500.000</p>
-                                <p class="card-desc">Sapi PO unggul dari bibit pilihan peternakan Hay Farms</p>
-                            </div>
-                            <div class="card-footer-custom d-flex align-items-center gap-2">
-                                <button class="btn btn-beli flex-grow-1">Beli</button>
-                                <a href="#" class="cart-icon" title="Tambah ke keranjang">
-                                    <i class="fas fa-cart-plus"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="col">
-                        <div class="produk-card h-100">
-                            <div class="card-img-wrap position-relative">
                                 <img src="public/images/bgheader_produk.png" alt="Kambing" class="card-img-top">
-                                 <a href="#" class="detail-badge text-decoration-none">Detail</a>
+                                <a href="#" onclick="showDetail(1); return false;" class="detail-badge text-decoration-none">Detail</a>
                             </div>
                             <div class="card-body-custom">
                                 <h5 class="card-product-name">Kambing Etawa</h5>
@@ -179,9 +138,97 @@
                         </div>
                     </div>
 
+                    <!-- Card 2 -->
+                    <div class="col">
+                        <div class="produk-card h-100">
+                            <div class="card-img-wrap position-relative">
+                                <img src="public/images/bgheader_produk.png" alt="Sapi Perah" class="card-img-top">
+                                <a href="#" onclick="showDetail(2); return false;" class="detail-badge text-decoration-none">Detail</a>
+                            </div>
+                            <div class="card-body-custom">
+                                <h5 class="card-product-name">Sapi Perah</h5>
+                                <p class="card-price">Rp 10.000.000</p>
+                                <p class="card-desc">Sapi perah terbaik dengan produktivitas susu tinggi dari POLIJE</p>
+                            </div>
+                            <div class="card-footer-custom d-flex align-items-center gap-2">
+                                <button class="btn btn-beli flex-grow-1">Beli</button>
+                                <a href="?page=user/keranjang" class="cart-icon" title="Tambah ke keranjang">
+                                    <i class="fas fa-cart-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+        </div>
+    </div>
+    <!-- MODAL DETAIL PRODUK -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 shadow-sm" style="border-radius:16px;overflow:hidden">
+
+                <!-- Header -->
+                <div class="modal-header border-0 py-3 px-4">
+                    <h5 class="modal-title fw-semibold text-success mb-0">Detail Ternak</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body p-0">
+
+                    <!-- BARIS ATAS: foto kiri + info kanan (sejajar di desktop) -->
+                    <div id="detail-top">
+
+                        <!-- Foto -->
+                        <div id="detail-img-col">
+                            <img id="modal-image" src="public/images/bgheader_produk.png"
+                                alt="Foto Ternak">
+                        </div>
+
+                        <!-- Info Utama -->
+                        <div id="detail-info-col">
+                            <div class="info-grid">
+                                <span class="info-label">ID Ternak</span>
+                                <span id="modal-id" class="text-success fw-semibold">0004</span>
+                                <span class="info-label">Jenis</span>
+                                <span id="modal-jenis">Sapi Perah</span>
+                                <span class="info-label">Umur</span>
+                                <span id="modal-umur">7 Tahun</span>
+                                <span class="info-label">Lokasi</span>
+                                <span id="modal-lokasi">Kandang 4</span>
+                                <span class="info-label">Status</span>
+                                <span id="modal-status">
+                                    <span class="badge bg-success px-3 py-1 rounded-pill">Sehat</span>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- BARIS BAWAH: riwayat & catatan — full width, selalu di bawah -->
+                    <div id="detail-bottom">
+
+                        <hr class="my-3">
+
+                        <p class="fw-semibold mb-2" style="font-size:13px">Riwayat Pemeriksaan Lengkap</p>
+                        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+                            <table class="table table-sm table-bordered mb-0" id="modal-riwayat"
+                                style="font-size:13px;min-width:380px">
+                            </table>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <p class="fw-semibold mb-2" style="font-size:13px">Catatan Medis</p>
+                        <div id="modal-catatan" class="bg-light rounded-3 p-3 text-muted"
+                            style="font-size:13px;line-height:1.6">
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
         </div>
     </div>
 </section>
