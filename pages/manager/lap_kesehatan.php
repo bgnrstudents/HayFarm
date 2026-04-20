@@ -31,56 +31,56 @@
 <!-- CARDS -->
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card card-akumulasi p-3 shadow-sm">
+        <div class="card card-kesehatan p-3 shadow-sm">
             <div class="d-flex align-items-center gap-3">
                 <div class="icon">
-                    <img src="../../public/svg/sapi.svg">
+                    <img src="../../public/svg/heart.svg">
                 </div>
                 <div>
-                    <h2 class="mb-0">50</h2>
-                    <small>Sapi</small>
+                    <h2 class="mb-0">80</h2>
+                    <small>Sehat</small>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card card-akumulasi p-3 shadow-sm">
+        <div class="card card-kesehatan p-3 shadow-sm">
             <div class="d-flex align-items-center gap-3">
                 <div class="icon">
-                    <img src="../../public/svg/kambing.svg">
+                    <img src="../../public/svg/suntik.svg">
                 </div>
                 <div>
-                    <h2 class="mb-0">40</h2>
-                    <small>Kambing</small>
+                    <h2 class="mb-0">20</h2>
+                    <small>Sakit</small>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card card-akumulasi p-3 shadow-sm">
+        <div class="card card-kesehatan p-3 shadow-sm">
             <div class="d-flex align-items-center gap-3">
                 <div class="icon">
-                    <img src="../../public/svg/domba.svg">
+                    <img src="../../public/svg/lab.svg">
                 </div>
                 <div>
-                    <h2 class="mb-0">30</h2>
-                    <small>Domba</small>
+                    <h2 class="mb-0">10</h2>
+                    <small>Observasi</small>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card card-akumulasi p-3 shadow-sm">
+        <div class="card card-kesehatan p-3 shadow-sm">
             <div class="d-flex align-items-center gap-3">
                 <div class="icon">
-                    <img src="../../public/svg/kandang.svg" alt="Kandang Icon">
+                    <img src="../../public/svg/warning.svg" alt="Kandang Icon">
                 </div>
                 <div>
-                    <h2 class="mb-0">120</h2>
-                    <small>Total Hewan</small>
+                    <h2 class="mb-0">10</h2>
+                    <small>Dalam Perawatan</small>
                 </div>
             </div>
         </div>
@@ -92,30 +92,30 @@
     <div class="col-md-6">
         <div class="card p-3 shadow-sm">
             <h6>Kasus Berdasarkan Jenis Hewan</h6>
-            <canvas id="reproChart"></canvas>
+            <canvas id="kesehatanReproChart"></canvas>
         </div>
     </div>
 
     <div class="col-md-6">
         <div class="card p-3 shadow-sm">
             <h6>Trend Pemeriksaan Kesehatan 6 Bulan Terakhir</h6>
-            <canvas id="trendChart"></canvas>
+            <canvas id="kesehatanTrendChart"></canvas>
         </div>
     </div>
 </div>
 
 <!-- TABLE -->
 <div class="card p-3 shadow-sm">
-    <h6>Detail Data Ternak</h6>
+    <h6>Detail Riwayat Kesehatan</h6>
     <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Jenis</th>
+                    <th>Jenis Hewan</th>
                     <th>Status</th>
-                    <th>Reproduksi</th>
-                    <th>Kesehatan</th>
+                    <th>Diagnosis</th>
+                    <th>Tindakan</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -123,9 +123,25 @@
                 <tr>
                     <td>0001</td>
                     <td>Sapi</td>
-                    <td><span class="badge bg-success">Aktif</span></td>
-                    <td>IB bulan lalu</td>
-                    <td>Sehat</td>
+                    <td><span class="badge bg-success">Sehat</span></td>
+                    <td>--</td>
+                    <td>Vaksinasi</td>
+                    <td><button class="btn-detail">Lihat Detail</button></td>
+                </tr>
+                <tr>
+                    <td>0002</td>
+                    <td>Kambing</td>
+                    <td><span class="badge bg-warning">Dalam Perawatan</span></td>
+                    <td>Infeksi ringan</td>
+                    <td>Antibiotik</td>
+                    <td><button class="btn-detail">Lihat Detail</button></td>
+                </tr>
+                <tr>
+                    <td>0003</td>
+                    <td>Domba</td>
+                    <td><span class="badge bg-danger">Observasi</span></td>
+                    <td>Demam</td>
+                    <td>Monitoring</td>
                     <td><button class="btn-detail">Lihat Detail</button></td>
                 </tr>
             </tbody>
@@ -134,4 +150,5 @@
 </div>
 
 
+<script src="/HAYFARM-1/public/js/kesehatan_manager.js"></script>
 <?php include '../../components/footer_manager.php'; ?>

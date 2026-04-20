@@ -8,15 +8,15 @@ document.addEventListener("DOMContentLoaded", function () {
         gray: '#6c757d'
     };
 
-    // KASUS BERDASARKAN JENIS HEWAN
-    const reproCtx = document.getElementById('kesehatanReproChart');
+    // Penjualan Per Jenis Produk
+    const reproCtx = document.getElementById('transaksiProChart');
     if (reproCtx) {
         new Chart(reproCtx, {
             type: 'bar',
             data: {
-                labels: ['Sapi', 'Kambing', 'Domba'],
+                labels: ['Hewan', 'Susu', 'Rumput'],
                 datasets: [{
-                    data: [4, 6, 3],
+                    data: [5, 20, 15],
                     backgroundColor: [
                         colors.primary,
                         colors.soft,
@@ -33,24 +33,36 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // TREND PEMERIKSAAN KESEHATAN
-    const trendCtx = document.getElementById('kesehatanTrendChart');
+    // Trend Penjualan 6 Bulan Terakhir
+    const trendCtx = document.getElementById('transaksiTrendChart');
     if (trendCtx) {
         new Chart(trendCtx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                labels: ['Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb'], // ← label X = bulan
                 datasets: [{
-                    data: [50, 60, 55, 70, 65, 80],
+                    data: [5000000, 10000000, 17500000, 13500000, 10500000, 25000000],
                     borderColor: colors.primary,
-                    backgroundColor: colors.soft,
-                    fill: true,
+                    pointBackgroundColor: colors.warning, 
+                    pointRadius: 6,
+                    backgroundColor: 'transparent',
+                    fill: false,
                     tension: 0.4
                 }]
             },
             options: {
                 plugins: {
                     legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp. ' + value.toLocaleString('id-ID');
+                            },
+                            stepSize: 5000000  
+                        }
+                    }
                 }
             }
         });

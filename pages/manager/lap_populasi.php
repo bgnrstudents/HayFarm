@@ -88,25 +88,25 @@
 </div>
 
 <!-- CHART SECTION -->
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card chart-box p-3 shadow-sm">
+<div class="row g-4 mb-4">  
+    <div class="col-md-4">  
+        <div class="card p-3 shadow-sm">
             <h6>Distribusi Status</h6>
-            <canvas id="statusChart"></canvas>
+            <canvas id="populasiStatusChart"></canvas>
         </div>
     </div>
 
     <div class="col-md-4">
         <div class="card p-3 shadow-sm">
             <h6>Status Reproduksi</h6>
-            <canvas id="reproChart"></canvas>
+            <canvas id="populasiReproChart"></canvas>
         </div>
     </div>
 
     <div class="col-md-4">
         <div class="card p-3 shadow-sm">
             <h6>Trend Populasi</h6>
-            <canvas id="trendChart"></canvas>
+            <canvas id="populasiTrendChart"></canvas>
         </div>
     </div>
 </div>
@@ -119,7 +119,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Jenis</th>
+                    <th>Jenis Hewan</th>
                     <th>Status</th>
                     <th>Reproduksi</th>
                     <th>Kesehatan</th>
@@ -140,5 +140,11 @@
     </div>
 </div>
 
+
+<script>
+    const labelsStatus = <?= json_encode($labelsStatus ?? ['Aktif', 'Bunting', 'Terjual', 'Tidak Produktif']) ?>;
+    const dataStatus   = <?= json_encode($dataStatus ?? [70, 25, 25, 5]) ?>;
+</script>
+<script src="/HAYFARM-1/public/js/populasi_manager.js"></script>
 
 <?php include '../../components/footer_manager.php'; ?>

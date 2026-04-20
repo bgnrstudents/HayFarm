@@ -68,7 +68,7 @@ body,input,button{
     align-items:center;
     gap:10px;
     padding:12px 14px;
-    border-radius:14px;
+    border-radius:15px;
     color:#2a3f2b;
     text-decoration:none;
     font-size:0.95rem;
@@ -171,6 +171,7 @@ body,input,button{
 .user small{
     color:#6f816f;
 }
+
 
 /* RESPONSIVE */
 @media(max-width:900px){
