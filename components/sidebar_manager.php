@@ -5,7 +5,9 @@ function isActive($page) {
 ?>
 
 <div class="sidebar p-3">
-    <img src="../../public/images/logo_hayfarm.png" class="logo">
+    <a href="/HayFarm-1/">
+        <img src="../../public/images/logo_hayfarm.png" class="logo" alt="Logo HayFarm">
+    </a>
     <ul class="menu">
         <li class="<?= isActive('dashboard.php') ?>">
             <a href="../../pages/manager/dashboard.php">

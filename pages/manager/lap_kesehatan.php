@@ -24,8 +24,8 @@
         <option>Domba</option>
     </select>
 
-    <button class="btn btn-success" onclick="exportPDF()">Export PDF</button>
-    <button class="btn btn-success" onclick="exportExcel()">Export Excel</button>
+    <button class="btn btn-success" onclick="exportPDF()"><i class="fa fa-file-pdf"></i> Export PDF</button>
+    <button class="btn btn-success" onclick="exportExcel()"><i class="fa fa-file-excel"></i> Export Excel</button>
 </div>
 
 <!-- CARDS -->
