@@ -510,13 +510,15 @@
 .edit-modal .btn-save:hover {
     background-color: #059669;
     box-shadow: 0 6px 14px rgba(16, 185, 129, 0.4);
-}/* Preview Modal Styles - Background Transparan */
+}
+
+/* Preview Modal Styles */
 .preview-modal {
-    background: transparent; /* Background dihilangkan */
+    background: transparent;
     border-radius: 16px;
     width: 95%;
     max-width: 1100px;
-    box-shadow: none; /* Shadow dihilangkan karena background transparan */
+    box-shadow: none;
     position: relative;
     padding: 10px;
 }
@@ -527,8 +529,8 @@
     right: 15px;
     font-size: 28px;
     cursor: pointer;
-    color: #ffffff; /* Warna putih agar terlihat di overlay gelap */
-    background: rgba(0, 0, 0, 0.3); /* Background semi-transparan untuk tombol close */
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
     border: none;
     width: 36px;
     height: 36px;
@@ -556,34 +558,32 @@
 }
 
 .preview-card {
-    background-color: #ffffff; /* Card tetap putih agar konten terbaca */
+    background-color: #ffffff;
     border-radius: 16px;
     overflow: hidden;
     width: 340px;
     min-width: 340px;
     flex-shrink: 0;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25); /* Shadow lebih tegas */
-    border: none; /* Border dihilangkan untuk look yang lebih clean */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    border: none;
     transition: transform 0.2s ease;
 }
 
-.preview-card:hover {
-    transform: translateY(-3px); /* Efek hover subtle */
-}
+.preview-card:hover { transform: translateY(-3px); }
 
 .preview-card .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 14px 18px;
-    background: linear-gradient(135deg, #175D2B 0%, #1e7a3a 100%); /* Gradient header */
+    background: linear-gradient(135deg, #175D2B 0%, #1e7a3a 100%);
     border-bottom: none;
 }
 
 .preview-card .header-title {
     font-size: 15px;
     font-weight: 700;
-    color: #ffffff; /* Teks putih di header hijau */
+    color: #ffffff;
 }
 
 .preview-card .header-id {
@@ -624,9 +624,7 @@
     transition: transform 0.3s ease;
 }
 
-.preview-card:hover .card-image img {
-    transform: scale(1.03); /* Zoom effect on hover */
-}
+.preview-card:hover .card-image img { transform: scale(1.03); }
 
 .preview-card .card-image .no-image {
     color: #9ca3af;
@@ -671,9 +669,7 @@
     color: #1f2937;
 }
 
-.preview-card .detail-item.empty {
-    visibility: hidden;
-}
+.preview-card .detail-item.empty { visibility: hidden; }
 
 .preview-card .status-available {
     display: inline-flex;
@@ -716,11 +712,11 @@
 .preview-card .status-unavailable .dot { background-color: #f44336; }
 
 .preview-card .btn-close {
-    display: flex; /* Ubah dari block ke flex */
-    align-items: center; /* Vertikal center */
-    justify-content: center; /* Horizontal center */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: calc(100% - 36px);
-    margin: 16px auto 18px; /* 'auto' pada margin kiri-kanan untuk center horizontal */
+    margin: 16px auto 18px;
     padding: 12px;
     background: linear-gradient(135deg, #175D2B 0%, #1e7a3a 100%);
     color: #ffffff;
@@ -731,7 +727,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(23, 93, 43, 0.3);
-    text-align: center; /* Fallback untuk teks */
+    text-align: center;
 }
 
 .preview-card .btn-close:hover {
@@ -740,27 +736,13 @@
     box-shadow: 0 6px 16px rgba(23, 93, 43, 0.4);
 }
 
-.preview-card .btn-close:active {
-    transform: translateY(0);
-}
+.preview-card .btn-close:active { transform: translateY(0); }
+
 /* Responsive Preview */
 @media (max-width: 768px) {
-    .preview-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-    
-    .preview-card {
-        width: 100%;
-        max-width: 340px;
-        min-width: auto;
-    }
-    
-    .preview-modal .modal-close {
-        color: #333;
-        background: rgba(255, 255, 255, 0.9);
-    }
+    .preview-container { flex-direction: column; align-items: center; gap: 20px; }
+    .preview-card { width: 100%; max-width: 340px; min-width: auto; }
+    .preview-modal .modal-close { color: #333; background: rgba(255, 255, 255, 0.9); }
 }
 
 /* Toast Notification */
@@ -887,7 +869,7 @@
             <div class="table-actions">
                 <button class="btn-filter"><i class="fa-solid fa-filter"></i> Filter</button>
                 <button class="btn-export" onclick="exportTableToCSV('produk_data.csv')"><i class="fa-solid fa-download"></i> Export</button>
-                <button class="btn-add" onclick="window.location.href='produk/hewan/tambah_hewan.php'">
+                <button class="btn-add" onclick="openAddModal()">
                     <i class="fa-solid fa-plus"></i> Tambah Produk
                 </button>
             </div>
@@ -915,7 +897,7 @@
         <div class="empty-state" id="emptyState">
             <i class="fa-solid fa-box-open"></i>
             <p>Belum ada data produk. Klik "Tambah Produk" untuk menambahkan data pertama Anda.</p>
-            <button class="btn-add" onclick="window.location.href='produk/hewan/tambah_hewan.php'">
+            <button class="btn-add" onclick="openAddModal()">
                 <i class="fa-solid fa-plus"></i> Tambah Produk Sekarang
             </button>
         </div>
@@ -1143,7 +1125,7 @@
                             <input type="date" class="form-input" id="edit-tgl-produksi-susu" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Tanggal Kadaluarsa <span class="required">*</span></label>
+                            <label class="form-label">Tanggal Kadaluwarsa <span class="required">*</span></label>
                             <input type="date" class="form-input" id="edit-tgl-expiry-susu" required>
                         </div>
                     </div>
@@ -1208,6 +1190,245 @@
             <button class="modal-close" onclick="closePreviewModal()">&times;</button>
             <div class="preview-container" id="previewContainer">
                 <!-- Preview cards will be generated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL TAMBAH PRODUK ================= -->
+    <div class="modal-overlay" id="addProductModal">
+        <div class="edit-modal" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeAddModal()">&times;</button>
+            
+            <div class="header">
+                <div>
+                    <h2>Tambah Produk Baru</h2>
+                    <p>Isi form di bawah untuk menambahkan produk</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="hewan" onclick="switchAddTab('hewan')">🐄 Hewan</div>
+                <div class="tab" data-tab="susu" onclick="switchAddTab('susu')">🥛 Susu</div>
+                <div class="tab" data-tab="rumput" onclick="switchAddTab('rumput')">🌿 Rumput</div>
+            </div>
+            
+            <div class="form-content">
+                <!-- ===== FORM HEWAN ===== -->
+                <form id="add-form-hewan" class="form-section active" onsubmit="handleAddSubmit(event, 'hewan')">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Jenis Hewan <span class="required">*</span></label>
+                            <select class="form-select" id="add-jenis-hewan" required>
+                                <option value="">-- Pilih Jenis --</option>
+                                <option value="sapi">Sapi</option>
+                                <option value="kambing">Kambing</option>
+                                <option value="domba">Domba</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nama Produk <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="add-nama-hewan" placeholder="Nama Hewan" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Harga <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="add-harga-hewan" placeholder="Rp 0" required oninput="formatCurrencyInput(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stok <span class="required">*</span></label>
+                            <select class="form-select" id="add-stok-hewan" required>
+                                <option value="">-- Pilih --</option>
+                                <option value="1">1</option><option value="2">2</option>
+                                <option value="3">3</option><option value="4">4</option>
+                                <option value="5">5</option><option value="10">10</option>
+                                <option value="15">15</option><option value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Upload Foto -->
+                    <div class="form-group full-width">
+                        <label class="form-label">Foto Hewan</label>
+                        <div class="upload-wrapper">
+                            <input type="file" id="add-file-hewan" class="file-input" hidden accept="image/*" onchange="previewAddImage(event, 'hewan')">
+                            <div class="upload-box" onclick="document.getElementById('add-file-hewan').click()">
+                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
+                                <p class="upload-text">Klik untuk menambahkan foto</p>
+                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
+                            </div>
+                            <div class="image-preview" id="add-preview-hewan" style="display: none;">
+                                <img id="add-img-hewan" src="" alt="Preview">
+                                <button type="button" class="btn-remove" onclick="removeAddImage('hewan')">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group full-width">
+                        <label class="form-label">Status <span class="required">*</span></label>
+                        <div class="status-divider"></div>
+                        <div class="status-options">
+                            <div class="status-option available active" onclick="selectAddStatus(this, 'hewan')">
+                                <span class="status-icon">✓</span><span>Tersedia</span>
+                            </div>
+                            <div class="status-option unavailable" onclick="selectAddStatus(this, 'hewan')">
+                                <span class="status-icon">✕</span><span>Tidak Tersedia</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="add-status-hewan" value="tersedia">
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Batal</button>
+                        <button type="submit" class="btn btn-save">💾 Simpan Data</button>
+                    </div>
+                </form>
+
+                <!-- ===== FORM SUSU ===== -->
+                <form id="add-form-susu" class="form-section" onsubmit="handleAddSubmit(event, 'susu')">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nama Produk <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="add-nama-susu" placeholder="Masukkan nama produk" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Produksi <span class="required">*</span></label>
+                            <input type="date" class="form-input" id="add-tgl-produksi-susu" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Kadaluwarsa <span class="required">*</span></label>
+                            <input type="date" class="form-input" id="add-tgl-expiry-susu" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Harga <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="add-harga-susu" placeholder="Rp 0" required oninput="formatCurrencyInput(this)">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label class="form-label">Stok <span class="required">*</span></label>
+                            <select class="form-select" id="add-stok-susu" required>
+                                <option value="">-- Pilih --</option>
+                                <option value="1">1</option><option value="2">2</option>
+                                <option value="3">3</option><option value="4">4</option>
+                                <option value="5">5</option><option value="10">10</option>
+                                <option value="15">15</option><option value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Upload Foto -->
+                    <div class="form-group full-width">
+                        <label class="form-label">Foto Produk</label>
+                        <div class="upload-wrapper">
+                            <input type="file" id="add-file-susu" class="file-input" hidden accept="image/*" onchange="previewAddImage(event, 'susu')">
+                            <div class="upload-box" onclick="document.getElementById('add-file-susu').click()">
+                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
+                                <p class="upload-text">Klik untuk menambahkan foto</p>
+                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
+                            </div>
+                            <div class="image-preview" id="add-preview-susu" style="display: none;">
+                                <img id="add-img-susu" src="" alt="Preview">
+                                <button type="button" class="btn-remove" onclick="removeAddImage('susu')">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group full-width">
+                        <label class="form-label">Status <span class="required">*</span></label>
+                        <div class="status-divider"></div>
+                        <div class="status-options">
+                            <div class="status-option available active" onclick="selectAddStatus(this, 'susu')">
+                                <span class="status-icon">✓</span><span>Tersedia</span>
+                            </div>
+                            <div class="status-option unavailable" onclick="selectAddStatus(this, 'susu')">
+                                <span class="status-icon">✕</span><span>Tidak Tersedia</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="add-status-susu" value="tersedia">
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Batal</button>
+                        <button type="submit" class="btn btn-save">💾 Simpan Data</button>
+                    </div>
+                </form>
+
+                <!-- ===== FORM RUMPUT ===== -->
+                <form id="add-form-rumput" class="form-section" onsubmit="handleAddSubmit(event, 'rumput')">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nama Produk <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="add-nama-rumput" placeholder="Rumput Gajah" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Produksi <span class="required">*</span></label>
+                            <input type="date" class="form-input" id="add-tanggal-rumput" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Harga <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="add-harga-rumput" placeholder="Rp 0" required oninput="formatCurrencyInput(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stok <span class="required">*</span></label>
+                            <select class="form-select" id="add-stok-rumput" required>
+                                <option value="">-- Pilih --</option>
+                                <option value="1">1</option><option value="2">2</option>
+                                <option value="3">3</option><option value="4">4</option>
+                                <option value="5">5</option><option value="10">10</option>
+                                <option value="15">15</option><option value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Upload Foto -->
+                    <div class="form-group full-width">
+                        <label class="form-label">Foto Produk</label>
+                        <div class="upload-wrapper">
+                            <input type="file" id="add-file-rumput" class="file-input" hidden accept="image/*" onchange="previewAddImage(event, 'rumput')">
+                            <div class="upload-box" onclick="document.getElementById('add-file-rumput').click()">
+                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
+                                <p class="upload-text">Klik untuk menambahkan foto</p>
+                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
+                            </div>
+                            <div class="image-preview" id="add-preview-rumput" style="display: none;">
+                                <img id="add-img-rumput" src="" alt="Preview">
+                                <button type="button" class="btn-remove" onclick="removeAddImage('rumput')">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group full-width">
+                        <label class="form-label">Status <span class="required">*</span></label>
+                        <div class="status-divider"></div>
+                        <div class="status-options">
+                            <div class="status-option available active" onclick="selectAddStatus(this, 'rumput')">
+                                <span class="status-icon">✓</span><span>Tersedia</span>
+                            </div>
+                            <div class="status-option unavailable" onclick="selectAddStatus(this, 'rumput')">
+                                <span class="status-icon">✕</span><span>Tidak Tersedia</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="add-status-rumput" value="tersedia">
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Batal</button>
+                        <button type="submit" class="btn btn-save">💾 Simpan Data</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1446,15 +1667,12 @@ function openEditModal(productId) {
         return;
     }
     
-    // Reset all forms first
     document.querySelectorAll('.edit-modal .form-section').forEach(form => form.classList.remove('active'));
     document.querySelectorAll('.edit-modal .tab').forEach(tab => tab.classList.remove('active'));
     
-    // Switch to correct tab based on product type
     const jenis = product.jenis?.toLowerCase();
     switchEditTab(jenis);
     
-    // Populate form based on product type
     if (jenis === 'hewan') {
         document.getElementById('edit-id-hewan').value = product.id;
         document.getElementById('edit-jenis-hewan').value = product.jenis_detail || '';
@@ -1464,7 +1682,6 @@ function openEditModal(productId) {
         document.getElementById('edit-stok-hewan').value = product.stok || '';
         document.getElementById('edit-status-hewan').value = product.status || 'tersedia';
         
-        // Set status UI
         const statusOpts = document.querySelectorAll('#edit-form-hewan .status-option');
         statusOpts.forEach(opt => opt.classList.remove('active'));
         if (product.status === 'tersedia') {
@@ -1473,7 +1690,6 @@ function openEditModal(productId) {
             statusOpts[1].classList.add('active');
         }
         
-        // Set image if exists
         if (product.foto) {
             document.getElementById('edit-img-hewan').src = product.foto;
             document.getElementById('edit-preview-hewan').style.display = 'flex';
@@ -1584,7 +1800,6 @@ function handleEditSubmit(event, type) {
     const id = document.getElementById(`edit-id-${type}`).value;
     const status = document.getElementById(`edit-status-${type}`).value;
     
-    // Get form values
     const updatedData = {
         status: status,
         updated_at: new Date().toISOString()
@@ -1596,7 +1811,6 @@ function handleEditSubmit(event, type) {
         updatedData.berat = document.getElementById('edit-berat-hewan').value;
         updatedData.harga = parseInt(document.getElementById('edit-harga-hewan').value.replace(/\D/g, '')) || 0;
         updatedData.stok = parseInt(document.getElementById('edit-stok-hewan').value) || 0;
-        // Handle image
         const imgSrc = document.getElementById('edit-img-hewan').src;
         if (imgSrc && !imgSrc.includes('placeholder')) {
             updatedData.foto = imgSrc;
@@ -1633,7 +1847,6 @@ function handleEditSubmit(event, type) {
     }
 }
 
-// Close modals when clicking outside
 document.getElementById('editModal').addEventListener('click', (e) => {
     if (e.target.id === 'editModal') closeEditModal();
 });
@@ -1669,32 +1882,12 @@ function openPreviewModal(productId) {
                 </div>
                 <h3 class="detail-title">DETAIL PRODUK RUMPUT</h3>
                 <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Kategori</label>
-                        <p class="value">${capitalizeFirst(product.jenis)}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Nama Produk</label>
-                        <p class="value">${product.nama || '-'}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Jenis</label>
-                        <p class="value">${capitalizeFirst(product.jenis_detail) || '-'}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Harga</label>
-                        <p class="value">${formatRupiah(product.harga)} / Kg</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Stok</label>
-                        <p class="value">${product.stok || 0} Kg</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Status</label>
-                        <p class="value ${statusClass}">
-                            <span class="dot" style="background-color: ${dotColor}"></span> ${statusText}
-                        </p>
-                    </div>
+                    <div class="detail-item"><label>Kategori</label><p class="value">${capitalizeFirst(product.jenis)}</p></div>
+                    <div class="detail-item"><label>Nama Produk</label><p class="value">${product.nama || '-'}</p></div>
+                    <div class="detail-item"><label>Jenis</label><p class="value">${capitalizeFirst(product.jenis_detail) || '-'}</p></div>
+                    <div class="detail-item"><label>Harga</label><p class="value">${formatRupiah(product.harga)} / Kg</p></div>
+                    <div class="detail-item"><label>Stok</label><p class="value">${product.stok || 0} Kg</p></div>
+                    <div class="detail-item"><label>Status</label><p class="value ${statusClass}"><span class="dot" style="background-color: ${dotColor}"></span> ${statusText}</p></div>
                 </div>
                 <button class="btn-close" onclick="closePreviewModal()">Tutup Preview</button>
             </div>
@@ -1712,36 +1905,13 @@ function openPreviewModal(productId) {
                 </div>
                 <h3 class="detail-title">DETAIL PRODUK HEWAN</h3>
                 <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Kategori</label>
-                        <p class="value">${capitalizeFirst(product.jenis)}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Nama Produk</label>
-                        <p class="value">${product.nama || '-'}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Jenis Hewan</label>
-                        <p class="value">${capitalizeFirst(product.jenis_detail) || '-'}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Berat</label>
-                        <p class="value">${product.berat ? product.berat + ' Kg' : '-'}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Harga</label>
-                        <p class="value">${formatRupiah(product.harga)}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Jumlah</label>
-                        <p class="value">${product.stok || 0} Ekor</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Status</label>
-                        <p class="value ${statusClass}">
-                            <span class="dot" style="background-color: ${dotColor}"></span> ${statusText}
-                        </p>
-                    </div>
+                    <div class="detail-item"><label>Kategori</label><p class="value">${capitalizeFirst(product.jenis)}</p></div>
+                    <div class="detail-item"><label>Nama Produk</label><p class="value">${product.nama || '-'}</p></div>
+                    <div class="detail-item"><label>Jenis Hewan</label><p class="value">${capitalizeFirst(product.jenis_detail) || '-'}</p></div>
+                    <div class="detail-item"><label>Berat</label><p class="value">${product.berat ? product.berat + ' Kg' : '-'}</p></div>
+                    <div class="detail-item"><label>Harga</label><p class="value">${formatRupiah(product.harga)}</p></div>
+                    <div class="detail-item"><label>Jumlah</label><p class="value">${product.stok || 0} Ekor</p></div>
+                    <div class="detail-item"><label>Status</label><p class="value ${statusClass}"><span class="dot" style="background-color: ${dotColor}"></span> ${statusText}</p></div>
                 </div>
                 <button class="btn-close" onclick="closePreviewModal()">Tutup Preview</button>
             </div>
@@ -1759,40 +1929,14 @@ function openPreviewModal(productId) {
                 </div>
                 <h3 class="detail-title">DETAIL PRODUK SUSU</h3>
                 <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Kategori</label>
-                        <p class="value">${capitalizeFirst(product.jenis)}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Nama Produk</label>
-                        <p class="value">${product.nama || '-'}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Jenis Susu</label>
-                        <p class="value">${capitalizeFirst(product.jenis_detail) || '-'}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Tgl. Produksi</label>
-                        <p class="value">${formatDate(product.tanggal_produksi)}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Tgl. Kadaluarsa</label>
-                        <p class="value">${formatDate(product.tanggal_expiry)}</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Harga</label>
-                        <p class="value">${formatRupiah(product.harga)} / Liter</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Stok</label>
-                        <p class="value">${product.stok || 0} Liter</p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Status</label>
-                        <p class="value ${statusClass}">
-                            <span class="dot" style="background-color: ${dotColor}"></span> ${statusText}
-                        </p>
-                    </div>
+                    <div class="detail-item"><label>Kategori</label><p class="value">${capitalizeFirst(product.jenis)}</p></div>
+                    <div class="detail-item"><label>Nama Produk</label><p class="value">${product.nama || '-'}</p></div>
+                    <div class="detail-item"><label>Jenis Susu</label><p class="value">${capitalizeFirst(product.jenis_detail) || '-'}</p></div>
+                    <div class="detail-item"><label>Tgl. Produksi</label><p class="value">${formatDate(product.tanggal_produksi)}</p></div>
+                    <div class="detail-item"><label>Tgl. Kadaluarsa</label><p class="value">${formatDate(product.tanggal_expiry)}</p></div>
+                    <div class="detail-item"><label>Harga</label><p class="value">${formatRupiah(product.harga)} / Liter</p></div>
+                    <div class="detail-item"><label>Stok</label><p class="value">${product.stok || 0} Liter</p></div>
+                    <div class="detail-item"><label>Status</label><p class="value ${statusClass}"><span class="dot" style="background-color: ${dotColor}"></span> ${statusText}</p></div>
                 </div>
                 <button class="btn-close" onclick="closePreviewModal()">Tutup Preview</button>
             </div>
@@ -1809,6 +1953,163 @@ function closePreviewModal() {
 
 document.getElementById('previewModal').addEventListener('click', (e) => {
     if (e.target.id === 'previewModal') closePreviewModal();
+});
+
+// ==================== MODAL TAMBAH PRODUK ====================
+function openAddModal() {
+    document.querySelectorAll('#addProductModal .form-section').forEach(f => f.classList.remove('active'));
+    document.querySelectorAll('#addProductModal .tab').forEach(t => t.classList.remove('active'));
+    switchAddTab('hewan');
+    resetAddForm('hewan');
+    resetAddForm('susu');
+    resetAddForm('rumput');
+    document.getElementById('addProductModal').classList.add('active');
+}
+
+function closeAddModal() {
+    document.getElementById('addProductModal').classList.remove('active');
+}
+
+function switchAddTab(tabName) {
+    document.querySelectorAll('#addProductModal .tab').forEach(tab => {
+        tab.classList.remove('active');
+        if(tab.dataset.tab === tabName) tab.classList.add('active');
+    });
+    document.querySelectorAll('#addProductModal .form-section').forEach(form => {
+        form.classList.remove('active');
+    });
+    document.getElementById(`add-form-${tabName}`).classList.add('active');
+}
+
+function resetAddForm(type) {
+    const form = document.getElementById(`add-form-${type}`);
+    form.reset();
+    const statusOpts = form.querySelectorAll('.status-option');
+    statusOpts.forEach(opt => opt.classList.remove('active'));
+    statusOpts[0].classList.add('active');
+    document.getElementById(`add-status-${type}`).value = 'tersedia';
+    removeAddImage(type);
+}
+
+function previewAddImage(event, type) {
+    const file = event.target.files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById(`add-img-${type}`).src = e.target.result;
+            document.getElementById(`add-preview-${type}`).style.display = 'flex';
+            document.querySelector(`#add-form-${type} .upload-box`).style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeAddImage(type) {
+    document.getElementById(`add-file-${type}`).value = "";
+    document.getElementById(`add-preview-${type}`).style.display = 'none';
+    document.querySelector(`#add-form-${type} .upload-box`).style.display = 'flex';
+}
+
+function selectAddStatus(element, type) {
+    const parent = element.parentElement;
+    parent.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('active'));
+    element.classList.add('active');
+    const status = element.classList.contains('available') ? 'tersedia' : 'tidak_tersedia';
+    document.getElementById(`add-status-${type}`).value = status;
+}
+
+function formatCurrencyInput(input) {
+    let value = input.value.replace(/[^0-9]/g, '');
+    if (value) {
+        input.dataset.raw = value;
+        input.value = 'Rp ' + parseInt(value).toLocaleString('id-ID');
+    }
+}
+
+function getRawCurrency(input) {
+    return input.dataset.raw || input.value.replace(/[^0-9]/g, '');
+}
+
+function handleAddSubmit(event, type) {
+    event.preventDefault();
+    
+    const labels = { 'hewan': 'Hewan', 'susu': 'Susu', 'rumput': 'Rumput' };
+    let product = { jenis: type };
+    
+    if (type === 'hewan') {
+        const nama = document.getElementById('add-nama-hewan').value.trim();
+        const hargaRaw = getRawCurrency(document.getElementById('add-harga-hewan'));
+        const stok = document.getElementById('add-stok-hewan').value;
+        const status = document.getElementById('add-status-hewan').value;
+        
+        if (!nama || !hargaRaw || !stok) {
+            showToast('Mohon lengkapi semua field yang wajib diisi!', 'error');
+            return;
+        }
+        
+        product.nama = nama;
+        product.harga = parseInt(hargaRaw);
+        product.stok = parseInt(stok);
+        product.status = status;
+        product.jenis_detail = document.getElementById('add-jenis-hewan').value;
+        
+    } else if (type === 'susu') {
+        const nama = document.getElementById('add-nama-susu').value.trim();
+        const tglProduksi = document.getElementById('add-tgl-produksi-susu').value;
+        const tglExpiry = document.getElementById('add-tgl-expiry-susu').value;
+        const hargaRaw = getRawCurrency(document.getElementById('add-harga-susu'));
+        const stok = document.getElementById('add-stok-susu').value;
+        const status = document.getElementById('add-status-susu').value;
+        
+        if (!nama || !tglProduksi || !hargaRaw || !stok) {
+            showToast('Mohon lengkapi semua field yang wajib diisi!', 'error');
+            return;
+        }
+        
+        product.nama = nama;
+        product.tanggal_produksi = tglProduksi;
+        product.tanggal_expiry = tglExpiry;
+        product.harga = parseInt(hargaRaw);
+        product.stok = parseInt(stok);
+        product.status = status;
+        product.jenis_detail = document.getElementById('add-jenis-susu')?.value || '';
+        product.tanggal = tglProduksi;
+        
+    } else if (type === 'rumput') {
+        const nama = document.getElementById('add-nama-rumput').value.trim();
+        const tanggal = document.getElementById('add-tanggal-rumput').value;
+        const hargaRaw = getRawCurrency(document.getElementById('add-harga-rumput'));
+        const stok = document.getElementById('add-stok-rumput').value;
+        const status = document.getElementById('add-status-rumput').value;
+        
+        if (!nama || !tanggal || !hargaRaw || !stok) {
+            showToast('Mohon lengkapi semua field yang wajib diisi!', 'error');
+            return;
+        }
+        
+        product.nama = nama;
+        product.tanggal = tanggal;
+        product.harga = parseInt(hargaRaw);
+        product.stok = parseInt(stok);
+        product.status = status;
+        product.jenis_detail = document.getElementById('add-jenis-rumput')?.value || '';
+    }
+    
+    const imgSrc = document.getElementById(`add-img-${type}`).src;
+    if (imgSrc && !imgSrc.includes('placeholder') && imgSrc.startsWith('data:')) {
+        product.foto = imgSrc;
+    }
+    
+    addProduct(product);
+    renderTable(getProducts());
+    updateStats();
+    closeAddModal();
+    
+    showToast(`Produk ${labels[type]} berhasil ditambahkan!`, 'success');
+}
+
+document.getElementById('addProductModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'addProductModal') closeAddModal();
 });
 
 // ==================== CHECK FOR NEW DATA ====================
@@ -1828,12 +2129,19 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTable(getProducts());
     checkForNewData();
     
-    // Listen for storage changes (from other tabs/pages)
     window.addEventListener('storage', (e) => {
         if (e.key === STORAGE_KEY) {
             updateStats();
             renderTable(getProducts());
         }
+    });
+    
+    document.querySelectorAll('input[placeholder="Rp 0"]').forEach(input => {
+        input.addEventListener('blur', function() {
+            if(this.value && !this.value.startsWith('Rp')) {
+                formatCurrencyInput(this);
+            }
+        });
     });
 });
 </script>
