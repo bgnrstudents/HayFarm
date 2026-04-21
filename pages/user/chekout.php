@@ -1,56 +1,200 @@
 <?php
 declare(strict_types=1);
- 
-// ── Autoloader sederhana (ganti dengan Composer di production) ──
-spl_autoload_register(function (string $class): void {
-    $base = __DIR__ . '/../src/';
-    $file = $base . str_replace(['HayFarm\\', '\\'], ['', '/'], $class) . '.php';
-    if (file_exists($file)) require_once $file;
-});
- 
-use HayFarm\Exceptions\ValidationException;
-use HayFarm\Exceptions\PaymentException;
-use HayFarm\Exceptions\UploadException;
-use HayFarm\Models\Product;
-use HayFarm\Services\ValidationService;
-use HayFarm\Services\UploadService;
-use HayFarm\Services\OrderService;
-use HayFarm\Services\Payment\TransferPaymentHandler;
-use HayFarm\Services\Payment\CODPaymentHandler;
-use HayFarm\Storage\SessionOrderStorage;
- 
-// ── Bootstrap ──
+
+// ══════════════════════════════════════════════
+//  SEMUA CLASS INLINE – tidak perlu folder src/
+// ══════════════════════════════════════════════
+
+// ── Exceptions ──
+class ValidationException extends RuntimeException {
+    private array $errors;
+    public function __construct(array $errors) {
+        parent::__construct('Validation failed');
+        $this->errors = $errors;
+    }
+    public function getErrors(): array { return $this->errors; }
+}
+
+class PaymentException extends RuntimeException {}
+class UploadException extends RuntimeException {}
+
+// ── Model: Product ──
+class Product {
+    public function __construct(
+        private string $id,
+        private string $name,
+        private int    $price,
+        private string $imageUrl,
+        private int    $stock,
+    ) {}
+
+    public function getId(): string       { return $this->id; }
+    public function getName(): string     { return $this->name; }
+    public function getPrice(): int       { return $this->price; }
+    public function getImageUrl(): string { return $this->imageUrl; }
+    public function getStock(): int       { return $this->stock; }
+
+    public function getFormattedPrice(): string {
+        return 'Rp ' . number_format($this->price, 0, ',', '.');
+    }
+}
+
+// ── Storage: SessionOrderStorage ──
+class SessionOrderStorage {
+    public function save(array $order): void {
+        $_SESSION['last_order'] = $order;
+    }
+    public function get(): ?array {
+        return $_SESSION['last_order'] ?? null;
+    }
+}
+
+// ── Service: ValidationService ──
+class ValidationService {
+    public static function sanitize(string $value): string {
+        return htmlspecialchars(strip_tags(trim($value)));
+    }
+
+    public function validate(array $data): void {
+        $errors = [];
+        if (empty($data['nama']))     $errors[] = 'Nama wajib diisi.';
+        if (empty($data['telepon']))  $errors[] = 'No Telepon wajib diisi.';
+        if (empty($data['alamat']))   $errors[] = 'Alamat wajib diisi.';
+        if (empty($data['kode_pos'])) $errors[] = 'Kode Pos wajib diisi.';
+        if (empty($data['metode']))   $errors[] = 'Metode pembayaran wajib dipilih.';
+        if (!empty($errors)) throw new ValidationException($errors);
+    }
+}
+
+// ── Service: UploadService ──
+class UploadService {
+    public function __construct(private string $uploadDir = 'uploads/') {
+        if (!is_dir($this->uploadDir)) {
+            mkdir($this->uploadDir, 0755, true);
+        }
+    }
+
+    public function upload(array $file): string {
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new UploadException('Gagal mengupload file.');
+        }
+        $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $mime    = mime_content_type($file['tmp_name']);
+        if (!in_array($mime, $allowed, true)) {
+            throw new UploadException('Format file tidak didukung. Gunakan JPG/PNG/GIF/WEBP.');
+        }
+        if ($file['size'] > 5 * 1024 * 1024) {
+            throw new UploadException('Ukuran file maksimal 5MB.');
+        }
+        $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('bukti_', true) . '.' . $ext;
+        $dest     = $this->uploadDir . $filename;
+        if (!move_uploaded_file($file['tmp_name'], $dest)) {
+            throw new UploadException('Gagal menyimpan file.');
+        }
+        return $dest;
+    }
+}
+
+// ── Payment Handlers ──
+class TransferPaymentHandler {
+    public function __construct(private UploadService $uploadService) {}
+
+    public function getMethod(): string { return 'transfer'; }
+
+    public function handle(array $customerData, Product $product, array $paymentData): array {
+        $file = $paymentData['file'] ?? null;
+        if (empty($file) || $file['error'] === UPLOAD_ERR_NO_FILE) {
+            throw new UploadException('Bukti pembayaran wajib diupload untuk metode transfer.');
+        }
+        $path = $this->uploadService->upload($file);
+        return ['path' => $path, 'wa_link' => '#'];
+    }
+}
+
+class CODPaymentHandler {
+    public function __construct(private string $waNumber) {}
+
+    public function getMethod(): string { return 'cod'; }
+
+    public function handle(array $customerData, Product $product, array $paymentData): array {
+        $text = urlencode(
+            "Halo, saya ingin memesan:\n" .
+            "Produk : {$product->getName()}\n" .
+            "Nama   : {$customerData['nama']}\n" .
+            "Telepon: {$customerData['telepon']}\n" .
+            "Alamat : {$customerData['alamat']}, {$customerData['kode_pos']}\n" .
+            "Metode : COD\n" .
+            "Total  : {$product->getFormattedPrice()}"
+        );
+        return ['wa_link' => "https://wa.me/{$this->waNumber}?text={$text}"];
+    }
+}
+
+// ── Service: OrderService ──
+class OrderService {
+    private array $handlers = [];
+
+    public function __construct(private SessionOrderStorage $storage) {}
+
+    public function registerPaymentHandler(object $handler): void {
+        $this->handlers[$handler->getMethod()] = $handler;
+    }
+
+    public function createOrder(array $customerData, Product $product, array $paymentData): array {
+        $metode  = $customerData['metode'];
+        $handler = $this->handlers[$metode] ?? null;
+        if (!$handler) throw new PaymentException("Metode pembayaran '{$metode}' tidak dikenali.");
+
+        $result = $handler->handle($customerData, $product, $paymentData);
+
+        $order = [
+            'customer' => $customerData,
+            'product'  => $product->getName(),
+            'total'    => $product->getPrice(),
+            'result'   => $result,
+            'time'     => date('Y-m-d H:i:s'),
+        ];
+        $this->storage->save($order);
+        return $result;
+    }
+}
+
+// ══════════════════════════════════════════════
+//  BOOTSTRAP & KONFIGURASI
+// ══════════════════════════════════════════════
 if (session_status() === PHP_SESSION_NONE) session_start();
- 
-// ── Konfigurasi ──
+
 $waNumber     = '6281234567890';
 $rekeningNo   = '1234 5678 90';
 $rekeningBank = 'BCA – a.n. Hay Farms Indonesia';
- 
-// ── Dependency Injection / Composition Root ──
+
+// ── Ambil data produk dari parameter URL (dikirim dari halaman produk) ──
+$produk_id     = htmlspecialchars($_GET['produk_id']     ?? 'PROD-001');
+$produk_nama   = htmlspecialchars(urldecode($_GET['produk_nama']   ?? 'Produk'));
+$produk_harga  = (int) preg_replace('/[^0-9]/', '', urldecode($_GET['produk_harga']  ?? '0'));
+$produk_gambar = htmlspecialchars(urldecode($_GET['produk_gambar'] ?? 'public/images/bgheader_produk.png'));
+
 $product = new Product(
-    id:       'SAPI-001',
-    name:     'Sapi Perah',
-    price:    10_000,
-    imageUrl: 'images/farel_perah.jpg',
+    id:       $produk_id,
+    name:     $produk_nama,
+    price:    $produk_harga,
+    imageUrl: $produk_gambar,
     stock:    50,
 );
- 
-$storage        = new SessionOrderStorage();
-$uploadService  = new UploadService('uploads/');
-$orderService   = new OrderService($storage);
- 
+
+$storage       = new SessionOrderStorage();
+$uploadService = new UploadService('uploads/');
+$orderService  = new OrderService($storage);
 $orderService->registerPaymentHandler(new TransferPaymentHandler($uploadService));
 $orderService->registerPaymentHandler(new CODPaymentHandler($waNumber));
- 
-$validator = new ValidationService();
- 
-// ── State ──
+$validator     = new ValidationService();
+
 $msgType = '';
 $errMsg  = '';
 $waLink  = '#';
 $old     = [];
- 
+
 // ── Proses Form ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama   = ValidationService::sanitize($_POST['nama']     ?? '');
@@ -58,44 +202,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $alamat = ValidationService::sanitize($_POST['alamat']   ?? '');
     $pos    = ValidationService::sanitize($_POST['kode_pos'] ?? '');
     $metode = $_POST['metode_pembayaran'] ?? '';
- 
+
     try {
         $validator->validate([
-            'nama'    => $nama,
-            'telepon' => $telp,
-            'alamat'  => $alamat,
-            'kode_pos'=> $pos,
-            'metode'  => $metode,
+            'nama'     => $nama,
+            'telepon'  => $telp,
+            'alamat'   => $alamat,
+            'kode_pos' => $pos,
+            'metode'   => $metode,
         ]);
- 
-        $result = $orderService->createOrder(
-            customerData: [
-                'nama'    => $nama,
-                'telepon' => $telp,
-                'alamat'  => $alamat,
-                'kode_pos'=> $pos,
-                'metode'  => $metode,
-            ],
-            product:     $product,
-            paymentData: ['file' => $_FILES['bukti_pembayaran'] ?? null],
+
+        $result  = $orderService->createOrder(
+            customerData: ['nama' => $nama, 'telepon' => $telp, 'alamat' => $alamat, 'kode_pos' => $pos, 'metode' => $metode],
+            product:      $product,
+            paymentData:  ['file' => $_FILES['bukti_pembayaran'] ?? null],
         );
- 
+
         $msgType = $metode;
         $waLink  = $result['wa_link'] ?? '#';
         $old     = [];
- 
+
     } catch (ValidationException $e) {
         $msgType = 'error';
         $errMsg  = implode('<br>', $e->getErrors());
         $old     = $_POST;
- 
     } catch (UploadException | PaymentException $e) {
         $msgType = 'error';
         $errMsg  = $e->getMessage();
         $old     = $_POST;
     }
 }
- 
+
 $fmtTotal = $product->getFormattedPrice();
 $fmtHarga = $product->getFormattedPrice();
 ?>
@@ -109,7 +246,6 @@ $fmtHarga = $product->getFormattedPrice();
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
 <style>
-/* ── (CSS tidak berubah dari versi sebelumnya) ── */
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height:100vh;}
 .page-top{background:#fff;border-bottom:2px solid #e0e0e0;padding:14px 24px;display:flex;align-items:center;gap:10px;}
@@ -160,17 +296,17 @@ body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height
 </style>
 </head>
 <body>
- 
+
 <div class="page-top">
   <span class="back-arrow"><i class="bi bi-arrow-left"></i></span>
   <h1>Informasi pengiriman</h1>
   <input type="text" class="search-box" placeholder="">
 </div>
- 
+
 <div class="checkout-wrap">
   <form method="POST" enctype="multipart/form-data" id="mainForm">
     <input type="hidden" name="metode_pembayaran" id="metodeHidden" value="transfer">
- 
+
     <div class="checkout-card">
       <!-- KIRI -->
       <div class="form-section">
@@ -208,7 +344,7 @@ body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height
             </div>
           </div>
         </div>
- 
+
         <p class="metode-title">Metode Pembayaran</p>
         <div class="metode-grid">
           <div class="metode-btn active" id="btnTransfer" onclick="setMetode('transfer')">
@@ -226,10 +362,10 @@ body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height
           <button type="button" class="btn-salin" onclick="salinRek()">Salin</button>
         </div>
       </div>
- 
+
       <!-- KANAN -->
       <div class="tagihan-section">
-        <p class="tagihan-title">Metode Pembayaran</p>
+        <p class="tagihan-title">Tagihan</p>
         <div class="produk-row">
           <img class="produk-img" src="<?= htmlspecialchars($product->getImageUrl()) ?>" alt="<?= htmlspecialchars($product->getName()) ?>">
           <div>
@@ -258,7 +394,7 @@ body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height
     </div>
   </form>
 </div>
- 
+
 <!-- Modal Transfer -->
 <div class="modal fade" id="mTransfer" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -278,7 +414,7 @@ body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height
     </div>
   </div>
 </div>
- 
+
 <!-- Modal COD -->
 <div class="modal fade" id="mCod" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -302,7 +438,7 @@ body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height
     </div>
   </div>
 </div>
- 
+
 <!-- Modal Error -->
 <div class="modal fade" id="mError" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -321,7 +457,7 @@ body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height
     </div>
   </div>
 </div>
- 
+
 <!-- Modal Salin -->
 <div class="modal fade" id="mSalin" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -333,19 +469,19 @@ body{font-family:'Nunito',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height
     </div>
   </div>
 </div>
- 
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const PHP_TYPE = <?= json_encode($msgType) ?>;
 const PHP_MSG  = <?= json_encode($errMsg)  ?>;
 const PHP_WA   = <?= json_encode($waLink)  ?>;
- 
+
 window.addEventListener('DOMContentLoaded', () => {
   if (PHP_TYPE === 'transfer') new bootstrap.Modal(document.getElementById('mTransfer')).show();
   else if (PHP_TYPE === 'cod') { document.getElementById('waBtn').href = PHP_WA; new bootstrap.Modal(document.getElementById('mCod')).show(); }
   else if (PHP_TYPE === 'error') { document.getElementById('errMsg').innerHTML = PHP_MSG; new bootstrap.Modal(document.getElementById('mError')).show(); }
 });
- 
+
 function setMetode(val) {
   document.getElementById('metodeHidden').value = val;
   const isTransfer = val === 'transfer';
@@ -356,7 +492,7 @@ function setMetode(val) {
   btn.innerHTML = isTransfer ? 'Kirim Bukti Pembayaran' : '<i class="bi bi-whatsapp me-1"></i> Kirim ke WhatsApp';
   btn.className = isTransfer ? 'btn-kirim' : 'btn-kirim wa-btn';
 }
- 
+
 function previewBukti(input) {
   const img = document.getElementById('previewImg');
   if (input.files?.[0]) {
@@ -365,14 +501,14 @@ function previewBukti(input) {
     r.readAsDataURL(input.files[0]);
   }
 }
- 
+
 function salinRek() {
   navigator.clipboard.writeText(document.getElementById('rekeningNo').innerText.replace(/\s/g, '')).then(() => {
     const m = new bootstrap.Modal(document.getElementById('mSalin'));
     m.show(); setTimeout(() => m.hide(), 1600);
   });
 }
- 
+
 document.getElementById('mainForm').addEventListener('submit', function(e) {
   const get = name => this.querySelector('[name="' + name + '"]').value.trim();
   const errs = [];
