@@ -364,7 +364,6 @@ body {
   }
 }
 
-/* Mobile (sm) */
 @media (max-width: 576px) {
   .card-img-wrap {
     aspect-ratio: 3 / 2;
@@ -399,7 +398,7 @@ body {
   }
 }
 
-/* Very small mobile */
+
 @media (max-width: 380px) {
   .produk-card {
     width: 100%;
@@ -411,7 +410,7 @@ body {
     font-size: 0.78rem;
   }
   .card-desc {
-    display: none; /* Sembunyikan deskripsi di layar sangat kecil */
+    display: none; 
   }
 }
 
@@ -424,7 +423,7 @@ body {
 /* ── BARIS ATAS: default mobile → susun vertikal */
 #detail-top {
   display: flex;
-  flex-direction: column; /* mobile: foto atas, info bawah */
+  flex-direction: column; 
   border-bottom: 1px solid #dee2e6;
 }
 
@@ -436,7 +435,7 @@ body {
   justify-content: center;
   padding: 24px;
   min-height: 220px;
-  border-bottom: 1px solid #dee2e6; /* pemisah foto & info di mobile */
+  border-bottom: 1px solid #dee2e6; 
 }
 
 #detail-img-col img {
@@ -465,17 +464,16 @@ body {
   font-weight: 500;
 }
 
-/* ── Baris bawah: riwayat & catatan — selalu full width */
+
 #detail-bottom {
   padding: 0 24px 24px;
   overflow-y: auto;
   max-height: 50vh;
 }
 
-/* ── DESKTOP ONLY: foto kiri sejajar info kanan */
 @media (min-width: 768px) {
   #detail-top {
-    flex-direction: row; /* desktop: sejajar kiri-kanan */
+    flex-direction: row;
     align-items: stretch;
   }
 
@@ -484,13 +482,13 @@ body {
     max-width: 42%;
     min-height: 320px;
     border-bottom: none;
-    border-right: 1px solid #dee2e6; /* ganti border bawah → border kanan */
+    border-right: 1px solid #dee2e6; 
   }
 
   #detail-info-col {
     flex: 1;
     display: flex;
-    align-items: center; /* info vertikal center sejajar dengan foto */
+    align-items: center;
     padding: 28px 32px;
   }
 
@@ -521,7 +519,6 @@ body {
   }
 }
 
-/* ── Tabel scroll horizontal */
 #modal-riwayat {
   min-width: 380px;
 }
