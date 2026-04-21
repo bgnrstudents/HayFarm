@@ -36,8 +36,8 @@
           <a href="#" class="btn btn-login px-4">Hi, <?= htmlspecialchars($_SESSION['username']) ?></a>
           <a href="logout.php" class="btn btn-danger px-4">Logout</a>
         <?php else: ?>
-          <a href="login.php" class="btn btn-login px-4">Login</a>
-          <a href="register.php" class="btn btn-register px-4">Register</a>
+          <a href="page?page=login" class="btn btn-login px-4">Login</a>
+          <a href="index.php?page=register" class="btn btn-register px-4">Register</a>
         <?php endif; ?>
       </div>
     </div>
