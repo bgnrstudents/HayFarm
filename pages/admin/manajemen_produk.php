@@ -257,21 +257,6 @@
 .action-btn.delete { background: #ffebee; color: #f44336; }
 .action-btn:hover { transform: scale(1.1); }
 
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #888;
-}
-.empty-state i {
-    font-size: 48px;
-    color: #ddd;
-    margin-bottom: 15px;
-}
-.empty-state p {
-    font-size: 14px;
-    margin-bottom: 20px;
-}
 
 /* Modal Overlay */
 .modal-overlay {
@@ -873,6 +858,7 @@
                     <i class="fa-solid fa-plus"></i> Tambah Produk
                 </button>
             </div>
+
         </div>
 
         <table class="product-table">
@@ -890,15 +876,7 @@
             </thead>
             <tbody id="productTableBody"></tbody>
         </table>
-        
-        <!-- Empty State -->
-        <div class="empty-state" id="emptyState">
-            <i class="fa-solid fa-box-open"></i>
-            <p>Belum ada data produk. Klik "Tambah Produk" untuk menambahkan data pertama Anda.</p>
-            <button class="btn-add" onclick="openAddModal()">
-                <i class="fa-solid fa-plus"></i> Tambah Produk Sekarang
-            </button>
-        </div>
+    
     </div>
 
     <!-- FILTER MODAL -->
@@ -1373,7 +1351,7 @@
                     </div>
                     <div class="button-group">
                         <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Batal</button>
-                        <button type="submit" class="btn btn-save">💾 Simpan Data</button>
+                        <button type="submit" class="btn btn-save"> Simpan Data</button>
                     </div>
                 </form>
 
