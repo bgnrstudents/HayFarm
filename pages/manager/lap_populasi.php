@@ -145,6 +145,6 @@
     const labelsStatus = <?= json_encode($labelsStatus ?? ['Aktif', 'Bunting', 'Terjual', 'Tidak Produktif']) ?>;
     const dataStatus   = <?= json_encode($dataStatus ?? [70, 25, 25, 5]) ?>;
 </script>
-<script src="/HAYFARM-1/public/js/populasi_manager.js"></script>
+<script src="../../public/js/populasi_manager.js"></script>
 
 <?php include '../../components/footer_manager.php'; ?>

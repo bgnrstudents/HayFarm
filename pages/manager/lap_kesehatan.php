@@ -151,5 +151,5 @@
 </div>
 
 
-<script src="/HAYFARM-1/public/js/kesehatan_manager.js"></script>
+<script src="../../public/js/kesehatan_manager.js"></script>
 <?php include '../../components/footer_manager.php'; ?>

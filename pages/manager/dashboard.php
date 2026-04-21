@@ -37,5 +37,5 @@
 </div>
 
 
-<script src="/HayFarm-1/public/js/dashboard_manager.js"></script>
+<script src="../../public/js/dashboard_manager.js"></script>
 <?php include '../../components/footer_manager.php'; ?>
