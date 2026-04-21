@@ -34,3 +34,67 @@ function showDetail(id) {
 
   new bootstrap.Modal(document.getElementById("detailModal")).show();
 }
+
+// chekout js
+function setMetode(val) {
+    // Reset semua tombol
+    document.querySelectorAll('.ck-metode-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Aktifkan yang diklik
+    document.getElementById('btn' + val).classList.add('active');
+
+    // Sembunyikan/tampilkan upload sesuai metode
+    document.getElementById('uploadSection').style.display =
+        val === 'Cod' ? 'none' : 'block';
+
+    // Ganti teks tombol bayar
+    const btnBayar = document.getElementById('btnBayar');
+    if (val === 'Cod') {
+        btnBayar.innerHTML = '<i class="fab fa-whatsapp"></i> Konfirmasi via WhatsApp';
+        btnBayar.className = 'ck-btn-bayar wa-btn';
+    } else {
+        btnBayar.innerHTML = '<i class="fas fa-lock"></i> Bayar Sekarang';
+        btnBayar.className = 'ck-btn-bayar';
+    }
+}
+function pilihWallet(el) {
+  document
+    .querySelectorAll(".ck-ewallet-btn")
+    .forEach((b) => b.classList.remove("active"));
+  el.classList.add("active");
+}
+
+function previewBukti(input) {
+  const img = document.getElementById("previewImg");
+  if (input.files && input.files[0]) {
+    const r = new FileReader();
+    r.onload = (e) => {
+      img.src = e.target.result;
+      img.style.display = "block";
+    };
+    r.readAsDataURL(input.files[0]);
+  }
+}
+
+function salinRek() {
+  const no = document.getElementById("rekeningNo").innerText.replace(/\s/g, "");
+  navigator.clipboard.writeText(no).then(() => {
+    const m = new bootstrap.Modal(document.getElementById("mSalin"));
+    m.show();
+    setTimeout(() => m.hide(), 1600);
+  });
+}
+
+function bayar() {
+  const btn = document.getElementById("btnBayar");
+  const ori = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = ori;
+    btn.disabled = false;
+    new bootstrap.Modal(document.getElementById("mSukses")).show();
+  }, 1500);
+}

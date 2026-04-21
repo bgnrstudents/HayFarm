@@ -3,14 +3,14 @@ session_start();
 
 $page = $_GET['page'] ?? 'user/home';
 
-// ── 1. WHITELIST semua halaman yang boleh diakses
+// 1. WHITELIST semua halaman yang boleh diakses
 $allowed_pages = [
     // User — dengan navbar & footer
     'user/home',
     'user/produk',
     'user/tentang_kami',
 
-    // User — TANPA navbar & footer (layout sendiri)
+    // User — TANPA navbar & footer
     'user/keranjang',
     'user/riwayat_pesanan',
     'user/chekout',
@@ -40,6 +40,7 @@ $page_css = match(true) {
     str_starts_with($page, 'user/home')      => 'home.css',
     str_starts_with($page, 'user/produk')    => 'produk.css',
     str_starts_with($page, 'user/keranjang') => 'keranjang.css',
+    str_starts_with($page, 'user/chekout') => 'chekout.css',
     str_starts_with($page, 'user/tentang')   => 'tentangkami.css',
     str_starts_with($page, 'user/riwayat_pesanan') => 'riwayat_pesanan.css',
     str_starts_with($page, 'admin/')         => 'admin.css',
@@ -82,7 +83,6 @@ $is_manager_sidebar = in_array($page, $manager_sidebar_pages);
 // User biasa = bukan salah satu dari grup di atas
 $is_user_with_navbar = !$is_user_no_layout && !$is_admin_sidebar && !$is_manager_sidebar;
 
-// ── 5. HEADER — selalu di-include (berisi <html>, <head>)
 include 'components/header.php';
 
 // ── 6. NAVBAR / SIDEBAR sesuai kondisi
