@@ -1,0 +1,310 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=DM+Serif+Text:ital@0;1&family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,68;1,17..18,400..700,68&display=swap");
+
+:root {
+  --color-primary: #ffffff;
+  --color-secondary2: #175d2b;
+  --color-secondary: #196c33;
+  --font-poppins: "Poppins", sans-serif;
+  --font-amatic: "Amatic SC", sans-serif;
+  --font-googlesans: "DM Serif Text", serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-poppins);
+}
+
+/* Home */
+.hero-section {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
+    url("../images/bghome.png") center/cover no-repeat;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-top: 80px;
+}
+
+.hero-content {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--color-primary);
+  padding: 0 20px;
+}
+
+.hero-title {
+  font-family: var(--font-amatic);
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+  margin-bottom: 35px;
+}
+
+.hero-btn {
+  background: var(--color-primary);
+  color: var(--color-secondary);
+  padding: 10px 40px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.hero-btn:hover {
+  box-shadow: 0 5px 10px rgba(255, 255, 255, 0.15);
+}
+
+/* BENEFIT  */
+.benefit-bar {
+  background-color: var(--color-secondary2); /* warna hijau kamu */
+  color: white;
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: 0 25px 55px -15px rgba(0, 0, 0, 0.5);
+  margin-top: -85px; /* ini yang bikin ngambang */
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.benefit-item {
+  width: 78px;
+  height: 78px;
+  background-color: #ffc107; /* kuning seperti UI kamu */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.benefit-item i {
+  color: var(--color-secondary);
+  font-size: 34px;
+}
+
+.benefit-text {
+  color: white;
+  font-size: 1.08rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .benefit-bar {
+    margin-top: -65px;
+    padding: 25px 25px;
+    max-width: 92%;
+  }
+}
+
+@media (max-width: 576px) {
+  .benefit-bar {
+    margin-top: -50px;
+    padding: 22px 15px;
+  }
+  .hero-title {
+    font-size: 3.4rem;
+  }
+}
+
+/* SECTION HOME2 */
+.home2-section {
+  min-height: 100vh;
+  background-color: var(--color-primary);
+}
+.container-home2 {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+}
+
+.about-image {
+  max-width: 520px;
+  width: 100%;
+  height: 520px;
+  border-radius: 20px;
+  box-shadow: 0px 30px 55.5px -12px rgba(0, 0, 0, 0.5);
+}
+.about-text {
+  color: var(--color-secondary2);
+}
+.about-text h2 {
+  font-size: 60px;
+  font-family: var(--font-amatic);
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.5;
+}
+.about-text p {
+  font-size: 19px;
+  line-height: 1.8;
+  text-align: justify;
+}
+.btn-home2 {
+  background-color: var(--color-secondary2);
+  padding: 10px 40px;
+  color: var(--color-primary);
+  padding: 12px 35px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.btn-home2:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+/* PRODUK UNGGULAN */
+.home3-section {
+  background: url("../images/bg_login.png") center/cover no-repeat;
+}
+.text-produk h2 {
+  color: var(--color-primary);
+  font-family: var(--font-poppins);
+  font-size: 30px;
+  font-weight: 600;
+}
+.text-produk p {
+  color: var(--color-primary);
+  font-size: 18px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+.produk-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.produk-card {
+  background: white;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  width: 100%;
+  max-width: 320px; /* Atur lebar card di sini */
+  flex: 1 1 300px; /* Fleksibel */
+}
+
+.produk-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 1px 0px 20px rgba(255, 255, 255, 0.43);
+}
+
+.produk-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.produk-card .card-body {
+  padding: 20px;
+  text-align: center;
+}
+
+.produk-card h5 {
+  font-weight: 700;
+  color: var(--color-secondary);
+  margin-bottom: 10px;
+}
+
+.produk-card p {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.5;
+}
+.btn-produk {
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+  padding: 12px 35px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.btn-produk:hover {
+  box-shadow: 1px 0px 10px 0px rgba(0, 0, 0, 0.43);
+}
+
+/* HEADER PRODUK */
+.produk-header {
+  min-height: 500px;
+  position: relative;
+}
+
+.produk-left {
+  background: linear-gradient(135deg, #1e6b2e 0%, #2e7d32 100%);
+  height: 500px;
+  display: flex;
+  align-items: center;
+  color: white;
+  padding: 0 60px;
+}
+
+.produk-text h1 {
+  font-family: var(--font-amatic);
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+
+.produk-text h2 {
+  font-size: 2.1rem;
+  font-weight: 400;
+  opacity: 0.95;
+}
+
+.produk-right {
+  height: 500px;
+  overflow: hidden;
+}
+
+.produk-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .produk-left {
+    padding: 0 40px;
+    height: 400px;
+  }
+  .produk-text h1 {
+    font-size: 2.6rem;
+  }
+  .produk-text h2 {
+    font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .produk-right {
+    height: 300px;
+  }
+}

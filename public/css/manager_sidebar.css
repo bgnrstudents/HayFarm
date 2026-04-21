@@ -1,21 +1,53 @@
-*{
+﻿*{
     margin:0;
-    font-family: 'Nunito', sans-serif;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Nunito', sans-serif;
+}
+
+html, body{
+    min-height:100%;
+    margin: 0;
+}
+
+body{
+    background:
+        radial-gradient(circle at top center, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.84) 12%, transparent 28%),
+        linear-gradient(180deg,#eaf4ea 0%,#d8eed7 35%,#d1e7cf 100%);
+    background-attachment:fixed;
+    background-size:cover;
+}
+
+body,input,button{
+    font-family:'Nunito', sans-serif;
+}
+
+.app-shell{
+    display:flex;
+    min-height:100vh;
+}
+
+.main-content {
+    min-height: 100vh;
+}
+
+.content-wrapper {
+    padding: 20px;
 }
 
 /* SIDEBAR */
-
 .sidebar{
-    width:250px;
-    height:100vh;
-    position:fixed;
-    left:0;
-    top:0;
+    width:260px;
+    min-height:100vh;
+    background:#fff;
+    border-right:1px solid rgba(0,0,0,0.05);
+    padding:24px 20px;
 }
 
 .logo{
     width:120px;
-    margin:10px 46px;
+    margin-left: 50px;
+    margin-bottom:20px;
 }
 
 .menu{
@@ -24,78 +56,139 @@
 }
 
 .menu li{
-    padding:10px 20px;
+    margin-bottom:8px;
+}
+
+.menu li i{
+    margin-right:3px;
 }
 
 .menu li a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 14px;
+    border-radius:15px;
+    color:#2a3f2b;
     text-decoration:none;
-    color:#333;
-    display:block;
+    font-size:0.95rem;
+    transition:0.2s;
 }
 
-.menu li.active{
-    background:#1c5f36;
-    border-radius:6px;
-    margin:10px;
+.menu li.active a,
+.menu li a:hover{
+    background:#1d6b35;
+    color:#fff;
 }
 
-.menu li.active a{
-    color:white;
+.menu li.active i {
+    color: #ffbe25;
 }
 
 .menu-title{
-    font-size:12px;
-    color:#777;
-    padding:15px 20px 5px;
+    margin:20px 0 12px;
+    font-size:0.8rem;
+    letter-spacing:0.08em;
+    color:#6d7f68;
+    text-transform:uppercase;
 }
 
-.logout{
-    margin-top:20px;
+.logout a:hover{
+    background:rgba(29,107,53,0.1);
 }
 
-
-/* MAIN CONTENT */
-
+/* MAIN */
 .main-content{
-    margin-left:250px;
-    height:100vh;
-    width: calc(100% - 250px);
-    background:rgba(221, 237, 226, 1);
+    flex:1;
 }
-
 
 /* TOPBAR */
-
 .topbar{
-    background:white;
-    padding:15px 30px;
     display:flex;
-    justify-content:space-between;
+    justify-content:flex-end;
     align-items:center;
+    padding:18px 0;
+    border-bottom:1px solid rgba(0,0,0,0.05);
+    margin-bottom:24px;
+    background: #ffffff; /* putih */
+    padding: 15px 25px;
 }
 
 .right-topbar{
     display:flex;
     align-items:center;
-    margin-left: auto;
-    gap:20px;
-}
-.notif{
+    gap:18px;
     position:relative;
-    font-size: 1.25rem;
 }
 
-.badge{
-    position: absolute;
-    background:red;
-    color:white;
+#currentDate{
+    color:#5f7d64;
+    font-size:0.95rem;
+}
+
+.notif{
+    position:relative;
+    width:44px;
+    height:44px;
+    display:grid;
+    place-items:center;
     border-radius:50%;
-    padding:3px 6px;
-    font-size:12px;
-    right: 123px;
-    top: 20px;
+    background:#fff;
+    box-shadow:0 12px 30px rgba(39,93,68,0.08);
+}
+
+.notif-wrapper {
+    position: relative;
+    margin: 0 15px;
+}
+
+.notif-wrapper i {
+    font-size: 20px;
+    color: #196c33;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    padding: 0.5px 5px;
+    border-radius: 50%;
 }
 
 .user{
     text-align:right;
+    color:#334434;
+    font-size:0.85rem;
+}
+
+.user strong{
+    font-weight:700;
+}
+
+.user small{
+    color:#6f816f;
+}
+
+
+/* RESPONSIVE */
+@media(max-width:900px){
+    .app-shell{
+        flex-direction:column;
+    }
+
+    .sidebar{
+        width:100%;
+        min-height:auto;
+    }
+
+    .main-content{
+        padding:20px;
+    }
+
+    .topbar{
+        justify-content:center;
+    }
 }
