@@ -133,7 +133,7 @@
                     <td><span class="badge bg-success">Aktif</span></td>
                     <td>IB bulan lalu</td>
                     <td>Sehat</td>
-                    <td><button class="btn-detail">Lihat Detail</button></td>
+                    <td><button class="btn-detail"><a href="../../pages/manager/detail_hewan_manager.php">Lihat Detail</a></button></td>
                 </tr>
             </tbody>
         </table>

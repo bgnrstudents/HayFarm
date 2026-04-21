@@ -126,7 +126,7 @@
                     <td><span class="badge bg-success">Sehat</span></td>
                     <td>--</td>
                     <td>Vaksinasi</td>
-                    <td><button class="btn-detail">Lihat Detail</button></td>
+                    <td><button class="btn-detail"><a href="../../pages/manager/detail_hewan_manager.php">Lihat Detail</a></button></td>
                 </tr>
                 <tr>
                     <td>0002</td>
@@ -134,7 +134,7 @@
                     <td><span class="badge bg-warning">Dalam Perawatan</span></td>
                     <td>Infeksi ringan</td>
                     <td>Antibiotik</td>
-                    <td><button class="btn-detail">Lihat Detail</button></td>
+                    <td><button class="btn-detail"><a href="../../pages/manager/detail_hewan_manager.php">Lihat Detail</a></button></td>
                 </tr>
                 <tr>
                     <td>0003</td>
@@ -142,7 +142,8 @@
                     <td><span class="badge bg-danger">Observasi</span></td>
                     <td>Demam</td>
                     <td>Monitoring</td>
-                    <td><button class="btn-detail">Lihat Detail</button></td>
+                    <td><button class="btn-detail"><a href="../../pages/manager/detail_hewan_manager.php">Lihat Detail</a></button></td>
+                    <!-- <td><button class="btn-detail"><a href="../../pages/manager/detail_hewan_manager.php?id=0003">Lihat Detail</a></button></td> -->
                 </tr>
             </tbody>
         </table>

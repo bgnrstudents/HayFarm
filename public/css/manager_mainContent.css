@@ -58,6 +58,11 @@ BUTTONS
     transition: 0.3s;
 }
 
+.btn-detail a{
+    text-decoration: none;
+    color: white;
+}
+
 .export-pdf {
     background: #0f7b32;
 }
