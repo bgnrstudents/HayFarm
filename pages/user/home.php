@@ -58,7 +58,7 @@
                 </p>
                 <p>Kami fokus hanya mengedepankan produk berkualitas, tetapi juga memberikan pembelajaran bagi mahasiswa dan masyarakat. Dengan pengalaman kami peternakan yang senantiasa, kami terus tingkat proses produksi di lapangan.</p>
                 <div class="con-btn-home2 text-end mt-5">
-                    <a href="#" class="btn-home2 text-center">
+                    <a href="index.php?page=user/chekout.php" class="btn-home2 text-center">
                         Lihat Selengkapnya <i class="fa-solid fa-arrow-right"></i>
                     </a>
                 </div>

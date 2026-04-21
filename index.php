@@ -40,6 +40,7 @@ $page_css = match(true) {
     str_starts_with($page, 'user/home')      => 'home.css',
     str_starts_with($page, 'user/produk')    => 'produk.css',
     str_starts_with($page, 'user/keranjang') => 'keranjang.css',
+    // str_starts_with($pages, 'user/chekout') => 'chekout.php',
     str_starts_with($page, 'user/tentang')   => 'tentangkami.css',
     str_starts_with($page, 'user/riwayat_pesanan') => 'riwayat_pesanan.css',
     str_starts_with($page, 'admin/')         => 'admin.css',
