@@ -5,7 +5,7 @@ function isActive($page) {
 ?>
 
 <div class="sidebar p-3">
-    <a href="/HayFarm-1/">
+    <a href="../../">
         <img src="../../public/images/logo_hayfarm.png" class="logo" alt="Logo HayFarm">
     </a>
     <ul class="menu">
