@@ -202,5 +202,6 @@
     </div>
   </div>
 </div>
+<script src="../../public/js/dashboard_admin.js"></script>
 </body>
 </html>

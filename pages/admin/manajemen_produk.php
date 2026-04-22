@@ -603,5 +603,6 @@
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 </div>
+<script src="../../public/js/manajemenProduk_admin.js"></script>
 </body>
 </html>
