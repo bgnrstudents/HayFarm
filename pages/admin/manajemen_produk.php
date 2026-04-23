@@ -31,10 +31,6 @@
 
     <!-- TOPBAR -->
     <div class="topbar">
-        <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Pencarian" id="globalSearch">
-        </div>
         <div class="topbar-right">
             <span id="currentDate"></span>
             <div class="notif">
