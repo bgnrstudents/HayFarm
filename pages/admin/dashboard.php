@@ -52,6 +52,12 @@
     <!-- TOPBAR -->
     <div class="topbar">
     
+    <!-- SEARCH -->
+<div class="search-box">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="text" placeholder="Pencarian">
+</div>
+
     <!-- RIGHT -->
     <div class="topbar-right">
         <span id="currentDate"></span>

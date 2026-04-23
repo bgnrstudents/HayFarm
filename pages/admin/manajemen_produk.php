@@ -31,6 +31,10 @@
 
     <!-- TOPBAR -->
     <div class="topbar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Pencarian" id="globalSearch">
+        </div>
         <div class="topbar-right">
             <span id="currentDate"></span>
             <div class="notif">
@@ -599,6 +603,6 @@
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 </div>
-<script src="../../public/js/manajemenProduk_admin.js"></script>
+<script src="../../public/js/manajemenProduk.js"></script>
 </body>
 </html>
