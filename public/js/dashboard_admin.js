@@ -1,4 +1,4 @@
- function updateData() {
+function updateData() {
     document.getElementById("hewan").innerText = 10000 + Math.floor(Math.random() * 500);
     document.getElementById("sakit").innerText = Math.floor(Math.random() * 20);
     document.getElementById("pembeli").innerText = 300 + Math.floor(Math.random() * 100);
@@ -57,3 +57,11 @@ setInterval(() => {
   }]);
 
 }, 10000);
+const dateEl = document.getElementById('currentDate');
+const now = new Date();
+dateEl.textContent = now.toLocaleDateString('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+});

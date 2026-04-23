@@ -1,5 +1,3 @@
-
-
 // ==================== UTILITIES ====================
 const dateEl = document.getElementById('currentDate');
 const now = new Date();
