@@ -370,3 +370,18 @@ document.addEventListener('DOMContentLoaded', () => {
         inp.addEventListener('blur', function() { if(this.value && !this.value.startsWith('Rp')) formatCurrencyInput(this); });
     });
 });
+// Fungsi closePreviewModal jika belum ada di file JS eksternal
+function closePreviewModal() {
+    const modal = document.getElementById('previewModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Tutup modal jika klik di luar area modal
+document.getElementById('previewModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePreviewModal();
+    }
+});
