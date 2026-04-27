@@ -3,7 +3,7 @@
   <div class="container-fluid">
     <!-- LOGO -->
     <a class="navbar-brand" href="index.php">
-      <img src="public/images/logo/logo1.png" style="height:52px;" alt="HayFarm">
+      <img src="../public/images/logo/logo2.png" style="height:52px;" alt="HayFarm">
     </a>
 
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

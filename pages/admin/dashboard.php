@@ -27,21 +27,21 @@
         </li>
 
         <li>
-            <a href="#"><i class="fa-solid fa-file-circle-check"></i> Verifikasi Penjualan</a>
+            <a href="verifikasi_penjualan.php"><i class="fa-solid fa-file-circle-check"></i> Verifikasi Penjualan</a>
         </li>
 
         <p class="menu-title">DATA</p>
 
         <li>
-            <a href="#"><i class="fa-solid fa-square-poll-vertical"></i> Data Hewan</a>
+            <a href="data_hewan.php"><i class="fa-solid fa-square-poll-vertical"></i> Data Hewan</a>
         </li>
 
         <li>
-            <a href="#"><i class="fa-solid fa-heart-pulse"></i> Data Kesehatan Hewan</a>
+            <a href="data_kesehatan.php"><i class="fa-solid fa-heart-pulse"></i> Data Kesehatan Hewan</a>
         </li>
 
         <li>
-            <a href="#"><i class="fa-solid fa-power-off"></i> Logout</a>
+            <a href=""><i class="fa-solid fa-power-off"></i> Logout</a>
         </li>
     </ul>
 </div>
