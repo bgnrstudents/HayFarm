@@ -20,7 +20,7 @@ if( isset($_POST['submit']) ){
             $hash = $row['password'];
             if(password_verify($password, $hash)){
                 $_SESSION['username'] = $row['username']; // ← fix: ambil dari $row
-                header('Location: ../index.php');
+                header('Location: index.php');
                 exit();
             } else {
                 $error = 'Email atau password salah !!';

@@ -1,0 +1,146 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap");
+
+:root {
+  --color-primary: #ffffff;
+  --color-secondary: #196c33;
+  --color-secondary2: #175d2b;
+  --font-poppins: "Poppins", sans-serif;
+  --font-amatic: "Amatic SC", sans-serif;
+  --font-serif: "DM Serif Text", serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-poppins);
+}
+/* LOGIN */
+body {
+    margin: 0;
+    padding: 0;
+    background: url('images/bg_login.png') no-repeat center center fixed;
+    background-size: cover;
+}
+section{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    color: #fff;
+}
+.form-box{
+    position: relative;
+    width: 630px;
+    height: 450px;
+    background-color: rgb(255, 255, 255);
+    border: 2px solid rgba(0, 0, 0, 0.42);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+h4{
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.5rem;
+    color: black;
+    text-align: center;
+    margin-bottom: 2%;
+    margin-top: 5%;
+    text-shadow: 9%;
+}
+p {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    color: black;
+    text-align: center;
+    margin-bottom: 8%;
+    text-shadow: 9%;
+}
+.form-container {
+    background: rgb(255, 255, 255);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 1030px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    margin: 0 auto;
+}
+.form-box{
+    position: relative;
+    margin: 20px 0;
+    width: 630px;
+    border-bottom: 2px solid #fff;
+}
+.form-box label{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all .5s ease-in-out;
+    color: #fafafa;
+    font-size: 1rem;
+    pointer-events: none;
+}
+.form-control{
+    position: relative;
+    /* margin: 5px; */
+    width: 500px;
+    height: 46px;
+    background: rgba(241, 249, 244, 1);
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: semibold;
+}
+.form-group label{
+    color: #000000;
+    font-weight: semibold;
+    font-family: 'Nunito', sans-serif;
+    justify-content: left;
+    align-items: start;
+}
+input:focus~label, input:valid~label{
+    top: -5px;
+}
+.inputbox input{
+    width: 350px;
+    height: 60px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 0 35px 0 5px;
+    color: #fff;
+}
+button{
+    width: 318px;
+    height: 46px;
+    border-radius: 8px;
+    background: rgba(25, 108, 51, 1);
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #fff;
+}
+.form-footer{
+    font-size: .9rem;
+    color: #009b48;
+    text-align: center;
+    margin: 25px 0 10px;
+}
+.form-footer p a{
+    text-decoration: none;
+    color: #009b48;
+    font-weight: 600;
+}
+.form-footer p a:hover{
+    text-decoration: underline;
+}

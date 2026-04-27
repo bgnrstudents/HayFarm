@@ -122,5 +122,5 @@
 </div>
 
 
-<script src="/HAYFARM-1/public/js/transaksi_manager.js"></script>
+<script src="../../public/js/transaksi_manager.js"></script>
 <?php include '../../components/footer_manager.php'; ?>

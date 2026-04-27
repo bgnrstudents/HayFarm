@@ -37,6 +37,7 @@ if (!in_array($page, $allowed_pages)) {
 
 // ── 2. CSS per halaman
 $page_css = match(true) {
+    str_starts_with($page, 'login' && 'register') => 'logregis.css',
     str_starts_with($page, 'user/home')      => 'home.css',
     str_starts_with($page, 'user/produk')    => 'produk.css',
     str_starts_with($page, 'user/keranjang') => 'keranjang.css',
@@ -47,8 +48,6 @@ $page_css = match(true) {
     str_starts_with($page, 'manager/')       => 'manager_sidebar.css',
     default                                  => 'style.css',
 };
-
-// ── 3. DEFINISI GRUP HALAMAN
 // User yang TIDAK pakai navbar & footer
 $user_no_layout_pages = [
     'user/keranjang',
