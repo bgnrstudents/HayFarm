@@ -1,387 +1,418 @@
-// ==================== UTILITIES ====================
-const dateEl = document.getElementById('currentDate');
-const now = new Date();
-dateEl.textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.className = `toast ${type}`;
-    toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 3000);
-}
-
-function generateId() { return '0000' + (Math.floor(Math.random() * 9000) + 1000); }
-function formatRupiah(angka) { return 'Rp ' + parseInt(angka).toLocaleString('id-ID'); }
-function formatDate(dateString) { if (!dateString) return '-'; return new Date(dateString).toLocaleDateString('id-ID'); }
-function getSatuan(jenis) { const s = { 'hewan': 'Ekor', 'susu': 'Liter', 'rumput': 'Kg' }; return s[jenis?.toLowerCase()] || ''; }
-function capitalizeFirst(str) { if (!str) return '-'; return str.charAt(0).toUpperCase() + str.slice(1); }
-
-// ==================== LOCAL STORAGE ====================
-const STORAGE_KEY = 'hayfarm_products';
-function getProducts() { const d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : []; }
-function saveProducts(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
-
-function addProduct(product) {
-    const products = getProducts();
-    product.id = generateId();
-    product.tanggal = product.tanggal || product.tanggal_produksi || new Date().toISOString().split('T')[0];
-    products.unshift(product);
-    saveProducts(products);
-    return product;
-}
-
-function updateProduct(id, updatedData) {
-    let products = getProducts();
-    const idx = products.findIndex(p => p.id === id);
-    if (idx !== -1) { products[idx] = { ...products[idx], ...updatedData }; saveProducts(products); return true; }
-    return false;
-}
-
-function deleteProduct(id) {
-    let products = getProducts();
-    products = products.filter(p => p.id !== id);
-    saveProducts(products);
-}
-
-// ==================== RENDER TABLE ====================
-function renderTable(products, searchQuery = '') {
-    const tbody = document.getElementById('productTableBody');
-    const emptyState = document.getElementById('emptyState');
-    const table = document.querySelector('.product-table');
-    tbody.innerHTML = '';
-    
-    let filtered = products;
-    if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        filtered = products.filter(p => p.nama?.toLowerCase().includes(q) || p.jenis?.toLowerCase().includes(q));
+const products = [
+    {
+        id: 1,
+        type: 'Hewan',
+        name: 'Sapi Perah FH',
+        date: '2026-03-10',
+        price: 'Rp 20.000.000',
+        stock: '4 Ekor',
+        status: 'Tersedia',
+        image: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=600'
+    },
+    {
+        id: 2,
+        type: 'Rumput',
+        name: 'Rumput Odot Premium',
+        date: '2026-03-12',
+        price: 'Rp 2.500',
+        stock: '500 Kg',
+        status: 'Tersedia',
+        image: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=600'
+    },
+    {
+        id: 3,
+        type: 'Susu',
+        name: 'Susu Segar Premium',
+        date: '2026-03-14',
+        price: 'Rp 15.000',
+        stock: '200 Liter',
+        status: 'Tersedia',
+        image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600'
     }
-    
-    if (filtered.length === 0) { emptyState.style.display = 'block'; table.style.display = 'none'; return; }
-    emptyState.style.display = 'none'; table.style.display = 'table';
-    
-    filtered.forEach(product => {
-        const row = document.createElement('tr');
-        const statusClass = product.status === 'tersedia' ? 'status-tersedia' : 'status-tidak-tersedia';
-        const statusText = product.status === 'tersedia' ? 'Tersedia' : 'Tidak Tersedia';
-        const jenisDisplay = product.jenis ? capitalizeFirst(product.jenis) : '-';
-        row.innerHTML = `
-            <td>${product.id}</td><td>${jenisDisplay}</td><td>${product.nama || '-'}</td>
-            <td>${formatDate(product.tanggal)}</td><td>${formatRupiah(product.harga)}</td>
-            <td>${product.stok} ${getSatuan(product.jenis)}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            <td><div class="action-buttons">
-                <button class="action-btn view" onclick="openPreviewModal('${product.id}')"><i class="fa-solid fa-eye"></i></button>
-                <button class="action-btn edit" onclick="openEditModal('${product.id}')"><i class="fa-solid fa-pen"></i></button>
-                <button class="action-btn delete" onclick="handleDelete('${product.id}')"><i class="fa-solid fa-trash"></i></button>
-            </div></td>`;
-        tbody.appendChild(row);
+];
+
+let activeFilter = { type: '', status: '' };
+let editingId = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderProducts();
+    updateStats();
+
+    const search = document.getElementById('tableSearch');
+    if (search) {
+        search.addEventListener('input', renderProducts);
+    }
+
+    const filterButton = document.querySelector('.btn-filter');
+    if (filterButton) {
+        filterButton.addEventListener('click', openFilterModal);
+    }
+});
+
+function getFilteredProducts() {
+    const keyword = (document.getElementById('tableSearch')?.value || '').toLowerCase().trim();
+
+    return products.filter(product => {
+        const matchesKeyword = [product.type, product.name, product.price, product.stock, product.status]
+            .join(' ')
+            .toLowerCase()
+            .includes(keyword);
+        const matchesType = !activeFilter.type || product.type === activeFilter.type;
+        const matchesStatus = !activeFilter.status || product.status === activeFilter.status;
+
+        return matchesKeyword && matchesType && matchesStatus;
     });
+}
+
+function renderProducts() {
+    const tbody = document.getElementById('productTableBody');
+    if (!tbody) return;
+
+    const rows = getFilteredProducts();
+    tbody.innerHTML = rows.map((product, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${product.type}</td>
+            <td>${product.name}</td>
+            <td>${formatDate(product.date)}</td>
+            <td>${product.price}</td>
+            <td>${product.stock}</td>
+            <td><span class="status-badge ${product.status === 'Tersedia' ? 'status-tersedia' : 'status-tidak-tersedia'}">${product.status}</span></td>
+            <td>
+                <div class="action-buttons">
+                    <button class="action-btn view" type="button" title="Preview" onclick="openPreviewModal(${product.id})"><i class="fa-solid fa-eye"></i></button>
+                    <button class="action-btn edit" type="button" title="Edit" onclick="openEditModal(${product.id})"><i class="fa-solid fa-pen"></i></button>
+                    <button class="action-btn delete" type="button" title="Hapus" onclick="deleteProduct(${product.id})"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;">Data produk tidak ditemukan</td></tr>';
+    }
 }
 
 function updateStats() {
-    const p = getProducts();
-    document.getElementById('totalProduk').textContent = p.length;
-    document.getElementById('totalRumput').textContent = p.filter(x => x.jenis === 'rumput').length;
-    document.getElementById('totalSusu').textContent = p.filter(x => x.jenis === 'susu').length;
-    document.getElementById('totalHewan').textContent = p.filter(x => x.jenis === 'hewan').length;
+    setText('totalProduk', products.length);
+    setText('totalRumput', products.filter(product => product.type === 'Rumput').length);
+    setText('totalSusu', products.filter(product => product.type === 'Susu').length);
+    setText('totalHewan', products.filter(product => product.type === 'Hewan').length);
 }
 
-function handleDelete(id) {
-    if (confirm('Yakin ingin menghapus produk ini?')) {
-        deleteProduct(id); renderTable(getProducts()); updateStats();
-        showToast('Produk berhasil dihapus', 'success');
-    }
+function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
 }
 
-// ==================== SEARCH & FILTER ====================
-document.getElementById('tableSearch').addEventListener('input', e => renderTable(getProducts(), e.target.value));
-document.getElementById('globalSearch').addEventListener('input', e => { document.getElementById('tableSearch').value = e.target.value; renderTable(getProducts(), e.target.value); });
+function formatDate(dateString) {
+    return new Date(`${dateString}T00:00:00`).toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+}
 
-function openFilterModal() { document.getElementById('filterModal').classList.add('active'); }
-function closeFilterModal() { document.getElementById('filterModal').classList.remove('active'); }
+function openFilterModal() {
+    document.getElementById('filterModal')?.classList.add('active');
+}
+
+function closeFilterModal() {
+    document.getElementById('filterModal')?.classList.remove('active');
+}
+
 function applyFilter() {
-    const jenis = document.getElementById('filterJenis').value, status = document.getElementById('filterStatus').value;
-    let products = getProducts();
-    if (jenis) products = products.filter(p => p.jenis?.toLowerCase() === jenis.toLowerCase());
-    if (status) products = products.filter(p => p.status === (status === 'Tersedia' ? 'tersedia' : 'tidak-tersedia'));
-    renderTable(products, document.getElementById('tableSearch').value); closeFilterModal();
-}
-function resetFilter() { document.getElementById('filterJenis').value = ''; document.getElementById('filterStatus').value = ''; renderTable(getProducts(), document.getElementById('tableSearch').value); closeFilterModal(); }
-document.querySelector('.btn-filter').addEventListener('click', openFilterModal);
-document.getElementById('filterModal').addEventListener('click', e => { if (e.target.id === 'filterModal') closeFilterModal(); });
-
-// ==================== EXPORT CSV ====================
-function exportTableToCSV(filename) {
-    const products = getProducts();
-    if (products.length === 0) { showToast('Tidak ada data untuk diexport', 'error'); return; }
-    let csv = ['NO,Jenis Produk,Nama Produk,Tanggal,Harga,Stok,Satuan,Status'];
-    products.forEach(p => {
-        csv.push([p.id, capitalizeFirst(p.jenis), `"${p.nama || ''}"`, formatDate(p.tanggal), p.harga, p.stok, getSatuan(p.jenis), p.status === 'tersedia' ? 'Tersedia' : 'Tidak Tersedia'].join(','));
-    });
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = filename; link.click();
-    showToast('Data berhasil diexport!', 'success');
+    activeFilter = {
+        type: document.getElementById('filterJenis')?.value || '',
+        status: document.getElementById('filterStatus')?.value || ''
+    };
+    renderProducts();
+    closeFilterModal();
 }
 
-// ==================== EDIT MODAL ====================
-function openEditModal(productId) {
-    const products = getProducts(), product = products.find(p => p.id === productId);
-    if (!product) { showToast('Produk tidak ditemukan', 'error'); return; }
-    document.querySelectorAll('.edit-modal .form-section').forEach(f => f.classList.remove('active'));
-    document.querySelectorAll('.edit-modal .tab').forEach(t => t.classList.remove('active'));
-    const jenis = product.jenis?.toLowerCase(); switchEditTab(jenis);
-    
-    if (jenis === 'hewan') {
-        document.getElementById('edit-id-hewan').value = product.id;
-        document.getElementById('edit-jenis-hewan').value = product.jenis_detail || '';
-        document.getElementById('edit-nama-hewan').value = product.nama || '';
-        document.getElementById('edit-berat-hewan').value = product.berat || '';
-        document.getElementById('edit-harga-hewan').value = product.harga ? formatRupiah(product.harga).replace(/[^0-9,]/g, '').replace(',', '.') : '';
-        document.getElementById('edit-stok-hewan').value = product.stok || '';
-        document.getElementById('edit-status-hewan').value = product.status || 'tersedia';
-        const opts = document.querySelectorAll('#edit-form-hewan .status-option');
-        opts.forEach(o => o.classList.remove('active'));
-        (product.status === 'tersedia' ? opts[0] : opts[1]).classList.add('active');
-        if (product.foto) { document.getElementById('edit-img-hewan').src = product.foto; document.getElementById('edit-preview-hewan').style.display = 'flex'; document.querySelector('#edit-form-hewan .upload-box').style.display = 'none'; }
-        else removeEditImage('hewan');
-    } else if (jenis === 'rumput') {
-        document.getElementById('edit-id-rumput').value = product.id;
-        document.getElementById('edit-jenis-rumput').value = product.jenis_detail || '';
-        document.getElementById('edit-nama-rumput').value = product.nama || '';
-        document.getElementById('edit-harga-rumput').value = product.harga ? formatRupiah(product.harga).replace(/[^0-9,]/g, '').replace(',', '.') : '';
-        document.getElementById('edit-stok-rumput').value = product.stok || '';
-        document.getElementById('edit-status-rumput').value = product.status || 'tersedia';
-        const opts = document.querySelectorAll('#edit-form-rumput .status-option');
-        opts.forEach(o => o.classList.remove('active'));
-        (product.status === 'tersedia' ? opts[0] : opts[1]).classList.add('active');
-        if (product.foto) { document.getElementById('edit-img-rumput').src = product.foto; document.getElementById('edit-preview-rumput').style.display = 'flex'; document.querySelector('#edit-form-rumput .upload-box').style.display = 'none'; }
-        else removeEditImage('rumput');
-    } else if (jenis === 'susu') {
-        document.getElementById('edit-id-susu').value = product.id;
-        document.getElementById('edit-jenis-susu').value = product.jenis_detail || '';
-        document.getElementById('edit-nama-susu').value = product.nama || '';
-        document.getElementById('edit-tgl-produksi-susu').value = product.tanggal_produksi || '';
-        document.getElementById('edit-tgl-expiry-susu').value = product.tanggal_expiry || '';
-        document.getElementById('edit-harga-susu').value = product.harga ? formatRupiah(product.harga).replace(/[^0-9,]/g, '').replace(',', '.') : '';
-        document.getElementById('edit-stok-susu').value = product.stok || '';
-        document.getElementById('edit-status-susu').value = product.status || 'tersedia';
-        const opts = document.querySelectorAll('#edit-form-susu .status-option');
-        opts.forEach(o => o.classList.remove('active'));
-        (product.status === 'tersedia' ? opts[0] : opts[1]).classList.add('active');
-        if (product.foto) { document.getElementById('edit-img-susu').src = product.foto; document.getElementById('edit-preview-susu').style.display = 'flex'; document.querySelector('#edit-form-susu .upload-box').style.display = 'none'; }
-        else removeEditImage('susu');
-    }
-    document.getElementById('editModal').classList.add('active');
+function resetFilter() {
+    activeFilter = { type: '', status: '' };
+    if (document.getElementById('filterJenis')) document.getElementById('filterJenis').value = '';
+    if (document.getElementById('filterStatus')) document.getElementById('filterStatus').value = '';
+    renderProducts();
 }
-function closeEditModal() { document.getElementById('editModal').classList.remove('active'); }
-function switchEditTab(tab) {
-    document.querySelectorAll('.edit-modal .tab').forEach(t => { t.classList.remove('active'); if(t.dataset.tab===tab) t.classList.add('active'); });
-    document.querySelectorAll('.edit-modal .form-section').forEach(f => f.classList.remove('active'));
-    document.getElementById(`edit-form-${tab}`).classList.add('active');
-}
-function previewEditImage(e, type) {
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-        document.getElementById(`edit-img-${type}`).src = ev.target.result;
-        document.getElementById(`edit-preview-${type}`).style.display = 'flex';
-        document.querySelector(`#edit-form-${type} .upload-box`).style.display = 'none';
-    }; reader.readAsDataURL(file);
-}
-function removeEditImage(type) {
-    document.getElementById(`edit-file-${type}`).value = '';
-    document.getElementById(`edit-preview-${type}`).style.display = 'none';
-    document.querySelector(`#edit-form-${type} .upload-box`).style.display = 'flex';
-}
-function selectEditStatus(el, type) {
-    el.parentElement.querySelectorAll('.status-option').forEach(o => o.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById(`edit-status-${type}`).value = el.classList.contains('available') ? 'tersedia' : 'tidak_tersedia';
-}
-function handleEditSubmit(e, type) {
-    e.preventDefault();
-    const id = document.getElementById(`edit-id-${type}`).value, status = document.getElementById(`edit-status-${type}`).value;
-    const data = { status, updated_at: new Date().toISOString() };
-    if(type==='hewan') {
-        data.jenis_detail = document.getElementById('edit-jenis-hewan').value;
-        data.nama = document.getElementById('edit-nama-hewan').value;
-        data.berat = document.getElementById('edit-berat-hewan').value;
-        data.harga = parseInt(document.getElementById('edit-harga-hewan').value.replace(/\D/g,''))||0;
-        data.stok = parseInt(document.getElementById('edit-stok-hewan').value)||0;
-        const img = document.getElementById('edit-img-hewan').src; if(img && !img.includes('placeholder')) data.foto = img;
-    } else if(type==='rumput') {
-        data.jenis_detail = document.getElementById('edit-jenis-rumput').value;
-        data.nama = document.getElementById('edit-nama-rumput').value;
-        data.harga = parseInt(document.getElementById('edit-harga-rumput').value.replace(/\D/g,''))||0;
-        data.stok = parseInt(document.getElementById('edit-stok-rumput').value)||0;
-        const img = document.getElementById('edit-img-rumput').src; if(img && !img.includes('placeholder')) data.foto = img;
-    } else if(type==='susu') {
-        data.jenis_detail = document.getElementById('edit-jenis-susu').value;
-        data.nama = document.getElementById('edit-nama-susu').value;
-        data.tanggal_produksi = document.getElementById('edit-tgl-produksi-susu').value;
-        data.tanggal_expiry = document.getElementById('edit-tgl-expiry-susu').value;
-        data.harga = parseInt(document.getElementById('edit-harga-susu').value.replace(/\D/g,''))||0;
-        data.stok = parseInt(document.getElementById('edit-stok-susu').value)||0;
-        const img = document.getElementById('edit-img-susu').src; if(img && !img.includes('placeholder')) data.foto = img;
-    }
-    if(updateProduct(id, data)) { renderTable(getProducts()); updateStats(); closeEditModal(); showToast('Produk berhasil diperbarui!', 'success'); }
-    else showToast('Gagal memperbarui produk', 'error');
-}
-document.getElementById('editModal').addEventListener('click', e => { if(e.target.id==='editModal') closeEditModal(); });
 
-// ==================== PREVIEW MODAL ====================
-function openPreviewModal(productId) {
-    const products = getProducts(), product = products.find(p => p.id === productId);
-    if(!product) { showToast('Produk tidak ditemukan', 'error'); return; }
-    const container = document.getElementById('previewContainer'), jenis = product.jenis?.toLowerCase();
-    const statusClass = product.status === 'tersedia' ? 'status-available' : 'status-unavailable';
-    const statusText = product.status === 'tersedia' ? 'Tersedia' : 'Tidak Tersedia';
-    const dotColor = product.status === 'tersedia' ? '#175D2B' : '#f44336';
-    let html = '';
-    const img = product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<span class="no-image"><i class="fa-solid fa-image"></i></span>';
-    if(jenis==='rumput') {
-        html = `<div class="preview-card"><div class="card-header"><span class="header-title">Preview Produk</span><span class="header-id">ID: ${product.id}</span></div>
-        <p class="category">${capitalizeFirst(product.jenis)}</p><div class="card-image">${img}</div><h3 class="detail-title">DETAIL PRODUK RUMPUT</h3>
-        <div class="detail-grid">
-            <div class="detail-item"><label>Kategori</label><p class="value">${capitalizeFirst(product.jenis)}</p></div>
-            <div class="detail-item"><label>Nama Produk</label><p class="value">${product.nama||'-'}</p></div>
-            <div class="detail-item"><label>Jenis</label><p class="value">${capitalizeFirst(product.jenis_detail)||'-'}</p></div>
-            <div class="detail-item"><label>Harga</label><p class="value">${formatRupiah(product.harga)} / Kg</p></div>
-            <div class="detail-item"><label>Stok</label><p class="value">${product.stok||0} Kg</p></div>
-            <div class="detail-item"><label>Status</label><p class="value ${statusClass}"><span class="dot" style="background:${dotColor}"></span> ${statusText}</p></div>
-        </div><button class="btn-close" onclick="closePreviewModal()">Tutup Preview</button></div>`;
-    } else if(jenis==='hewan') {
-        html = `<div class="preview-card"><div class="card-header"><span class="header-title">Preview Produk</span><span class="header-id">ID: ${product.id}</span></div>
-        <p class="category">${capitalizeFirst(product.jenis)}</p><div class="card-image">${img}</div><h3 class="detail-title">DETAIL PRODUK HEWAN</h3>
-        <div class="detail-grid">
-            <div class="detail-item"><label>Kategori</label><p class="value">${capitalizeFirst(product.jenis)}</p></div>
-            <div class="detail-item"><label>Nama Produk</label><p class="value">${product.nama||'-'}</p></div>
-            <div class="detail-item"><label>Jenis Hewan</label><p class="value">${capitalizeFirst(product.jenis_detail)||'-'}</p></div>
-            <div class="detail-item"><label>Berat</label><p class="value">${product.berat?product.berat+' Kg':'-'}</p></div>
-            <div class="detail-item"><label>Harga</label><p class="value">${formatRupiah(product.harga)}</p></div>
-            <div class="detail-item"><label>Jumlah</label><p class="value">${product.stok||0} Ekor</p></div>
-            <div class="detail-item"><label>Status</label><p class="value ${statusClass}"><span class="dot" style="background:${dotColor}"></span> ${statusText}</p></div>
-        </div><button class="btn-close" onclick="closePreviewModal()">Tutup Preview</button></div>`;
-    } else if(jenis==='susu') {
-        html = `<div class="preview-card"><div class="card-header"><span class="header-title">Preview Produk</span><span class="header-id">ID: ${product.id}</span></div>
-        <p class="category">${capitalizeFirst(product.jenis)}</p><div class="card-image">${img}</div><h3 class="detail-title">DETAIL PRODUK SUSU</h3>
-        <div class="detail-grid">
-            <div class="detail-item"><label>Kategori</label><p class="value">${capitalizeFirst(product.jenis)}</p></div>
-            <div class="detail-item"><label>Nama Produk</label><p class="value">${product.nama||'-'}</p></div>
-            <div class="detail-item"><label>Jenis Susu</label><p class="value">${capitalizeFirst(product.jenis_detail)||'-'}</p></div>
-            <div class="detail-item"><label>Tgl. Produksi</label><p class="value">${formatDate(product.tanggal_produksi)}</p></div>
-            <div class="detail-item"><label>Tgl. Kadaluarsa</label><p class="value">${formatDate(product.tanggal_expiry)}</p></div>
-            <div class="detail-item"><label>Harga</label><p class="value">${formatRupiah(product.harga)} / Liter</p></div>
-            <div class="detail-item"><label>Stok</label><p class="value">${product.stok||0} Liter</p></div>
-            <div class="detail-item"><label>Status</label><p class="value ${statusClass}"><span class="dot" style="background:${dotColor}"></span> ${statusText}</p></div>
-        </div><button class="btn-close" onclick="closePreviewModal()">Tutup Preview</button></div>`;
-    }
-    container.innerHTML = html; document.getElementById('previewModal').classList.add('active');
-}
-function closePreviewModal() { document.getElementById('previewModal').classList.remove('active'); }
-document.getElementById('previewModal').addEventListener('click', e => { if(e.target.id==='previewModal') closePreviewModal(); });
-
-// ==================== ADD MODAL ====================
 function openAddModal() {
-    document.querySelectorAll('#addProductModal .form-section').forEach(f => f.classList.remove('active'));
-    document.querySelectorAll('#addProductModal .tab').forEach(t => t.classList.remove('active'));
-    switchAddTab('hewan'); resetAddForm('hewan'); resetAddForm('susu'); resetAddForm('rumput');
-    document.getElementById('addProductModal').classList.add('active');
+    document.getElementById('addProductModal')?.classList.add('active');
+    switchAddTab('hewan');
 }
-function closeAddModal() { document.getElementById('addProductModal').classList.remove('active'); }
-function switchAddTab(tab) {
-    document.querySelectorAll('#addProductModal .tab').forEach(t => { t.classList.remove('active'); if(t.dataset.tab===tab) t.classList.add('active'); });
-    document.querySelectorAll('#addProductModal .form-section').forEach(f => f.classList.remove('active'));
-    document.getElementById(`add-form-${tab}`).classList.add('active');
-}
-function resetAddForm(type) {
-    document.getElementById(`add-form-${type}`).reset();
-    const opts = document.querySelectorAll(`#add-form-${type} .status-option`);
-    opts.forEach(o => o.classList.remove('active')); opts[0].classList.add('active');
-    document.getElementById(`add-status-${type}`).value = 'tersedia'; removeAddImage(type);
-}
-function previewAddImage(e, type) {
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-        document.getElementById(`add-img-${type}`).src = ev.target.result;
-        document.getElementById(`add-preview-${type}`).style.display = 'flex';
-        document.querySelector(`#add-form-${type} .upload-box`).style.display = 'none';
-    }; reader.readAsDataURL(file);
-}
-function removeAddImage(type) {
-    document.getElementById(`add-file-${type}`).value = '';
-    document.getElementById(`add-preview-${type}`).style.display = 'none';
-    document.querySelector(`#add-form-${type} .upload-box`).style.display = 'flex';
-}
-function selectAddStatus(el, type) {
-    el.parentElement.querySelectorAll('.status-option').forEach(o => o.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById(`add-status-${type}`).value = el.classList.contains('available') ? 'tersedia' : 'tidak_tersedia';
-}
-function formatCurrencyInput(input) {
-    let v = input.value.replace(/[^0-9]/g,'');
-    if(v) { input.dataset.raw = v; input.value = 'Rp ' + parseInt(v).toLocaleString('id-ID'); }
-}
-function getRawCurrency(input) { return input.dataset.raw || input.value.replace(/[^0-9]/g,''); }
 
-function handleAddSubmit(e, type) {
-    e.preventDefault();
-    const labels = { 'hewan':'Hewan', 'susu':'Susu', 'rumput':'Rumput' };
-    let product = { jenis: type };
-    
-    if(type==='hewan') {
-        const nama = document.getElementById('add-nama-hewan').value.trim(), hargaRaw = getRawCurrency(document.getElementById('add-harga-hewan')), stok = document.getElementById('add-stok-hewan').value, status = document.getElementById('add-status-hewan').value;
-        if(!nama || !hargaRaw || !stok) { showToast('Mohon lengkapi semua field yang wajib diisi!', 'error'); return; }
-        product.nama = nama; product.harga = parseInt(hargaRaw); product.stok = parseInt(stok); product.status = status;
-        product.jenis_detail = document.getElementById('add-jenis-hewan').value;
-        product.berat = document.getElementById('add-berat-hewan').value || null;
-    } else if(type==='susu') {
-        const nama = document.getElementById('add-nama-susu').value.trim(), tglProd = document.getElementById('add-tgl-produksi-susu').value, tglExp = document.getElementById('add-tgl-expiry-susu').value, hargaRaw = getRawCurrency(document.getElementById('add-harga-susu')), stok = document.getElementById('add-stok-susu').value, status = document.getElementById('add-status-susu').value;
-        if(!nama || !tglProd || !hargaRaw || !stok) { showToast('Mohon lengkapi semua field yang wajib diisi!', 'error'); return; }
-        product.nama = nama; product.tanggal_produksi = tglProd; product.tanggal_expiry = tglExp; product.tanggal = tglProd;
-        product.harga = parseInt(hargaRaw); product.stok = parseInt(stok); product.status = status;
-        product.jenis_detail = document.getElementById('add-jenis-susu').value;
-    } else if(type==='rumput') {
-        const nama = document.getElementById('add-nama-rumput').value.trim(), hargaRaw = getRawCurrency(document.getElementById('add-harga-rumput')), stok = document.getElementById('add-stok-rumput').value, status = document.getElementById('add-status-rumput').value;
-        if(!nama || !hargaRaw || !stok) { showToast('Mohon lengkapi semua field yang wajib diisi!', 'error'); return; }
-        product.nama = nama; product.harga = parseInt(hargaRaw); product.stok = parseInt(stok); product.status = status;
-        product.jenis_detail = document.getElementById('add-jenis-rumput').value;
-        product.tanggal = new Date().toISOString().split('T')[0];
-    }
-    
-    const img = document.getElementById(`add-img-${type}`).src;
-    if(img && !img.includes('placeholder') && img.startsWith('data:')) product.foto = img;
-    
-    addProduct(product); renderTable(getProducts()); updateStats(); closeAddModal();
-    showToast(`Produk ${labels[type]} berhasil ditambahkan!`, 'success');
+function closeAddModal() {
+    document.getElementById('addProductModal')?.classList.remove('active');
 }
-document.getElementById('addProductModal')?.addEventListener('click', e => { if(e.target.id==='addProductModal') closeAddModal(); });
 
-// ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', () => {
-    updateStats(); renderTable(getProducts());
-    const last = sessionStorage.getItem('productCount'), curr = getProducts().length;
-    if(last && curr > parseInt(last)) showToast('Produk baru berhasil ditambahkan!', 'success');
-    sessionStorage.setItem('productCount', curr);
-    window.addEventListener('storage', e => { if(e.key===STORAGE_KEY) { updateStats(); renderTable(getProducts()); }});
-    document.querySelectorAll('input[placeholder="Rp 0"]').forEach(inp => {
-        inp.addEventListener('blur', function() { if(this.value && !this.value.startsWith('Rp')) formatCurrencyInput(this); });
+function switchAddTab(type) {
+    switchTabInModal('addProductModal', type, 'add-form');
+}
+
+function switchEditTab(type) {
+    switchTabInModal('editModal', type, 'edit-form');
+}
+
+function switchTabInModal(modalId, type, formPrefix) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    modal.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === type);
     });
-});
-// Fungsi closePreviewModal jika belum ada di file JS eksternal
+    modal.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
+    document.getElementById(`${formPrefix}-${type}`)?.classList.add('active');
+}
+
+function handleAddSubmit(event, type) {
+    event.preventDefault();
+
+    const product = readProductForm('add', type);
+    product.id = Date.now();
+    products.unshift(product);
+
+    renderProducts();
+    updateStats();
+    closeAddModal();
+    event.target.reset();
+    removeAddImage(type);
+    showFlashMessage('Produk baru berhasil ditambahkan.');
+}
+
+function openEditModal(id) {
+    const product = products.find(item => item.id === id);
+    if (!product) return;
+
+    editingId = id;
+    const type = product.type.toLowerCase();
+    switchEditTab(type);
+    fillEditForm(product, type);
+    document.getElementById('editModal')?.classList.add('active');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal')?.classList.remove('active');
+    editingId = null;
+}
+
+function handleEditSubmit(event, type) {
+    event.preventDefault();
+    const index = products.findIndex(item => item.id === editingId);
+    if (index === -1) return;
+
+    products[index] = { ...products[index], ...readProductForm('edit', type), id: editingId };
+    renderProducts();
+    updateStats();
+    closeEditModal();
+    showFlashMessage('Perubahan produk berhasil disimpan.');
+}
+
+function readProductForm(mode, type) {
+    const label = { hewan: 'Hewan', rumput: 'Rumput', susu: 'Susu' }[type];
+    const name = getValue(`${mode}-nama-${type}`) || defaultName(type);
+    const price = getValue(`${mode}-harga-${type}`) || 'Rp 0';
+    const stockValue = getValue(`${mode}-stok-${type}`) || '0';
+    const status = normalizeStatus(getValue(`${mode}-status-${type}`));
+    const date = getValue(`${mode}-tgl-produksi-${type}`) || new Date().toISOString().slice(0, 10);
+
+    return {
+        type: label,
+        name,
+        date,
+        price,
+        stock: `${stockValue} ${stockUnit(type)}`,
+        status,
+        image: defaultImage(type)
+    };
+}
+
+function fillEditForm(product, type) {
+    setValue(`edit-nama-${type}`, product.name);
+    setValue(`edit-harga-${type}`, product.price);
+    setValue(`edit-stok-${type}`, parseInt(product.stock, 10) || '');
+    setValue(`edit-status-${type}`, product.status.toLowerCase().replaceAll(' ', '-'));
+
+    if (type === 'susu') {
+        setValue('edit-tgl-produksi-susu', product.date);
+        setValue('edit-tgl-expiry-susu', product.date);
+    }
+
+    const statusInput = document.getElementById(`edit-status-${type}`);
+    const statusWrap = statusInput?.closest('.form-group');
+    statusWrap?.querySelectorAll('.status-option').forEach(option => {
+        option.classList.toggle('active', option.classList.contains(product.status === 'Tersedia' ? 'available' : 'unavailable'));
+    });
+}
+
+function getValue(id) {
+    return document.getElementById(id)?.value.trim() || '';
+}
+
+function setValue(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.value = value;
+}
+
+function normalizeStatus(value) {
+    return value === 'tidak-tersedia' || value === 'tidak tersedia' ? 'Tidak Tersedia' : 'Tersedia';
+}
+
+function stockUnit(type) {
+    return { hewan: 'Ekor', rumput: 'Kg', susu: 'Liter' }[type] || '';
+}
+
+function defaultName(type) {
+    return { hewan: 'Produk Hewan', rumput: 'Produk Rumput', susu: 'Produk Susu' }[type];
+}
+
+function defaultImage(type) {
+    return {
+        hewan: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=600',
+        rumput: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=600',
+        susu: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600'
+    }[type];
+}
+
+function selectAddStatus(element, type) {
+    selectStatusOption(element, `add-status-${type}`);
+}
+
+function selectEditStatus(element, type) {
+    selectStatusOption(element, `edit-status-${type}`);
+}
+
+function selectStatusOption(element, inputId) {
+    element.parentElement.querySelectorAll('.status-option').forEach(option => option.classList.remove('active'));
+    element.classList.add('active');
+    setValue(inputId, element.classList.contains('available') ? 'tersedia' : 'tidak-tersedia');
+}
+
+function previewAddImage(event, type) {
+    previewImage(event, `add-preview-${type}`, `add-img-${type}`);
+}
+
+function previewEditImage(event, type) {
+    previewImage(event, `edit-preview-${type}`, `edit-img-${type}`);
+}
+
+function previewImage(event, previewId, imageId) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        const preview = document.getElementById(previewId);
+        const image = document.getElementById(imageId);
+        if (preview && image) {
+            image.src = e.target.result;
+            preview.style.display = 'flex';
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeAddImage(type) {
+    removeImage(`add-file-${type}`, `add-preview-${type}`, `add-img-${type}`);
+}
+
+function removeEditImage(type) {
+    removeImage(`edit-file-${type}`, `edit-preview-${type}`, `edit-img-${type}`);
+}
+
+function removeImage(fileId, previewId, imageId) {
+    const file = document.getElementById(fileId);
+    const preview = document.getElementById(previewId);
+    const image = document.getElementById(imageId);
+    if (file) file.value = '';
+    if (image) image.src = '';
+    if (preview) preview.style.display = 'none';
+}
+
+function openPreviewModal(id) {
+    const product = products.find(item => item.id === id);
+    if (!product) return;
+
+    setText('previewTitle', `Preview ${product.type}`);
+    setText('previewSubtitle', 'Data produk aktif');
+    setText('previewProductId', `ID: ${formatProductId(product)}`);
+    setText('previewSectionTitle', `INFORMASI ${product.type.toUpperCase()}`);
+    setText('previewProductType', product.type);
+    setText('previewProductName', product.name);
+    setText('previewProductDate', formatDate(product.date));
+    setText('previewProductPrice', product.price);
+    setText('previewProductStock', product.stock);
+    setText('previewProductStatus', product.status);
+
+    const image = document.getElementById('previewProductImage');
+    if (image) {
+        image.src = product.image || defaultImage(product.type.toLowerCase());
+        image.alt = product.name;
+    }
+
+    const statusWrap = document.getElementById('previewStatusWrap');
+    if (statusWrap) {
+        statusWrap.classList.toggle('unavailable', product.status !== 'Tersedia');
+    }
+
+    document.getElementById('previewModal')?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
 function closePreviewModal() {
-    const modal = document.getElementById('previewModal');
-    if (modal) {
-        modal.style.display = 'none';
+    document.getElementById('previewModal')?.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+function formatProductId(product) {
+    const prefix = { Hewan: 'S-H', Rumput: 'S-R', Susu: 'S-S' }[product.type] || 'S-P';
+    return `${prefix}-${String(product.id).slice(-3).padStart(3, '0')}`;
+}
+
+function deleteProduct(id) {
+    const index = products.findIndex(item => item.id === id);
+    if (index === -1) return;
+
+    products.splice(index, 1);
+    renderProducts();
+    updateStats();
+    showFlashMessage('Produk berhasil dihapus.');
+}
+
+function formatCurrencyInput(input) {
+    const numbers = input.value.replace(/\D/g, '');
+    input.value = numbers ? `Rp ${Number(numbers).toLocaleString('id-ID')}` : '';
+}
+
+function exportTableToCSV(filename) {
+    const rows = getFilteredProducts();
+    const csvRows = [
+        ['Jenis Produk', 'Nama Produk', 'Tanggal', 'Harga', 'Stok', 'Status'],
+        ...rows.map(product => [product.type, product.name, product.date, product.price, product.stock, product.status])
+    ];
+    const csv = csvRows.map(row => row.map(cell => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    showFlashMessage('Data produk berhasil diekspor.');
+}
+
+document.addEventListener('click', event => {
+    if (event.target.classList.contains('modal-overlay')) {
+        event.target.classList.remove('active');
         document.body.style.overflow = 'auto';
     }
-}
+});
 
-// Tutup modal jika klik di luar area modal
-document.getElementById('previewModal')?.addEventListener('click', function(e) {
-    if (e.target === this) {
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        closeAddModal();
+        closeEditModal();
+        closeFilterModal();
         closePreviewModal();
     }
 });

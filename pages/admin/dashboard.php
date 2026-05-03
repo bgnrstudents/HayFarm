@@ -13,61 +13,14 @@
  <link rel="stylesheet" href="../../public/css/admin_dashboard.css">  
 </head>
 <body>
-<!-- SIDEBAR -->
-<div class="sidebar">
-    <img src="../../public/images/logo_hayfarm.png" class="logo">
 
-    <ul class="menu">
-        <li class="active">
-            <a href="dashboard.php"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
-        </li>
-
-        <li>
-            <a href="manajemen_produk.php"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a>
-        </li>
-
-        <li>
-            <a href="verifikasi_penjualan.php"><i class="fa-solid fa-file-circle-check"></i> Verifikasi Penjualan</a>
-        </li>
-
-        <p class="menu-title">DATA</p>
-
-        <li>
-            <a href="data_hewan.php"><i class="fa-solid fa-square-poll-vertical"></i> Data Hewan</a>
-        </li>
-
-        <li>
-            <a href="data_kesehatan.php"><i class="fa-solid fa-heart-pulse"></i> Data Kesehatan Hewan</a>
-        </li>
-
-        <li>
-            <a href=""><i class="fa-solid fa-power-off"></i> Logout</a>
-        </li>
-    </ul>
-</div>
+<?php include __DIR__ . '/../../components/sidebar_admin.php'; ?>
 
 <!-- MAIN -->
 <div class="main-content">
 
     <!-- TOPBAR -->
-    <div class="topbar justify-content-end">
-      
-    <!-- RIGHT -->
-    <div class="topbar-right">
-        <span id="currentDate"></span>
-
-        <div class="notif">
-            <i class="fa-solid fa-bell"style="color: rgb(25, 108, 51); size: 1.25rem;"></i>
-            <span class="badge">6</span>
-        </div>
-
-        <div class="user">
-            <strong>Farel</strong>
-            <small>Admin</small>
-        </div>
-    </div>
-
-</div>
+    <?php include __DIR__ . '/../../components/navbar_admin.php'; ?>
 
     <!-- TITLE -->
     <h4>Dashboard</h4>
@@ -132,7 +85,7 @@
   
   <div class="notification-grid">
     <!-- Card 1 - Vaksinasi -->
-    <div class="notification-card card-vaksinasi">
+    <a class="notification-card card-vaksinasi" href="data_kesehatan.php">
       <div>
         <div class="card-title">
           <span>Vaksinasi diperlukan segera</span>
@@ -145,10 +98,10 @@
         <div class="card-number-label">Hewan </div>
       </div>
       <div class="card-arrow">›</div>
-    </div>
+    </a>
 
     <!-- Card 2 - Produk Kedaluwarsa -->
-    <div class="notification-card card-default">
+    <a class="notification-card card-default" href="manajemen_produk.php">
       <div>
         <div class="card-title">
           <span>Produk Kedaluwarsa</span>
@@ -161,10 +114,10 @@
         <div class="card-number-label">Produk </div>
       </div>
       <div class="card-arrow">›</div>
-    </div>
+    </a>
 
     <!-- Card 3 - Kelahiran -->
-    <div class="notification-card card-default">
+    <a class="notification-card card-default" href="data_kesehatan.php">
       <div>
         <div class="card-title">
           <span>Kelahiran bulan ini</span>
@@ -177,10 +130,10 @@
         <div class="card-number-label">Hewan </div>
       </div>
       <div class="card-arrow">›</div>
-    </div>
+    </a>
 
     <!-- Card 4 - Perlu Verifikasi -->
-    <div class="notification-card card-default">
+    <a class="notification-card card-default" href="verifikasi_penjualan.php">
       <div>
         <div class="card-title">
           <span>Perlu verifikasi</span>
@@ -193,8 +146,9 @@
         <div class="card-number-label">Orang </div>
       </div>
       <div class="card-arrow">›</div>
-    </div>
+    </a>
   </div>
+</div>
 </div>
 <script src="../../public/js/dashboard_admin.js"></script>
 </body>

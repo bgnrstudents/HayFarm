@@ -125,7 +125,6 @@
         }
 
         function confirmAction() {
-            alert('Pesanan Berhasil Diverifikasi!');
             closeOrderModal();
         }
 

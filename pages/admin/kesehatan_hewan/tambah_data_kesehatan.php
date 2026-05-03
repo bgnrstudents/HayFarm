@@ -129,7 +129,7 @@
 
                         <div class="col-12 d-flex justify-content-start gap-2 mt-4">
                             <button type="button" onclick="history.back()" class="btn btn-outline-secondary px-4">Batal</button>
-                            <button type="button" onclick="alert('✅ Data berhasil disimpan!'); window.location.href='kesehatan.php';" class="btn btn-success px-4 fw-bold" style="background-color: #10b981; border:none; min-width: 180px;">
+                            <button type="button" onclick="window.location.href='kesehatan.php';" class="btn btn-success px-4 fw-bold" style="background-color: #10b981; border:none; min-width: 180px;">
                                 <i class="bi bi-save me-2"></i>Simpan Data
                             </button>
                         </div>

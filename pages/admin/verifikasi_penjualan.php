@@ -9,313 +9,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
 
-<style>
-* {margin:0;padding:0;box-sizing:border-box;font-family:'Nunito',sans-serif;}
-
-/* SIDEBAR */
-.sidebar {
-    width: 250px;
-    height: 100vh;
-    background: #fff;
-    position: fixed;
-    padding: 10px;
-}
-
-.logo {
-    width: 130px;
-    display: block;
-    margin: 10px auto 20px; 
-}
-
-/* MENU */
-.menu {
-    list-style: none;
-}
-
-.menu li {
-    margin-bottom: 10px;
-}
-
-.menu li a {
-    text-decoration: none;
-    color: #333;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-radius: 8px;
-}
-
-.menu li a:hover {
-    background: #f8f9fa;
-}
-
-.menu .active a {
-    background: #175D2B;
-    color: #fff; 
-}
-
-.menu .active a i {
-    color: #ffbe25; 
-}
-
-.menu-title {
-    font-size: 12px;
-    color: #777;
-    margin: 15px 0 5px;
-}
-
-.main-content {
-    margin-left:250px;
-    padding:20px;
-    min-height:100vh;
-    background: linear-gradient(to bottom,#ffffff 0px,#ffffff 80px,#dbe7df 80px,#c9d8cf 40%,#b8c8be 100%);
-}
-
-/* TOPBAR */
-.topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #ffffff; 
-    padding: 10px 20px; 
-    
-}
-
-/* SEARCH */
-.search-box {
-    position: relative;
-    width: 300px;
-}
-
-.search-box i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #999;
-    font-size: 14px;
-    pointer-events: none; 
-}
-
-/* INPUT */
-.search-box input {
-    width: 100%;
-    padding: 8px 12px 8px 35px;
-    border-radius: 20px;
-    border: none;
-    outline: none;
-    background: #f1f3f5;
-    font-size: 14px;
-}
-
-/* RIGHT SECTION */
-.topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-/* DATE */
-#currentDate {
-    font-size: 13px;
-    color: #555;
-}
-
-/* NOTIF */
-.notif {
-    position: relative;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.notif .badge {
-    position: absolute;
-    top: -6px;
-    right: -8px;
-    background: red;
-    color: white;
-    font-size: 10px;
-    padding: 3px 5px;
-    border-radius: 50%;
-}
-
-/* USER */
-.user {
-    display: flex;
-    flex-direction: column;
-    font-size: 12px;
-    text-align: right;
-}
-
-.user strong {
-    font-size: 13px;
-}
-
-.section-header h2 {font-weight:700;}
-.section-header p {color:#777;font-size:13px;}
-
-/* FILTER */
-.filter-box {
-    background:white;
-    padding:15px;
-    border-radius:12px;
-    display:flex;
-    gap:10px;
-    margin:20px 0;
-}
-
-.filter-box select {
-    padding:8px;
-    border-radius:8px;
-    border:1px solid #ddd;
-}
-
-/* STATS */
-.stats {
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-    margin-bottom:20px;
-}
-
-.stat-card {
-    background:white;
-    padding:15px;
-    border-radius:12px;
-}
-
-.stat-card h4 {font-size:13px;color:#777;}
-.stat-card h2 {font-size:20px;font-weight:bold;}
-
-/* TABLE */
-.table-box {
-    background:white;
-    border-radius:12px;
-    padding:20px;
-}
-
-table {width:100%;border-collapse:collapse;}
-th,td {padding:12px;font-size:14px;border-bottom:1px solid #eee;}
-thead th {
-    background:#ffc107;
-    color:#3b2f00;
-    font-weight:800;
-    border-bottom:1px solid #e0a800;
-}
-tbody td {
-    background:#fffdf5;
-}
-tbody tr:nth-child(even) td {
-    background:#fffaf0;
-}
-
-.status {
-    padding:5px 10px;
-    border-radius:20px;
-    font-size:12px;
-}
-
-.wait {background:#fff3cd;color:#856404;}
-.ok {background:#d4edda;color:#155724;}
-.no {background:#f8d7da;color:#721c24;}
-
-.btn-verif {
-    background:#175D2B;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:8px;
-}
-
-.eye {
-    background:#eee;
-    border:none;
-    padding:6px 10px;
-    border-radius:6px;
-}
-
-.btn-verif:hover {background:#0f4921;}
-.eye:hover {background:#dde2e6;}
-
-/* POPUP */
-.popup-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 9999;
-}
-
-.popup-overlay.active {
-    display: flex;
-}
-
-.popup-card {
-    width: min(980px, 100%);
-    max-height: 90vh;
-    background: #fff;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
-}
-
-.popup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.popup-title {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.popup-close {
-    background: #f1f3f5;
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    font-size: 20px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.popup-close:hover {
-    background: #e2e8f0;
-}
-
-.popup-iframe {
-    width: 100%;
-    height: 78vh;
-    border: none;
-    display: block;
-}
-
-/* PAGINATION */
-.pagination {
-    display:flex;
-    justify-content:flex-end;
-    margin-top:10px;
-    gap:5px;
-}
-.pagination button {
-    border:none;
-    padding:6px 10px;
-    border-radius:6px;
-}
-.active-page {
-    background:#175D2B;
-    color:white;
-}
-</style>
+<link rel="stylesheet" href="../../public/css/admin_verifikasiPenjualan.css">
 </head>
 
 <body>
@@ -375,7 +69,7 @@ tbody tr:nth-child(even) td {
 <td>2</td>
 <td>15.250.000</td>
 <td><span class="status wait">Menunggu</span></td>
-<td><button class="btn-verif" onclick="openDelete()">Verifikasi</button></td>
+<td><button class="btn-verif" onclick="openPending()">Verifikasi</button></td>
 </tr>
 
 <tr>
@@ -397,7 +91,7 @@ tbody tr:nth-child(even) td {
 <td>3</td>
 <td>8.750.000</td>
 <td><span class="status wait">Menunggu</span></td>
-<td><button class="btn-verif" onclick="openDelete()">Verifikasi</button></td>
+<td><button class="btn-verif" onclick="openPending()">Verifikasi</button></td>
 </tr>
 
 <tr>
@@ -424,58 +118,69 @@ tbody tr:nth-child(even) td {
 
 </div>
 
-<div class="popup-overlay" id="statusPopup" onclick="closePopupOutside(event)">
-    <div class="popup-card">
-        <div class="popup-header">
-            <h4 class="popup-title" id="popupTitle">Detail Verifikasi</h4>
-            <button class="popup-close" type="button" onclick="closePopup()">&times;</button>
+<div class="sales-modal-overlay" id="salesModal" onclick="closeSalesModalOutside(event)">
+    <div class="sales-modal-card">
+        <div class="sales-modal-body">
+            <div class="sales-modal-header">
+                <div>
+                    <h2 class="sales-modal-title">Detail Pesanan</h2>
+                    <p class="sales-modal-subtitle" id="salesSubtitle">Review pesanan pelanggan</p>
+                </div>
+                <button class="sales-modal-close" type="button" onclick="closeSalesModal()">&times;</button>
+            </div>
+
+            <div class="sales-order-id" id="salesOrderId">#ORD-2026-001</div>
+            <div class="sales-status-badge waiting" id="salesStatusText">Menunggu Verifikasi</div>
+
+            <div class="sales-section-title">Informasi Pelanggan</div>
+            <div class="sales-info-row">
+                <div class="sales-icon-box"><i class="fas fa-user"></i></div>
+                <div><span class="sales-label">Nama Lengkap</span><span class="sales-value" id="salesCustomer">Ahmad Ridwan</span></div>
+            </div>
+            <div class="sales-info-row">
+                <div class="sales-icon-box"><i class="fas fa-envelope"></i></div>
+                <div><span class="sales-label">Email</span><span class="sales-value" id="salesEmail">ahmad.ridwan@example.com</span></div>
+            </div>
+            <div class="sales-info-row">
+                <div class="sales-icon-box"><i class="fas fa-phone"></i></div>
+                <div><span class="sales-label">Nomor Telepon</span><span class="sales-value" id="salesPhone">08123456789</span></div>
+            </div>
+            <div class="sales-info-row">
+                <div class="sales-icon-box"><i class="fas fa-map-marker-alt"></i></div>
+                <div><span class="sales-label">Alamat Pengiriman</span><span class="sales-value" id="salesAddress">Cianjur, Jawa Barat</span></div>
+            </div>
+
+            <div class="sales-section-title" id="proofTitle">Bukti Transfer</div>
+            <div class="sales-proof-card" id="salesProof" onclick="openSalesLightbox('https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=900')">
+                <img src="https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=120" alt="Bukti transfer">
+                <div>
+                    <span class="sales-value">Bukti_Transfer.jpg</span>
+                    <span class="sales-label">Klik untuk memperbesar</span>
+                </div>
+            </div>
+
+            <div class="sales-section-title">Ringkasan Pembayaran</div>
+            <div class="sales-summary">
+                <div class="sales-summary-row">
+                    <div class="sales-value"><i class="fas fa-credit-card"></i> Metode Pembayaran</div>
+                    <div class="sales-value">Transfer Bank</div>
+                </div>
+                <div class="sales-summary-row sales-total-row">
+                    <span class="sales-total-label">Total</span>
+                    <span class="sales-total" id="salesTotal">Rp 15.250.000</span>
+                </div>
+            </div>
+
+            <div class="sales-actions" id="salesActions"></div>
         </div>
-        <iframe class="popup-iframe" id="popupFrame" src=""></iframe>
     </div>
 </div>
 
-<script>
-// Fungsi utama untuk membuka popup
-function openPopup(page, title) {
-    document.getElementById('popupTitle').textContent = title;
-    document.getElementById('popupFrame').src = page;
-    document.getElementById('statusPopup').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
+<div class="sales-lightbox" id="salesLightbox" onclick="closeSalesLightbox()">
+    <img id="salesLightboxImage" src="" alt="Bukti transfer">
+</div>
 
-// Fungsi untuk tombol Verifikasi (Baris ini yang memanggil file)
-function openDelete() {
-    // Arahkan ke folder verifikasi_penjualan dan file menunggu_verifikasi.php
-    openPopup('verifikasi_penjualan/menunggu_verifikasi.php', 'Menunggu Verifikasi');
-}
-
-function openVerified() {
-    openPopup('verifikasi_penjualan/sudah_verifikasi.php', 'Pesanan Diverifikasi');
-}
-
-function openRejected() {
-    openPopup('verifikasi_penjualan/verifikasi_ditolak.php', 'Pesanan Ditolak');
-}
-
-// Fungsi menutup popup
-function closePopup() {
-    document.getElementById('statusPopup').classList.remove('active');
-    document.getElementById('popupFrame').src = '';
-    document.body.style.overflow = 'auto';
-}
-
-function closePopupOutside(event) {
-    if (event.target.id === 'statusPopup') {
-        closePopup();
-    }
-}
-
-document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-        closePopup();
-    }
-});
-</script>
+<script src="../../public/js/verifikasiPenjualan_admin.js"></script>
 
 
 </body>

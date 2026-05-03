@@ -161,8 +161,7 @@ function selectStatus(element, value) {
 // Handle save with alert simulation
 function handleSave(event) {
     event.preventDefault(); // Prevent actual submit for demo
-    alert('✅ Data berhasil disimpan!');
-    window.history.back(); // Go back to list
+    window.history.back();
 }
 
 // Populate from URL params

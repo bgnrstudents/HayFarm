@@ -156,7 +156,7 @@
 
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 25px;">
                    <button class="ord-btn ord-btn-confirm" 
-        onclick="alert('Terverifikasi!'); window.history.back()" 
+        onclick="window.history.back();" 
         style="width: 100%; padding: 14px; border-radius: 10px; border: none; background: #16a34a; color: white; font-weight: 700; cursor: pointer; font-size: 14px;">
     Verifikasi & Konfirmasi
 </button>
@@ -188,7 +188,6 @@
         }
 
         function confirmAction() {
-            alert('Pesanan Berhasil Diverifikasi!');
             closeOrderModal();
         }
 

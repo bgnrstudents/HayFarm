@@ -350,7 +350,6 @@ function selectStatus(element, value) {
 
 document.getElementById('editHewanForm').addEventListener('submit', function (event) {
     event.preventDefault();
-    alert('Perubahan data hewan berhasil disimpan.');
     window.location.href = 'data.php';
 });
 </script>

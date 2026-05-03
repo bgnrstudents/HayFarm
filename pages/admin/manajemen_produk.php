@@ -3,199 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin | Manajemen Penjualan</title>
+<title>Admin | Manajemen Produk</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../public/css/admin_manajemenProduk.css">
+<link rel="stylesheet" href="../../public/css/admin_manajemenProduk.css?v=2">
 
-<!-- CSS untuk Preview Produk Card -->
-<style>
-  /* Preview Card Styles */
-  .preview-card-container {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 20px;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
 
-  .preview-card {
-    background-color: #ffffff;
-    border-radius: 16px;
-    overflow: hidden;
-    width: 360px;
-    min-width: 360px;
-    flex-shrink: 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-
-  .preview-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    background-color: #ffffff;
-    border-bottom: 1px solid #eee;
-  }
-
-  .preview-header-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #333333;
-  }
-
-  .preview-header-id {
-    background-color: #2a2a2a;
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 12px;
-    border-radius: 20px;
-  }
-
-  .preview-category {
-    padding: 0 20px 12px;
-    color: #666666;
-    font-size: 14px;
-  }
-
-  .preview-card-image {
-    width: 100%;
-    height: 180px;
-    overflow: hidden;
-  }
-
-  .preview-card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .preview-detail-title {
-    padding: 16px 20px 12px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #333333;
-    letter-spacing: 0.5px;
-  }
-
-  .preview-detail-grid {
-    padding: 0 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 20px;
-  }
-
-  .preview-detail-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .preview-detail-item label {
-    font-size: 12px;
-    color: #888888;
-    font-weight: 500;
-  }
-
-  .preview-detail-item .value {
-    font-size: 14px;
-    font-weight: 700;
-    color: #333333;
-  }
-
-  .preview-detail-item.empty {
-    visibility: hidden;
-  }
-
-  .preview-status-available {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #2ecc40 !important;
-    font-weight: 700 !important;
-  }
-
-  .preview-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #2ecc40;
-    border-radius: 50%;
-    display: inline-block;
-  }
-
-  .preview-btn-close {
-    display: block;
-    width: calc(100% - 40px);
-    margin: 20px 20px 20px;
-    padding: 14px;
-    background-color: #2ecc40;
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 700;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-
-  .preview-btn-close:hover {
-    background-color: #27ae35;
-  }
-
-  /* Responsive Preview */
-  @media (max-width: 1150px) {
-    .preview-card-container {
-      flex-direction: column;
-      align-items: center;
-      gap: 25px;
-    }
-    .preview-card {
-      width: 100%;
-      max-width: 360px;
-      min-width: auto;
-    }
-  }
-</style>
 </head>
 <body>
-<!-- SIDEBAR -->
-<div class="sidebar">
-    <img src="../../public/images/logo_hayfarm.png" class="logo" alt="Logo">
-
-    <ul class="menu">
-        <li><a href="dashboard.php"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a></li>
-        <li class="active"><a href="manajemen_produk.php"><i class="fa-solid fa-credit-card"></i> Manajemen Produk</a></li>
-        <li><a href="#"><i class="fa-solid fa-file-circle-check"></i> Verifikasi Penjualan</a></li>
-        <p class="menu-title">DATA</p>
-        <li><a href="#"><i class="fa-solid fa-square-poll-vertical"></i> Data Hewan</a></li>
-        <li><a href="#"><i class="fa-solid fa-heart-pulse"></i> Data Kesehatan Hewan</a></li>
-        <li><a href="#"><i class="fa-solid fa-power-off"></i> Logout</a></li>
-    </ul>
-</div>
+<?php include __DIR__ . '/../../components/sidebar_admin.php'; ?>
 
 <!-- MAIN -->
 <div class="main-content">
 
     <!-- TOPBAR -->
-    <div class="topbar justify-content-end">
-        <div class="topbar-right">
-            <span id="currentDate"></span>
-            <div class="notif">
-                <i class="fa-solid fa-bell" style="color: rgb(25, 108, 51);"></i>
-                <span class="badge">6</span>
-            </div>
-            <div class="user">
-                <strong>Farel</strong>
-                <small>Admin</small>
-            </div>
-        </div>
-    </div>
+    <?php include __DIR__ . '/../../components/navbar_admin.php'; ?>
 
     <!-- STATS CARDS -->
     <div class="stats-container">
@@ -520,139 +344,41 @@
         </div>
     </div>
 
-    <!-- PREVIEW MODAL (UPDATED WITH PRODUCT CARDS) -->
+    <!-- PREVIEW MODAL -->
     <div class="modal-overlay" id="previewModal">
-        <div class="preview-modal" style="max-width: 1200px; width: 95%;">
-            <button class="modal-close" onclick="closePreviewModal()">&times;</button>
-            <div class="preview-card-container" id="previewContainer">
-                
-                <!-- CARD 1 - RUMPUT -->
-                <div class="preview-card">
-                    <div class="preview-card-header">
-                        <span class="preview-header-title">Preview Produk</span>
-                        <span class="preview-header-id">ID: S-R-001</span>
-                    </div>
-                    <p class="preview-category">Rumput</p>
-                    <div class="preview-card-image">
-                        <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=600" alt="Rumput">
-                    </div>
-                    <h3 class="preview-detail-title">DETAIL PRODUK RUMPUT</h3>
-                    <div class="preview-detail-grid">
-                        <div class="preview-detail-item">
-                            <label>Nama Produk</label>
-                            <p class="value">Rumput</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Nama Produk</label>
-                            <p class="value">Rumput Odot</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Tgl Produksi</label>
-                            <p class="value">05 Maret 2026</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Harga</label>
-                            <p class="value">Rp 2.500 / Kg</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Stok</label>
-                            <p class="value">500 Kg</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Status</label>
-                            <p class="value preview-status-available">
-                                <span class="preview-dot"></span> Tersedia
-                            </p>
-                        </div>
-                    </div>
-                    <button class="preview-btn-close" onclick="closePreviewModal()">Tutup Preview</button>
+        <div class="preview-card">
+            <div class="preview-header">
+                <div>
+                    <h2 id="previewTitle">Preview Produk</h2>
+                    <p id="previewSubtitle">Data produk aktif</p>
                 </div>
-
-                <!-- CARD 2 - HEWAN -->
-                <div class="preview-card">
-                    <div class="preview-card-header">
-                        <span class="preview-header-title">Preview Produk</span>
-                        <span class="preview-header-id">ID: S-H-001</span>
-                    </div>
-                    <p class="preview-category">Hewan</p>
-                    <div class="preview-card-image">
-                        <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=600" alt="Sapi Perah">
-                    </div>
-                    <h3 class="preview-detail-title">DETAIL PRODUK HEWAN</h3>
-                    <div class="preview-detail-grid">
-                        <div class="preview-detail-item">
-                            <label>Kategori</label>
-                            <p class="value">Hewan</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Nama Produk</label>
-                            <p class="value">Sapi Perah</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Jumlah</label>
-                            <p class="value">4 Ekor</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Harga</label>
-                            <p class="value">Rp 20.000.000</p>
-                        </div>
-                        <div class="preview-detail-item empty"></div>
-                        <div class="preview-detail-item">
-                            <label>Status</label>
-                            <p class="value preview-status-available">
-                                <span class="preview-dot"></span> Tersedia
-                            </p>
-                        </div>
-                    </div>
-                    <button class="preview-btn-close" onclick="closePreviewModal()">Tutup Preview</button>
-                </div>
-
-                <!-- CARD 3 - SUSU -->
-                <div class="preview-card">
-                    <div class="preview-card-header">
-                        <span class="preview-header-title">Preview Produk</span>
-                        <span class="preview-header-id">ID: S-S-001</span>
-                    </div>
-                    <p class="preview-category">Produk Olahan</p>
-                    <div class="preview-card-image">
-                        <img src="https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600" alt="Susu Segar">
-                    </div>
-                    <h3 class="preview-detail-title">DETAIL PRODUK SUSU</h3>
-                    <div class="preview-detail-grid">
-                        <div class="preview-detail-item">
-                            <label>Kategori</label>
-                            <p class="value">Produk Olahan</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Nama Produk</label>
-                            <p class="value">Susu Segar</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Tgl Produksi</label>
-                            <p class="value">10 Maret 2026</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Harga</label>
-                            <p class="value">Rp 15.000 / Liter</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Stok</label>
-                            <p class="value">200 Liter</p>
-                        </div>
-                        <div class="preview-detail-item">
-                            <label>Status</label>
-                            <p class="value preview-status-available">
-                                <span class="preview-dot"></span> Tersedia
-                            </p>
-                        </div>
-                    </div>
-                    <button class="preview-btn-close" onclick="closePreviewModal()">Tutup Preview</button>
-                </div>
-
+                <div class="preview-id-badge" id="previewProductId">ID: -</div>
             </div>
+
+            <div class="preview-image-container">
+                <img id="previewProductImage" src="" alt="Preview produk">
+            </div>
+
+            <p class="preview-section-title" id="previewSectionTitle">INFORMASI PRODUK</p>
+
+            <div class="preview-info-grid">
+                <div class="preview-info-box"><span class="preview-label">Jenis Produk</span><span class="preview-value" id="previewProductType">-</span></div>
+                <div class="preview-info-box"><span class="preview-label">Nama Produk</span><span class="preview-value" id="previewProductName">-</span></div>
+                <div class="preview-info-box"><span class="preview-label">Tanggal</span><span class="preview-value" id="previewProductDate">-</span></div>
+                <div class="preview-info-box"><span class="preview-label">Harga</span><span class="preview-value" id="previewProductPrice">-</span></div>
+                <div class="preview-info-box"><span class="preview-label">Stok</span><span class="preview-value" id="previewProductStock">-</span></div>
+                <div class="preview-info-box">
+                    <span class="preview-label">Status</span>
+                    <div class="preview-status-pill" id="previewStatusWrap">
+                        <div class="preview-dot"></div>
+                        <span id="previewProductStatus">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="preview-btn-confirm" type="button" onclick="closePreviewModal()">Tutup Preview</button>
         </div>
     </div>
-
     <!-- ================= MODAL TAMBAH PRODUK ================= -->
     <div class="modal-overlay" id="addProductModal">
         <div class="edit-modal" style="max-width: 600px;">
@@ -878,6 +604,6 @@
     <div class="toast" id="toast"></div>
 </div>
 
-<script src="../../public/js/manajemenProduk_admin.js"></script>
+<script src="../../public/js/manajemenProduk_admin.js?v=2"></script>
 </body>
 </html>

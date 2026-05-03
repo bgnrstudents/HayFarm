@@ -1,9 +1,9 @@
 <?php
 $current = basename($_SERVER['PHP_SELF']);
-$loginUrl = '/HayFarm/login.php';
+$loginUrl = '/hayfarm20/login.php';
 $topMenu = [
-    'index.php' => ['icon' => 'fa-table-cells-large', 'label' => 'Dashboard'],
-    'produk.php' => ['icon' => 'fa-credit-card', 'label' => 'Manajemen Produk'],
+    'dashboard.php' => ['icon' => 'fa-table-cells-large', 'label' => 'Dashboard'],
+    'manajemen_produk.php' => ['icon' => 'fa-credit-card', 'label' => 'Manajemen Produk'],
     'verifikasi_penjualan.php' => ['icon' => 'fa-file-circle-check', 'label' => 'Verifikasi Penjualan'],
 ];
 $bottomMenu = [
@@ -182,4 +182,128 @@ $bottomMenu = [
             closeLogModal();
         }
     });
+</script>
+
+<div class="flash-message-container" id="flashMessageContainer" aria-live="polite" aria-atomic="true"></div>
+
+<style>
+    .flash-message-container {
+        position: fixed;
+        top: 22px;
+        right: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 20000;
+        pointer-events: none;
+    }
+
+    .flash-message {
+        min-width: 280px;
+        max-width: min(420px, calc(100vw - 32px));
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 5px solid #16a34a;
+        border-radius: 12px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+        color: #1f2937;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        opacity: 0;
+        pointer-events: auto;
+        transform: translateX(18px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .flash-message.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .flash-message.hide {
+        opacity: 0;
+        transform: translateX(18px);
+    }
+
+    .flash-message.success { border-left-color: #16a34a; }
+    .flash-message.danger { border-left-color: #ef4444; }
+    .flash-message.warning { border-left-color: #f59e0b; }
+    .flash-message.info { border-left-color: #3b82f6; }
+
+    .flash-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 28px;
+        font-size: 13px;
+        color: #ffffff;
+        background: #16a34a;
+        font-weight: 800;
+    }
+
+    .flash-message.danger .flash-icon { background: #ef4444; }
+    .flash-message.warning .flash-icon { background: #f59e0b; }
+    .flash-message.info .flash-icon { background: #3b82f6; }
+
+    .flash-body { flex: 1; min-width: 0; }
+    .flash-title { font-size: 14px; font-weight: 800; margin-bottom: 2px; color: #111827; }
+    .flash-text { font-size: 13px; line-height: 1.45; color: #4b5563; margin: 0; }
+
+    .flash-close {
+        border: none;
+        background: transparent;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        padding: 0;
+    }
+
+    @media (max-width: 767px) {
+        .flash-message-container { top: 14px; right: 14px; left: 14px; }
+        .flash-message { width: 100%; min-width: 0; }
+    }
+</style>
+
+<script>
+    function showFlashMessage(message, type = 'success', options = {}) {
+        const container = document.getElementById('flashMessageContainer');
+        if (!container) return;
+
+        const titles = { success: 'Berhasil', danger: 'Gagal', warning: 'Perhatian', info: 'Info' };
+        const icons = { success: 'check', danger: 'x', warning: '!', info: 'i' };
+        const flash = document.createElement('div');
+
+        flash.className = `flash-message ${type}`;
+        flash.innerHTML = `
+            <span class="flash-icon">${icons[type] || icons.success}</span>
+            <div class="flash-body">
+                <div class="flash-title">${options.title || titles[type] || titles.success}</div>
+                <p class="flash-text">${message}</p>
+            </div>
+            <button class="flash-close" type="button" aria-label="Tutup">&times;</button>
+        `;
+
+        container.appendChild(flash);
+        requestAnimationFrame(() => flash.classList.add('show'));
+
+        const close = () => {
+            flash.classList.add('hide');
+            flash.classList.remove('show');
+            window.setTimeout(() => flash.remove(), 250);
+        };
+
+        flash.querySelector('.flash-close').addEventListener('click', close);
+        window.setTimeout(close, options.duration || 2600);
+    }
+
+    function flashThen(message, callback, type = 'success', delay = 900) {
+        showFlashMessage(message, type);
+        window.setTimeout(callback, delay);
+    }
 </script>

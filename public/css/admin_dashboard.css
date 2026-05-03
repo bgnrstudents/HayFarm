@@ -84,6 +84,9 @@
     align-items: center;
     background: #ffffff; 
     padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
     
 }
 
@@ -232,6 +235,22 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  text-decoration: none !important;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notification-card *,
+.notification-card:hover *,
+.notification-card:focus * {
+  text-decoration: none !important;
+}
+
+.notification-card:hover {
+  color: inherit;
+  text-decoration: none !important;
+  transform: translateY(-2px);
 }
 
 .notification-card > div:first-child {

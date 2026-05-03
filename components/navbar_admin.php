@@ -1,17 +1,16 @@
-<div class="navbar  d-flex align-items-center justify-content-between">
-    
-    <div class="topbar-right">
-        <span id="currentDate"></span>
-        <div class="notif">
-            <i class="fa fa-bell"></i>
-            <span class="badge">6</span>
-        </div>
-        <div class="user">
-            <strong>Farel</strong>
-            <small>Admin</small>
+<div class="topbar justify-content-end">
+        <div class="topbar-right">
+            <span id="currentDate"></span>
+            <a class="notif" href="dashboard.php" aria-label="Lihat notifikasi di dashboard">
+                <i class="fa-solid fa-bell" style="color: rgb(25, 108, 51);"></i>
+                <span class="badge">6</span>
+            </a>
+            <div class="user">
+                <strong>Farel</strong>
+                <small>Admin</small>
+            </div>
         </div>
     </div>
-</div>
 
 <script>
 const dateEl = document.getElementById('currentDate');
