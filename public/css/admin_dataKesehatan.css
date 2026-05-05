@@ -72,7 +72,14 @@ tbody tr:nth-child(even) td {
 .action i { margin-right:10px; cursor:pointer; }
 
 /* PAGINATION */
-.pagination { display:flex; justify-content:space-between; margin-top:15px; }
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 .page-btn { border:none; padding:6px 10px; border-radius:6px; }
 .active-page { background:#175D2B; color:white; }
 
@@ -147,19 +154,51 @@ tbody tr:nth-child(even) td {
 .status-observasi.active { border-color: #3b82f6; color: #3b82f6; background-color: #eff6ff; }
 
 /* Footer buttons */
-.btn-footer { display: flex; gap: 12px; margin-top: 30px; }
+.btn-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 24px;
+}
+
 .btn-kembali {
-    background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0;
-    flex: 1; padding: 13px; font-weight: 600; border-radius: 10px;
-    transition: all 0.2s; cursor: pointer;
+    display: block;
+    width: 100%;
+    background-color: #f8fafc; 
+    color: #475569; 
+    border: 1px solid #e2e8f0;
+    padding: 13px; 
+    font-weight: 600; 
+    border-radius: 10px;
+    transition: all 0.2s; 
+    cursor: pointer;
+    text-align: center;
 }
-.btn-kembali:hover { background-color: #f1f5f9; }
+
+.btn-kembali:hover {
+    background: #f1f5f9;
+}
+
 .btn-simpan {
-    background-color: #175D2B; color: #fff; border: none;
-    flex: 1; padding: 13px; font-weight: 600; border-radius: 10px;
-    transition: all 0.2s; cursor: pointer;
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #175D2B;
+    color: #ffffff;
+    border: none;
+    padding: 13px;
+    font-weight: 700;
+    border-radius: 10px;
+    transition: all 0.2s;
+    cursor: pointer;
+    text-align: center;
 }
-.btn-simpan:hover { background-color: #166534; }
+
+.btn-simpan:hover {
+    background: #0f4921;
+}
 
 /* Tips box */
 .tips-box {
@@ -194,8 +233,8 @@ tbody tr:nth-child(even) td {
 .value { font-size: 14px; color: #334155; font-weight: 700; }
 .status-health { background: #ecfdf5; color: #10b981; padding: 4px 15px; border-radius: 8px; font-size: 12px; font-weight: 800; border: 1px solid #d1fae5; }
 .note-box-preview { background: #fffbeb; border: 1px solid #fef3c7; padding: 15px; border-radius: 12px; color: #b45309; font-size: 13px; line-height: 1.6; }
-.footer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 35px; }
-.btn-back { background: white; border: 1px solid #e2e8f0; color: #64748b; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; }
+.footer-actions { display: block; margin-top: 35px; }
+.btn-back { width: 100%; background: white; border: 1px solid #e2e8f0; color: #64748b; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; }
 .btn-save { background: #009688; color: white; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; border: none; }
 
 /* ===================== */

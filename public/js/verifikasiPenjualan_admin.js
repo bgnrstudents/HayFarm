@@ -4,20 +4,23 @@ const salesStatusText = document.getElementById('salesStatusText');
 const salesTotal = document.getElementById('salesTotal');
 const salesProof = document.getElementById('salesProof');
 const proofTitle = document.getElementById('proofTitle');
+let pendingVerificationFormId = null;
+let pendingVerificationActionId = null;
 
-function openSalesModal(status) {
+function openSalesModal(status, orderId, customer, total) {
     const config = {
         pending: {
             subtitle: 'Periksa bukti pembayaran sebelum konfirmasi',
             statusText: 'Menunggu Verifikasi',
             statusClass: 'waiting',
-            customer: 'Ahmad Ridwan',
+            customer: customer || 'Pelanggan',
             email: 'ahmad.ridwan@example.com',
-            total: 'Rp 15.250.000',
+            total: total || 'Rp 0',
             rejected: false,
             showProof: true,
             actions: `
                 <button class="sales-btn confirm" type="button" onclick="confirmVerification()">Verifikasi & Konfirmasi</button>
+                <button class="sales-btn reject" type="button" onclick="rejectVerification()">Tolak Pesanan</button>
                 <button class="sales-btn close" type="button" onclick="closeSalesModal()">Batal</button>
             `
         },
@@ -45,6 +48,7 @@ function openSalesModal(status) {
         }
     }[status];
 
+    document.getElementById('salesOrderId').textContent = orderId || '#ORD';
     document.getElementById('salesSubtitle').textContent = config.subtitle;
     document.getElementById('salesCustomer').textContent = config.customer;
     document.getElementById('salesEmail').textContent = config.email;
@@ -59,20 +63,42 @@ function openSalesModal(status) {
     document.body.style.overflow = 'hidden';
 }
 
-function openPending() {
-    openSalesModal('pending');
+function openPending(formId, actionId, orderId, customer, total) {
+    pendingVerificationFormId = formId || null;
+    pendingVerificationActionId = actionId || null;
+    openSalesModal('pending', orderId, customer, total);
 }
 
 function openVerified() {
+    pendingVerificationFormId = null;
+    pendingVerificationActionId = null;
     openSalesModal('verified');
 }
 
 function openRejected() {
+    pendingVerificationFormId = null;
+    pendingVerificationActionId = null;
     openSalesModal('rejected');
 }
 
 function confirmVerification() {
-    showFlashMessage('Pesanan berhasil diverifikasi.');
+    submitPendingVerification('verifikasi');
+}
+
+function rejectVerification() {
+    submitPendingVerification('tolak');
+}
+
+function submitPendingVerification(action) {
+    const form = pendingVerificationFormId ? document.getElementById(pendingVerificationFormId) : null;
+    const actionInput = pendingVerificationActionId ? document.getElementById(pendingVerificationActionId) : null;
+    if (form) {
+        if (actionInput) {
+            actionInput.value = action;
+        }
+        form.submit();
+        return;
+    }
     closeSalesModal();
 }
 
@@ -102,3 +128,52 @@ document.addEventListener('keydown', function (event) {
         closeSalesModal();
     }
 });
+
+function setupAdminPagination(tbodySelector, paginationSelector, rowsPerPage = 5) {
+    const tbody = document.querySelector(tbodySelector);
+    const pagination = document.querySelector(paginationSelector);
+    if (!tbody || !pagination) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const totalRows = rows.length;
+    const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+    let currentPage = 1;
+
+    const info = pagination.querySelector('span');
+    const buttons = pagination.querySelectorAll('.page-btn');
+    const previousButton = buttons[0];
+    const pageButton = buttons[1];
+    const nextButton = buttons[2];
+
+    function renderPage() {
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+
+        rows.forEach((row, index) => {
+            row.style.display = index >= startIndex && index < endIndex ? '' : 'none';
+        });
+
+        const start = totalRows > 0 ? startIndex + 1 : 0;
+        const end = Math.min(endIndex, totalRows);
+        if (info) info.textContent = `Menampilkan ${start}-${end} dari ${totalRows} data`;
+        if (pageButton) pageButton.textContent = currentPage;
+        if (previousButton) previousButton.disabled = currentPage <= 1;
+        if (nextButton) nextButton.disabled = currentPage >= totalPages;
+    }
+
+    previousButton?.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage -= 1;
+            renderPage();
+        }
+    });
+
+    nextButton?.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage += 1;
+            renderPage();
+        }
+    });
+
+    renderPage();
+}

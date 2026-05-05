@@ -1,4 +1,4 @@
-const products = [
+const defaultProducts = [
     {
         id: 1,
         type: 'Hewan',
@@ -31,8 +31,15 @@ const products = [
     }
 ];
 
+const products = Array.isArray(window.productData) && window.productData.length
+    ? window.productData
+    : defaultProducts;
+
 let activeFilter = { type: '', status: '' };
 let editingId = null;
+let pendingDeleteProductId = null;
+let currentProductPage = 1;
+const rowsPerPage = 5;
 
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
@@ -40,7 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const search = document.getElementById('tableSearch');
     if (search) {
-        search.addEventListener('input', renderProducts);
+        search.addEventListener('input', () => {
+            currentProductPage = 1;
+            renderProducts();
+        });
     }
 
     const filterButton = document.querySelector('.btn-filter');
@@ -69,13 +79,18 @@ function renderProducts() {
     if (!tbody) return;
 
     const rows = getFilteredProducts();
-    tbody.innerHTML = rows.map((product, index) => `
-        <tr>
-            <td>${index + 1}</td>
+    const totalPages = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+    currentProductPage = Math.min(currentProductPage, totalPages);
+    const startIndex = (currentProductPage - 1) * rowsPerPage;
+    const visibleRows = rows.slice(startIndex, startIndex + rowsPerPage);
+
+    tbody.innerHTML = visibleRows.map((product, index) => `
+        <tr class="${needsPriceInput(product) ? 'needs-price-row' : ''}">
+            <td>${startIndex + index + 1}</td>
             <td>${product.type}</td>
             <td>${product.name}</td>
             <td>${formatDate(product.date)}</td>
-            <td>${product.price}</td>
+            <td>${needsPriceInput(product) ? `<span class="price-needed">${product.price}</span>` : product.price}</td>
             <td>${product.stock}</td>
             <td><span class="status-badge ${product.status === 'Tersedia' ? 'status-tersedia' : 'status-tidak-tersedia'}">${product.status}</span></td>
             <td>
@@ -91,6 +106,8 @@ function renderProducts() {
     if (!rows.length) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;">Data produk tidak ditemukan</td></tr>';
     }
+
+    updateProductPagination(rows.length);
 }
 
 function updateStats() {
@@ -98,6 +115,29 @@ function updateStats() {
     setText('totalRumput', products.filter(product => product.type === 'Rumput').length);
     setText('totalSusu', products.filter(product => product.type === 'Susu').length);
     setText('totalHewan', products.filter(product => product.type === 'Hewan').length);
+}
+
+function updateProductPagination(totalVisible) {
+    const info = document.getElementById('productPaginationInfo');
+    const pagination = document.querySelector('.product-section .pagination');
+    if (!info || !pagination) return;
+
+    const total = totalVisible || 0;
+    const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+    const start = total > 0 ? ((currentProductPage - 1) * rowsPerPage) + 1 : 0;
+    const end = total > 0 ? Math.min(currentProductPage * rowsPerPage, total) : 0;
+    info.textContent = `Menampilkan ${start}-${end} dari ${total} data`;
+
+    const buttons = pagination.querySelectorAll('.page-btn');
+    if (buttons[0]) buttons[0].disabled = currentProductPage <= 1;
+    if (buttons[1]) buttons[1].textContent = currentProductPage;
+    if (buttons[2]) buttons[2].disabled = currentProductPage >= totalPages;
+}
+
+function changeProductPage(direction) {
+    const totalPages = Math.max(1, Math.ceil(getFilteredProducts().length / rowsPerPage));
+    currentProductPage = Math.min(Math.max(currentProductPage + direction, 1), totalPages);
+    renderProducts();
 }
 
 function setText(id, value) {
@@ -126,6 +166,7 @@ function applyFilter() {
         type: document.getElementById('filterJenis')?.value || '',
         status: document.getElementById('filterStatus')?.value || ''
     };
+    currentProductPage = 1;
     renderProducts();
     closeFilterModal();
 }
@@ -134,6 +175,7 @@ function resetFilter() {
     activeFilter = { type: '', status: '' };
     if (document.getElementById('filterJenis')) document.getElementById('filterJenis').value = '';
     if (document.getElementById('filterStatus')) document.getElementById('filterStatus').value = '';
+    currentProductPage = 1;
     renderProducts();
 }
 
@@ -188,6 +230,7 @@ function openEditModal(id) {
     const type = product.type.toLowerCase();
     switchEditTab(type);
     fillEditForm(product, type);
+    configureEditRequiredFields(product, type);
     document.getElementById('editModal')?.classList.add('active');
 }
 
@@ -201,7 +244,11 @@ function handleEditSubmit(event, type) {
     const index = products.findIndex(item => item.id === editingId);
     if (index === -1) return;
 
-    products[index] = { ...products[index], ...readProductForm('edit', type), id: editingId };
+    const updatedProduct = { ...products[index], ...readProductForm('edit', type), id: editingId };
+    if (priceNumber(updatedProduct.price) > 0) {
+        updatedProduct.needs_price = false;
+    }
+    products[index] = updatedProduct;
     renderProducts();
     updateStats();
     closeEditModal();
@@ -225,6 +272,20 @@ function readProductForm(mode, type) {
         status,
         image: defaultImage(type)
     };
+}
+
+function configureEditRequiredFields(product, type) {
+    const form = document.getElementById(`edit-form-${type}`);
+    if (!form) return;
+
+    form.querySelectorAll('input, select, textarea').forEach(input => {
+        input.required = false;
+    });
+
+    const priceInput = document.getElementById(`edit-harga-${type}`);
+    if (priceInput) {
+        priceInput.required = true;
+    }
 }
 
 function fillEditForm(product, type) {
@@ -370,18 +431,49 @@ function formatProductId(product) {
 }
 
 function deleteProduct(id) {
-    const index = products.findIndex(item => item.id === id);
+    const product = products.find(item => item.id === id);
+    if (!product) return;
+
+    pendingDeleteProductId = id;
+    setText('deleteProductTarget', `${product.type} - ${product.name}`);
+    document.getElementById('deleteProductOverlay')?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeProductDelete() {
+    document.getElementById('deleteProductOverlay')?.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    pendingDeleteProductId = null;
+}
+
+function closeProductDeleteOutside(event) {
+    if (event.target.id === 'deleteProductOverlay') {
+        closeProductDelete();
+    }
+}
+
+function confirmProductDelete() {
+    const index = products.findIndex(item => item.id === pendingDeleteProductId);
     if (index === -1) return;
 
     products.splice(index, 1);
     renderProducts();
     updateStats();
+    closeProductDelete();
     showFlashMessage('Produk berhasil dihapus.');
 }
 
 function formatCurrencyInput(input) {
     const numbers = input.value.replace(/\D/g, '');
     input.value = numbers ? `Rp ${Number(numbers).toLocaleString('id-ID')}` : '';
+}
+
+function priceNumber(price) {
+    return Number(String(price || '').replace(/\D/g, '')) || 0;
+}
+
+function needsPriceInput(product) {
+    return Boolean(product.needs_price) && priceNumber(product.price) === 0;
 }
 
 function exportTableToCSV(filename) {
@@ -414,5 +506,6 @@ document.addEventListener('keydown', event => {
         closeEditModal();
         closeFilterModal();
         closePreviewModal();
+        closeProductDelete();
     }
 });

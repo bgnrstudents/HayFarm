@@ -195,10 +195,10 @@ thead th {
     border-bottom:1px solid #e0a800;
 }
 tbody td {
-    background:#fffdf5;
+    background:#fff;
 }
 tbody tr:nth-child(even) td {
-    background:#fffaf0;
+    background:#fff;
 }
 
 .status {
@@ -457,15 +457,21 @@ tbody tr:nth-child(even) td {
 
 /* PAGINATION */
 .pagination {
-    display:flex;
-    justify-content:flex-end;
-    margin-top:10px;
-    gap:5px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
-.pagination button {
+.page-btn {
     border:none;
     padding:6px 10px;
     border-radius:6px;
+}
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 .active-page {
     background:#175D2B;

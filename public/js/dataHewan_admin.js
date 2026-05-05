@@ -135,7 +135,22 @@ function fillPreview(record) {
     document.getElementById('previewUsia').textContent = record.usia || hitungUsia(record.tgl_lahir);
     document.getElementById('previewKandang').textContent = record.kandang || '-';
     document.getElementById('previewTanggalLahir').textContent = formatTanggalIndonesia(record.tgl_lahir);
-    document.getElementById('previewImage').src = getPreviewImage(record.jenis);
+    const previewImage = document.getElementById('previewImage');
+    const previewImageContainer = previewImage.closest('.preview-image-container');
+    if (record.foto) {
+        const prefix = record.foto.startsWith('../../') ? '' : '../../';
+        previewImage.src = prefix + record.foto;
+        previewImage.alt = `Foto ${record.jenis}`;
+        if (previewImageContainer) {
+            previewImageContainer.classList.remove('no-image');
+        }
+    } else {
+        previewImage.removeAttribute('src');
+        previewImage.alt = 'Foto hewan belum tersedia';
+        if (previewImageContainer) {
+            previewImageContainer.classList.add('no-image');
+        }
+    }
 
     const statusWrap = document.getElementById('previewStatusWrap');
     const statusElement = document.getElementById('previewStatus');
@@ -143,17 +158,6 @@ function fillPreview(record) {
     statusElement.textContent = tersedia ? 'Tersedia' : 'Tidak Tersedia';
     statusElement.className = `preview-status-text ${tersedia ? '' : 'status-tidak-produktif'}`;
     statusWrap.className = `status-pill-preview ${tersedia ? '' : 'status-tidak-produktif-dot'}`;
-}
-
-function getPreviewImage(jenis) {
-    const imageMap = {
-        'Sapi Perah': 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?q=80&w=400',
-        'Sapi PO': 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=400',
-        'Kambing': 'https://images.unsplash.com/photo-1524024973431-2ad916746881?q=80&w=400',
-        'Domba': 'https://images.unsplash.com/photo-1484557985045-edf25e08da73?q=80&w=400'
-    };
-
-    return imageMap[jenis] || imageMap['Sapi Perah'];
 }
 
 function openPreview(trigger) {
@@ -172,8 +176,9 @@ function closePreviewOutside(event) {
     }
 }
 
-function openDelete(namaHewan) {
+function openDelete(namaHewan, idHewan) {
     document.getElementById('deleteTarget').textContent = namaHewan || 'data ini';
+    document.getElementById('deleteIdHewan').value = idHewan || '';
     openOverlay('deleteOverlay');
 }
 
@@ -187,21 +192,28 @@ function closeDeleteOutside(event) {
     }
 }
 
-function confirmDelete() {
-    showFlashMessage('Data hewan berhasil dihapus.');
-    closeDelete();
-}
+document.getElementById('tambahForm').addEventListener('submit', function () {
+    const submitButton = this.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Menyimpan...';
+    }
+});
 
-document.getElementById('tambahForm').addEventListener('submit', function (event) {
-    event.preventDefault();
-    showFlashMessage('Data hewan berhasil disimpan.');
-    closeTambah();
+document.getElementById('deleteHewanForm').addEventListener('submit', function () {
+    const submitButton = this.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Menghapus...';
+    }
 });
 
 document.getElementById('editHewanForm').addEventListener('submit', function (event) {
-    event.preventDefault();
-    showFlashMessage('Perubahan data hewan berhasil disimpan.');
-    closeEdit();
+    const submitButton = this.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Menyimpan...';
+    }
 });
 
 document.addEventListener('keydown', function (event) {
@@ -212,3 +224,52 @@ document.addEventListener('keydown', function (event) {
         closeDelete();
     }
 });
+
+function setupAdminPagination(tbodySelector, paginationSelector, rowsPerPage = 5) {
+    const tbody = document.querySelector(tbodySelector);
+    const pagination = document.querySelector(paginationSelector);
+    if (!tbody || !pagination) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const totalRows = rows.length;
+    const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+    let currentPage = 1;
+
+    const info = pagination.querySelector('span');
+    const buttons = pagination.querySelectorAll('.page-btn');
+    const previousButton = buttons[0];
+    const pageButton = buttons[1];
+    const nextButton = buttons[2];
+
+    function renderPage() {
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+
+        rows.forEach((row, index) => {
+            row.style.display = index >= startIndex && index < endIndex ? '' : 'none';
+        });
+
+        const start = totalRows > 0 ? startIndex + 1 : 0;
+        const end = Math.min(endIndex, totalRows);
+        if (info) info.textContent = `Menampilkan ${start}-${end} dari ${totalRows} data`;
+        if (pageButton) pageButton.textContent = currentPage;
+        if (previousButton) previousButton.disabled = currentPage <= 1;
+        if (nextButton) nextButton.disabled = currentPage >= totalPages;
+    }
+
+    previousButton?.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage -= 1;
+            renderPage();
+        }
+    });
+
+    nextButton?.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage += 1;
+            renderPage();
+        }
+    });
+
+    renderPage();
+}

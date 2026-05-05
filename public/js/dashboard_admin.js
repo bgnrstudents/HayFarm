@@ -1,67 +1,61 @@
-function updateData() {
-    document.getElementById("hewan").innerText = 10000 + Math.floor(Math.random() * 500);
-    document.getElementById("sakit").innerText = Math.floor(Math.random() * 20);
-    document.getElementById("pembeli").innerText = 300 + Math.floor(Math.random() * 100);
-  }
+const salesData = window.dashboardSalesData || { labels: [], values: [] };
 
-  setInterval(updateData, 10000); // update tiap 10 detik
-
-let dataSeries = [
-  { x: new Date().getTime(), y: 50 }
-];
-
-var options = {
-  chart: {
-    type: 'area',
-    height: 350,
-    animations: {
-      enabled: true,
-      easing: 'linear',
-      dynamicAnimation: {
-        speed: 1000
+const chartEl = document.querySelector('#chart');
+if (chartEl) {
+  const hasSalesData = Array.isArray(salesData.values) && salesData.values.length > 0;
+  if (!hasSalesData) {
+    chartEl.innerHTML = '<div class="chart-empty-state">Belum ada transaksi terverifikasi untuk ditampilkan di grafik.</div>';
+  } else if (typeof ApexCharts === 'undefined') {
+    chartEl.innerHTML = '<div class="chart-empty-state">Grafik belum bisa dimuat. Pastikan koneksi CDN ApexCharts aktif.</div>';
+  } else {
+  const options = {
+    chart: {
+      type: 'area',
+      height: 350,
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      selection: { enabled: false }
+    },
+    series: [{
+      name: 'Transaksi Terverifikasi',
+      data: salesData.values
+    }],
+    xaxis: {
+      categories: salesData.labels
+    },
+    yaxis: {
+      min: 0,
+      tickAmount: 5,
+      labels: {
+        formatter: value => `${Math.round(Number(value || 0))}`
+      }
+    },
+    dataLabels: { enabled: false },
+    stroke: { curve: 'straight', width: 3 },
+    markers: {
+      size: 7,
+      strokeWidth: 3,
+      strokeColors: '#ffffff',
+      hover: { size: 9 }
+    },
+    colors: ['#16a34a'],
+    tooltip: {
+      y: {
+        formatter: value => `${Math.round(Number(value || 0))} transaksi diverifikasi`
       }
     }
-  },
-
-  series: [{
-    name: 'Penjualan',
-    data: dataSeries
-  }],
-
-  xaxis: {
-    type: 'datetime'
-  },
-
-  stroke: {
-    curve: 'smooth'
-  },
-
-  colors: ['#16a34a']
-};
-
-var chart = new ApexCharts(document.querySelector("#chart"), options);
-chart.render();
-
-
-//UPDATE REAL-TIME
-setInterval(() => {
-  let newData = {
-    x: new Date().getTime(),
-    y: Math.floor(Math.random() * 100)
   };
 
-  dataSeries.push(newData);
+  new ApexCharts(chartEl, options).render();
+  }
+}
 
-  chart.updateSeries([{
-    data: dataSeries
-  }]);
-
-}, 10000);
-const dateEl = document.getElementById('currentDate');
-const now = new Date();
-dateEl.textContent = now.toLocaleDateString('id-ID', {
+const dashboardDateEl = document.getElementById('currentDate');
+if (dashboardDateEl) {
+  dashboardDateEl.textContent = new Date().toLocaleDateString('id-ID', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
-});
+  });
+}

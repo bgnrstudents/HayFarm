@@ -416,6 +416,18 @@ tbody tr:nth-child(even) td {
     height: 100%;
     object-fit: cover;
 }
+.preview-image-container.no-image {
+    background: #f3f4f6;
+    border: 1px dashed #cbd5e1;
+    color: #64748b;
+}
+.preview-image-container.no-image img {
+    display: none;
+}
+.no-image-text {
+    font-size: 15px;
+    font-weight: 700;
+}
 .section-title {
     font-size: 11px;
     font-weight: 800;

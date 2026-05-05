@@ -1,3 +1,96 @@
+<?php
+require_once __DIR__ . '/../../config/database.php';
+
+function labelJenisProduk(string $jenis): string
+{
+    return [
+        'hewan' => 'Hewan',
+        'rumput' => 'Rumput',
+        'susu' => 'Susu',
+    ][$jenis] ?? ucfirst($jenis);
+}
+
+function labelStatusProduk(string $status): string
+{
+    return $status === 'terjual' ? 'Tidak Tersedia' : 'Tersedia';
+}
+
+function labelJenisHewanProduk(string $jenis): string
+{
+    return [
+        'sapi_perah' => 'Sapi Perah',
+        'sapi_po' => 'Sapi PO',
+        'kambing' => 'Kambing',
+        'domba' => 'Domba',
+    ][$jenis] ?? ucwords(str_replace('_', ' ', $jenis));
+}
+
+function satuanProduk(string $jenis, string $satuan): string
+{
+    if ($satuan !== '') {
+        return ucfirst($satuan);
+    }
+
+    return [
+        'hewan' => 'Ekor',
+        'rumput' => 'Kg',
+        'susu' => 'Liter',
+    ][$jenis] ?? '';
+}
+
+$produkData = [];
+$queryProduk = mysqli_query(
+    $db,
+    "SELECT id_produk, jenis_produk, nama_produk, harga, stok, satuan, tgl_kadaluarsa, status_produk
+     FROM data_produk
+     ORDER BY id_produk ASC"
+);
+
+if ($queryProduk) {
+    while ($row = mysqli_fetch_assoc($queryProduk)) {
+        $jenis = $row['jenis_produk'];
+        $tanggal = $row['tgl_kadaluarsa'] && $row['tgl_kadaluarsa'] !== '0000-00-00'
+            ? $row['tgl_kadaluarsa']
+            : date('Y-m-d');
+
+        $produkData[] = [
+            'id' => (int) $row['id_produk'],
+            'type' => labelJenisProduk($jenis),
+            'name' => $row['nama_produk'],
+            'date' => $tanggal,
+            'price' => 'Rp ' . number_format((float) $row['harga'], 0, ',', '.'),
+            'stock' => (float) $row['stok'] . ' ' . satuanProduk($jenis, $row['satuan'] ?? ''),
+            'status' => labelStatusProduk($row['status_produk']),
+            'image' => '',
+        ];
+    }
+}
+
+$queryHewanJual = mysqli_query(
+    $db,
+    "SELECT id_hewan, jenis_hewan, berat_badan, no_kandang
+     FROM data_ternak
+     WHERE status_hewan = 'tdk_produktif'
+     ORDER BY id_hewan ASC"
+);
+
+if ($queryHewanJual) {
+    while ($row = mysqli_fetch_assoc($queryHewanJual)) {
+        $kode = str_pad((string) $row['id_hewan'], 5, '0', STR_PAD_LEFT);
+        $produkData[] = [
+            'id' => 100000 + (int) $row['id_hewan'],
+            'type' => 'Hewan',
+            'needs_price' => true,
+            'name' => labelJenisHewanProduk($row['jenis_hewan']),
+            'date' => date('Y-m-d'),
+            'price' => 'Rp 0',
+            'stock' => '1 Ekor',
+            'status' => 'Tersedia',
+            'image' => '',
+        ];
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +101,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../public/css/admin_manajemenProduk.css?v=2">
+<link rel="stylesheet" href="../../public/css/admin_manajemenProduk.css?v=3">
 
 
 </head>
@@ -90,6 +183,14 @@
             </thead>
             <tbody id="productTableBody"></tbody>
         </table>
+        <div class="pagination">
+            <span id="productPaginationInfo">Menampilkan 1-0 dari 0 data</span>
+            <div>
+                <button class="page-btn" type="button" onclick="changeProductPage(-1)">Sebelumnya</button>
+                <button class="page-btn active-page">1</button>
+                <button class="page-btn" type="button" onclick="changeProductPage(1)">Selanjutnya</button>
+            </div>
+        </div>
     
     </div>
 
@@ -164,7 +265,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Harga <span class="required">*</span></label>
-                            <input type="text" class="form-input" id="edit-harga-hewan" placeholder="Rp 20.000.000" required>
+                            <input type="text" class="form-input" id="edit-harga-hewan" placeholder="Rp 20.000.000" required oninput="formatCurrencyInput(this)">
                         </div>
                     </div>
                     <div class="form-group">
@@ -602,8 +703,28 @@
 
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
+
+    <div class="Delete-overlay" id="deleteProductOverlay" onclick="closeProductDeleteOutside(event)">
+        <div class="Delete-box">
+            <div class="Delete-header-custom">
+                <div class="icon-circle"><i class="fas fa-trash-alt"></i></div>
+                <h2 class="Delete-title-custom">Apakah Anda yakin?</h2>
+            </div>
+            <div class="Delete-body-custom">
+                <p>Anda akan menghapus: <strong id="deleteProductTarget">produk ini</strong></p>
+                <p class="warning-text">Tindakan ini tidak dapat dibatalkan. Data akan dihapus dari tabel produk.</p>
+            </div>
+            <div class="btn-group-custom">
+                <button type="button" class="btn-custom btn-cancel" onclick="closeProductDelete()">Batal</button>
+                <button type="button" class="btn-custom btn-delete" onclick="confirmProductDelete()">Hapus</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<script src="../../public/js/manajemenProduk_admin.js?v=2"></script>
+<script>
+window.productData = <?= json_encode($produkData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+</script>
+<script src="../../public/js/manajemenProduk_admin.js?v=3"></script>
 </body>
 </html>

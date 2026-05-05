@@ -1,7 +1,7 @@
 <div class="topbar justify-content-end">
         <div class="topbar-right">
             <span id="currentDate"></span>
-            <a class="notif" href="dashboard.php" aria-label="Lihat notifikasi di dashboard">
+            <a class="notif" href="/HayFarm/pages/admin/dashboard.php#dashboardNotifications" aria-label="Lihat notifikasi di dashboard">
                 <i class="fa-solid fa-bell" style="color: rgb(25, 108, 51);"></i>
                 <span class="badge">6</span>
             </a>

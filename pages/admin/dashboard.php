@@ -1,4 +1,76 @@
-﻿<!DOCTYPE html>
+﻿<?php
+require_once __DIR__ . '/../../config/database.php';
+
+function nilaiScalar(mysqli $db, string $sql): int
+{
+    $result = mysqli_query($db, $sql);
+    if (!$result) {
+        return 0;
+    }
+
+    $row = mysqli_fetch_row($result);
+    return (int) ($row[0] ?? 0);
+}
+
+$jumlahHewan = nilaiScalar($db, 'SELECT COUNT(*) FROM data_ternak');
+$hewanSakit = nilaiScalar($db, "SELECT COUNT(*) FROM data_kesehatan WHERE tgl_pemeriksaan = CURDATE() AND status_kesehatan <> 'sehat'");
+$jumlahPembeli = nilaiScalar($db, "SELECT COUNT(DISTINCT id_user) FROM transaksi WHERE status_transaksi = 'telah_dikonfirmasi'");
+$berhasilDiverifikasi = nilaiScalar($db, "SELECT COUNT(*) FROM transaksi WHERE status_transaksi = 'telah_dikonfirmasi'");
+$menungguVerifikasi = nilaiScalar($db, "SELECT COUNT(*) FROM transaksi WHERE status_transaksi = 'menunggu_verifikasi'");
+
+$tahunSekarang = (int) date('Y');
+$tahunGrafik = (int) ($_GET['tahun'] ?? $tahunSekarang);
+$tahunOptions = [$tahunSekarang];
+$queryTahun = mysqli_query($db, "SELECT DISTINCT YEAR(tgl_transaksi) AS tahun FROM transaksi ORDER BY tahun DESC");
+if ($queryTahun) {
+    while ($row = mysqli_fetch_assoc($queryTahun)) {
+        $tahun = (int) $row['tahun'];
+        if ($tahun > 0) {
+            $tahunOptions[] = $tahun;
+        }
+    }
+}
+$tahunOptions = array_values(array_unique($tahunOptions));
+rsort($tahunOptions);
+if (!in_array($tahunGrafik, $tahunOptions, true)) {
+    $tahunGrafik = $tahunSekarang;
+}
+
+$queryGrafik = mysqli_query(
+    $db,
+    "SELECT MONTH(tgl_transaksi) AS bulan, COUNT(*) AS total
+     FROM transaksi
+     WHERE status_transaksi = 'telah_dikonfirmasi' AND YEAR(tgl_transaksi) = $tahunGrafik
+     GROUP BY MONTH(tgl_transaksi)
+     ORDER BY bulan ASC"
+);
+
+$namaBulan = [
+    1 => 'Januari',
+    2 => 'Februari',
+    3 => 'Maret',
+    4 => 'April',
+    5 => 'Mei',
+    6 => 'Juni',
+    7 => 'Juli',
+    8 => 'Agustus',
+    9 => 'September',
+    10 => 'Oktober',
+    11 => 'November',
+    12 => 'Desember',
+];
+$bulanLabels = array_values($namaBulan);
+$penjualanBulanan = array_fill(0, 12, 0);
+if ($queryGrafik) {
+    while ($row = mysqli_fetch_assoc($queryGrafik)) {
+        $bulanIndex = (int) $row['bulan'] - 1;
+        if ($bulanIndex >= 0 && $bulanIndex < 12) {
+            $penjualanBulanan[$bulanIndex] = (int) $row['total'];
+        }
+    }
+}
+?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -10,7 +82,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
- <link rel="stylesheet" href="../../public/css/admin_dashboard.css">  
+ <link rel="stylesheet" href="../../public/css/admin_dashboard.css?v=2">  
 </head>
 <body>
 
@@ -28,32 +100,42 @@
 <div class="container mt-4">
   <div class="row g-4">
 
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card shadow-sm">
         <div class="card-body">
           <h6 class="text-muted">Jumlah Hewan</h6>
-          <h2 id="hewan">10243</h2>
-          <small class="text-success">📈 8 Dari kemarin</small>
+          <h2 id="hewan"><?= $jumlahHewan ?></h2>
+          <small class="text-muted">Dari tabel data ternak</small>
         </div>
       </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card shadow-sm">
         <div class="card-body">
           <h6 class="text-muted">Hewan Sakit per Hari</h6>
-          <h2 id="sakit">12</h2>
-          <small class="text-danger">📉 2 Dari kemarin</small>
+          <h2 id="sakit"><?= $hewanSakit ?></h2>
+          <small class="text-muted">Status bukan sehat hari ini</small>
         </div>
       </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card shadow-sm">
         <div class="card-body">
           <h6 class="text-muted">Jumlah Pembeli</h6>
-          <h2 id="pembeli">345</h2>
-          <small class="text-success">📈 7 Dari kemarin</small>
+          <h2 id="pembeli"><?= $jumlahPembeli ?></h2>
+          <small class="text-muted">Pembeli transaksi terkonfirmasi</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="text-muted">Berhasil Diverifikasi</h6>
+          <h2><?= $berhasilDiverifikasi ?></h2>
+          <small class="text-muted">Transaksi sudah dikonfirmasi</small>
         </div>
       </div>
     </div>
@@ -63,24 +145,25 @@
 <div class="card">
 
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <h3 style="margin:0;">Grafik Penjualan </h3>
+    <div>
+      <h3 style="margin:0;">Grafik Transaksi Terverifikasi</h3>
+      <small class="text-muted">Titik menunjukkan jumlah transaksi yang berhasil diverifikasi per bulan pada tahun <?= $tahunGrafik ?></small>
+    </div>
+    <form method="GET" style="margin:0;">
+      <select name="tahun" onchange="this.form.submit()" style="padding:5px 10px;border-radius:6px;border:1px solid #ccc;">
+        <?php foreach ($tahunOptions as $tahun): ?>
+          <option value="<?= $tahun ?>" <?= $tahun === $tahunGrafik ? 'selected' : '' ?>><?= $tahun ?></option>
+        <?php endforeach; ?>
+      </select>
+    </form>
 
-    <select style="
-      padding:5px 10px;
-      border-radius:6px;
-      border:1px solid #ccc;
-    ">
-      <option>Harian</option>
-      <option selected>Bulanan</option>
-      <option>Tahunan</option>
-    </select>
   </div>
 
   <div id="chart"></div>
 </div>
 
 <!-- Notifikasi -->
-<div class="notification-container">
+<div class="notification-container" id="dashboardNotifications">
   <h2 class="notification-title">Notifikasi</h2>
   
   <div class="notification-grid">
@@ -101,7 +184,7 @@
     </a>
 
     <!-- Card 2 - Produk Kedaluwarsa -->
-    <a class="notification-card card-default" href="manajemen_produk.php">
+    <a class="notification-card card-expired" href="manajemen_produk.php">
       <div>
         <div class="card-title">
           <span>Produk Kedaluwarsa</span>
@@ -117,7 +200,7 @@
     </a>
 
     <!-- Card 3 - Kelahiran -->
-    <a class="notification-card card-default" href="data_kesehatan.php">
+    <a class="notification-card card-birth" href="data_kesehatan.php">
       <div>
         <div class="card-title">
           <span>Kelahiran bulan ini</span>
@@ -133,7 +216,7 @@
     </a>
 
     <!-- Card 4 - Perlu Verifikasi -->
-    <a class="notification-card card-default" href="verifikasi_penjualan.php">
+    <a class="notification-card card-verification" href="verifikasi_penjualan.php">
       <div>
         <div class="card-title">
           <span>Perlu verifikasi</span>
@@ -142,7 +225,7 @@
         <div class="card-description">Menunggu konfirmasi admin </div>
       </div>
       <div class="card-number">
-        <div class="card-number-value text-orange">3</div>
+        <div class="card-number-value text-orange"><?= $menungguVerifikasi ?></div>
         <div class="card-number-label">Orang </div>
       </div>
       <div class="card-arrow">›</div>
@@ -150,6 +233,12 @@
   </div>
 </div>
 </div>
-<script src="../../public/js/dashboard_admin.js"></script>
+<script>
+window.dashboardSalesData = {
+  labels: <?= json_encode(array_values($bulanLabels)) ?>,
+  values: <?= json_encode(array_values($penjualanBulanan)) ?>
+};
+</script>
+<script src="../../public/js/dashboard_admin.js?v=2"></script>
 </body>
 </html>

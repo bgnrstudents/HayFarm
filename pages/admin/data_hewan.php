@@ -1,51 +1,275 @@
 <?php
-$dataHewan = [
-    [
-        'id' => '00004',
-        'jenis' => 'Sapi Perah',
-        'berat' => '450 Kg',
-        'kelamin' => 'Betina',
-        'kandang' => 'A-01',
-        'tgl_lahir' => '2021-03-15',
-        'status' => 'produktif',
-    ],
-    [
-        'id' => '00005',
-        'jenis' => 'Sapi PO',
-        'berat' => '510 Kg',
-        'kelamin' => 'Jantan',
-        'kandang' => 'A-03',
-        'tgl_lahir' => '2020-11-08',
-        'status' => 'produktif',
-    ],
-    [
-        'id' => '00006',
-        'jenis' => 'Kambing',
-        'berat' => '65 Kg',
-        'kelamin' => 'Betina',
-        'kandang' => 'B-02',
-        'tgl_lahir' => '2023-01-27',
-        'status' => 'tidak_produktif',
-    ],
-    [
-        'id' => '00008',
-        'jenis' => 'Domba',
-        'berat' => '72 Kg',
-        'kelamin' => 'Jantan',
-        'kandang' => 'C-01',
-        'tgl_lahir' => '2022-07-04',
-        'status' => 'produktif',
-    ],
-    [
-        'id' => '00010',
-        'jenis' => 'Kambing',
-        'berat' => '58 Kg',
-        'kelamin' => 'Betina',
-        'kandang' => 'B-04',
-        'tgl_lahir' => '2024-02-10',
-        'status' => 'tidak_produktif',
-    ],
-];
+require_once __DIR__ . '/../../config/database.php';
+
+function labelJenis(string $jenis): string
+{
+    $labels = [
+        'sapi_perah' => 'Sapi Perah',
+        'sapi_po' => 'Sapi PO',
+        'kambing' => 'Kambing',
+        'domba' => 'Domba',
+    ];
+
+    return $labels[$jenis] ?? ucwords(str_replace('_', ' ', $jenis));
+}
+
+function labelKelamin(string $kelamin): string
+{
+    return ucfirst(strtolower($kelamin));
+}
+
+function normalisasiStatus(string $status): string
+{
+    return $status === 'tdk_produktif' ? 'tidak_produktif' : $status;
+}
+
+function redirectCrud(string $aksi, string $status): void
+{
+    header("Location: data_hewan.php?$aksi=$status");
+    exit;
+}
+
+function nilaiPost(string $key): string
+{
+    return trim($_POST[$key] ?? '');
+}
+
+function enumJenisHewan(string $jenis): ?string
+{
+    $map = [
+        'Sapi Perah' => 'sapi_perah',
+        'Sapi PO' => 'sapi_po',
+        'Kambing' => 'kambing',
+        'Domba' => 'domba',
+        'sapi_perah' => 'sapi_perah',
+        'sapi_po' => 'sapi_po',
+        'kambing' => 'kambing',
+        'domba' => 'domba',
+    ];
+
+    return $map[$jenis] ?? null;
+}
+
+function enumJenisKelamin(string $kelamin): ?string
+{
+    $map = [
+        'Jantan' => 'jantan',
+        'Betina' => 'betina',
+        'jantan' => 'jantan',
+        'betina' => 'betina',
+    ];
+
+    return $map[$kelamin] ?? null;
+}
+
+function enumStatusHewan(string $status): ?string
+{
+    $map = [
+        'produktif' => 'produktif',
+        'tidak_produktif' => 'tdk_produktif',
+        'tdk_produktif' => 'tdk_produktif',
+    ];
+
+    return $map[$status] ?? null;
+}
+
+function angkaBerat(string $berat): ?float
+{
+    $angka = str_replace(',', '.', preg_replace('/[^0-9,.]/', '', $berat));
+
+    if ($angka === '' || !is_numeric($angka) || (float) $angka <= 0) {
+        return null;
+    }
+
+    return (float) $angka;
+}
+
+function tanggalValid(string $tanggal): bool
+{
+    $date = DateTime::createFromFormat('Y-m-d', $tanggal);
+    if (!$date || $date->format('Y-m-d') !== $tanggal) {
+        return false;
+    }
+
+    $hariIni = new DateTime('today');
+    return $date <= $hariIni;
+}
+
+function uploadFotoHewan(): ?string
+{
+    if (!isset($_FILES['foto_hewan']) || ($_FILES['foto_hewan']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return '';
+    }
+
+    if ($_FILES['foto_hewan']['error'] !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+    ];
+    $mime = mime_content_type($_FILES['foto_hewan']['tmp_name']);
+    if (!isset($allowed[$mime])) {
+        return null;
+    }
+
+    $uploadDir = __DIR__ . '/../../public/uploads/hewan';
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true)) {
+        return null;
+    }
+
+    $filename = 'hewan_' . date('YmdHis') . '_' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
+    $target = $uploadDir . '/' . $filename;
+
+    if (!move_uploaded_file($_FILES['foto_hewan']['tmp_name'], $target)) {
+        return null;
+    }
+
+    return 'public/uploads/hewan/' . $filename;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $aksi = nilaiPost('aksi');
+    $idHewanInput = ltrim(nilaiPost('id_hewan'), '0');
+
+    if ($aksi === 'tambah' || $aksi === 'edit') {
+        $jenisHewan = enumJenisHewan(nilaiPost('jenis_hewan'));
+        $beratBadan = angkaBerat(nilaiPost('berat_badan'));
+        $jenisKelamin = enumJenisKelamin(nilaiPost('jenis_kelamin'));
+        $noKandang = nilaiPost('no_kandang');
+        $tglLahir = nilaiPost('tgl_lahir');
+        $statusHewan = enumStatusHewan(nilaiPost('status'));
+
+        if (
+            $jenisHewan === null ||
+            $beratBadan === null ||
+            $jenisKelamin === null ||
+            $noKandang === '' ||
+            strlen($noKandang) > 5 ||
+            !tanggalValid($tglLahir) ||
+            $statusHewan === null
+        ) {
+            redirectCrud($aksi, 'gagal');
+        }
+    }
+
+    if ($aksi === 'tambah') {
+        if ($idHewanInput === '' || !ctype_digit($idHewanInput)) {
+            redirectCrud('tambah', 'gagal');
+        }
+
+        $idHewan = (int) $idHewanInput;
+        $namaHewan = ucwords(str_replace('_', ' ', $jenisHewan)) . ' ' . str_pad((string) $idHewan, 5, '0', STR_PAD_LEFT);
+        $fotoHewan = uploadFotoHewan();
+        if ($fotoHewan === null) {
+            redirectCrud('tambah', 'gagal');
+        }
+        $stmt = mysqli_prepare(
+            $db,
+            'INSERT INTO data_ternak
+                (id_hewan, jenis_hewan, nama_hewan, berat_badan, jenis_kelamin, no_kandang, tgl_lahir, foto_hewan, status_hewan)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+
+        if (!$stmt) {
+            redirectCrud('tambah', 'gagal');
+        }
+
+        mysqli_stmt_bind_param($stmt, 'issdsssss', $idHewan, $jenisHewan, $namaHewan, $beratBadan, $jenisKelamin, $noKandang, $tglLahir, $fotoHewan, $statusHewan);
+
+        if (!mysqli_stmt_execute($stmt)) {
+            redirectCrud('tambah', mysqli_errno($db) === 1062 ? 'duplikat' : 'gagal');
+        }
+
+        redirectCrud('tambah', 'berhasil');
+    }
+
+    if ($aksi === 'edit') {
+        if ($idHewanInput === '' || !ctype_digit($idHewanInput)) {
+            redirectCrud('edit', 'gagal');
+        }
+
+        $idHewan = (int) $idHewanInput;
+        $namaHewan = ucwords(str_replace('_', ' ', $jenisHewan)) . ' ' . str_pad((string) $idHewan, 5, '0', STR_PAD_LEFT);
+        $fotoHewan = uploadFotoHewan();
+        if ($fotoHewan === null) {
+            redirectCrud('edit', 'gagal');
+        }
+
+        $sql = 'UPDATE data_ternak
+             SET jenis_hewan = ?, nama_hewan = ?, berat_badan = ?, jenis_kelamin = ?, no_kandang = ?, tgl_lahir = ?, status_hewan = ?';
+        if ($fotoHewan !== '') {
+            $sql .= ', foto_hewan = ?';
+        }
+        $sql .= ' WHERE id_hewan = ?';
+
+        $stmt = mysqli_prepare($db, $sql);
+
+        if (!$stmt) {
+            redirectCrud('edit', 'gagal');
+        }
+
+        if ($fotoHewan !== '') {
+            mysqli_stmt_bind_param($stmt, 'ssdsssssi', $jenisHewan, $namaHewan, $beratBadan, $jenisKelamin, $noKandang, $tglLahir, $statusHewan, $fotoHewan, $idHewan);
+        } else {
+            mysqli_stmt_bind_param($stmt, 'ssdssssi', $jenisHewan, $namaHewan, $beratBadan, $jenisKelamin, $noKandang, $tglLahir, $statusHewan, $idHewan);
+        }
+
+        if (!mysqli_stmt_execute($stmt) || mysqli_stmt_affected_rows($stmt) < 0) {
+            redirectCrud('edit', 'gagal');
+        }
+
+        redirectCrud('edit', 'berhasil');
+    }
+
+    if ($aksi === 'hapus') {
+        if ($idHewanInput === '' || !ctype_digit($idHewanInput)) {
+            redirectCrud('hapus', 'gagal');
+        }
+
+        $idHewan = (int) $idHewanInput;
+        $stmt = mysqli_prepare($db, 'DELETE FROM data_ternak WHERE id_hewan = ?');
+
+        if (!$stmt) {
+            redirectCrud('hapus', 'gagal');
+        }
+
+        mysqli_stmt_bind_param($stmt, 'i', $idHewan);
+
+        if (!mysqli_stmt_execute($stmt)) {
+            redirectCrud('hapus', mysqli_errno($db) === 1451 ? 'terpakai' : 'gagal');
+        }
+
+        redirectCrud('hapus', mysqli_stmt_affected_rows($stmt) > 0 ? 'berhasil' : 'gagal');
+    }
+}
+
+$dataHewan = [];
+$queryDataHewan = mysqli_query(
+    $db,
+    "SELECT id_hewan, jenis_hewan, berat_badan, jenis_kelamin, no_kandang, tgl_lahir, foto_hewan, status_hewan
+     FROM data_ternak
+     ORDER BY id_hewan ASC"
+);
+
+if (!$queryDataHewan) {
+    die('Gagal mengambil data ternak: ' . mysqli_error($db));
+}
+
+while ($row = mysqli_fetch_assoc($queryDataHewan)) {
+    $dataHewan[] = [
+        'id' => str_pad((string) $row['id_hewan'], 5, '0', STR_PAD_LEFT),
+        'jenis' => labelJenis($row['jenis_hewan']),
+        'berat' => (float) $row['berat_badan'] . ' Kg',
+        'kelamin' => labelKelamin($row['jenis_kelamin']),
+        'kandang' => $row['no_kandang'],
+        'tgl_lahir' => $row['tgl_lahir'],
+        'foto' => $row['foto_hewan'],
+        'status' => normalisasiStatus($row['status_hewan']),
+    ];
+}
 
 function labelStatus(string $status): string
 {
@@ -93,11 +317,31 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="../../public/css/admin_dataHewan.css">
+<link rel="stylesheet" href="../../public/css/admin_dataHewan.css?v=2">
 </head>
 <body>
 
 <?php include __DIR__ . '/../../components/sidebar_admin.php'; ?>
+
+<?php if (isset($_GET['tambah']) || isset($_GET['edit']) || isset($_GET['hapus'])): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    <?php if (($_GET['tambah'] ?? '') === 'berhasil'): ?>
+    showFlashMessage('Data hewan berhasil ditambahkan.');
+    <?php elseif (($_GET['tambah'] ?? '') === 'duplikat'): ?>
+    showFlashMessage('ID hewan sudah ada di database. Gunakan ID yang berbeda.', 'warning');
+    <?php elseif (($_GET['edit'] ?? '') === 'berhasil'): ?>
+    showFlashMessage('Data hewan berhasil diperbarui.');
+    <?php elseif (($_GET['hapus'] ?? '') === 'berhasil'): ?>
+    showFlashMessage('Data hewan berhasil dihapus.');
+    <?php elseif (($_GET['hapus'] ?? '') === 'terpakai'): ?>
+    showFlashMessage('Data hewan tidak bisa dihapus karena masih digunakan oleh data lain.', 'warning');
+    <?php else: ?>
+    showFlashMessage('Proses data hewan gagal dilakukan.', 'danger');
+    <?php endif; ?>
+});
+</script>
+<?php endif; ?>
 
 <div class="modal-overlay" id="tambahOverlay" onclick="closeModalOutside(event, 'tambahOverlay')">
     <div class="form-modal-box">
@@ -109,10 +353,11 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
             <button type="button" class="modal-close-btn" onclick="closeTambah()"><i class="bi bi-x-lg"></i></button>
         </div>
 
-        <form id="tambahForm">
+        <form id="tambahForm" action="data_hewan.php" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="aksi" value="tambah">
             <div class="row">
                 <div class="col-md-6">
-                    <label class="form-label">ID Hewan</label>
+                    <label class="form-label">Kode Hewan</label>
                     <input type="text" name="id_hewan" class="form-control" placeholder="Contoh: 00011" required>
                 </div>
                 <div class="col-md-6">
@@ -127,7 +372,7 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Berat Badan Hewan</label>
-                    <input type="text" name="berat_badan" class="form-control" placeholder="Contoh: 85 Kg" required>
+                    <input type="number" name="berat_badan" class="form-control" placeholder="Contoh: 85" min="0.1" step="0.1" required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Jenis Kelamin</label>
@@ -143,7 +388,11 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Tanggal Lahir</label>
-                    <input type="date" name="tgl_lahir" class="form-control" required>
+                    <input type="date" name="tgl_lahir" class="form-control" max="<?= date('Y-m-d') ?>" required>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Foto Hewan</label>
+                    <input type="file" name="foto_hewan" class="form-control" accept="image/jpeg,image/png,image/webp">
                 </div>
             </div>
 
@@ -188,16 +437,17 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
         </div>
 
         <div class="summary-strip">
-            <div class="summary-item"><span>ID Hewan</span><strong id="editSummaryId">-</strong></div>
+            <div class="summary-item"><span>Kode Hewan</span><strong id="editSummaryId">-</strong></div>
             <div class="summary-item"><span>Jenis</span><strong id="editSummaryJenis">-</strong></div>
             <div class="summary-item"><span>Usia</span><strong id="editSummaryUsia">-</strong></div>
             <div class="summary-item"><span>Status</span><strong id="editSummaryStatus">-</strong></div>
         </div>
 
-        <form id="editHewanForm">
+        <form id="editHewanForm" action="data_hewan.php" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="aksi" value="edit">
             <div class="row">
                 <div class="col-md-6">
-                    <label class="form-label">ID Hewan</label>
+                    <label class="form-label">Kode Hewan</label>
                     <input type="text" name="id_hewan" id="editIdHewan" class="form-control" readonly>
                 </div>
                 <div class="col-md-6">
@@ -211,7 +461,7 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Berat Badan Hewan</label>
-                    <input type="text" name="berat_badan" id="editBeratBadan" class="form-control">
+                    <input type="number" name="berat_badan" id="editBeratBadan" class="form-control" min="0.1" step="0.1">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Jenis Kelamin</label>
@@ -226,7 +476,11 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Tanggal Lahir</label>
-                    <input type="date" name="tgl_lahir" id="editTanggalLahir" class="form-control">
+                    <input type="date" name="tgl_lahir" id="editTanggalLahir" class="form-control" max="<?= date('Y-m-d') ?>">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Ganti Foto Hewan</label>
+                    <input type="file" name="foto_hewan" class="form-control" accept="image/jpeg,image/png,image/webp">
                 </div>
             </div>
 
@@ -267,8 +521,9 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
                 <div class="id-badge">ID: <span id="previewIdBadge">-</span></div>
             </div>
 
-            <div class="preview-image-container">
-                <img id="previewImage" src="" alt="Preview hewan">
+            <div class="preview-image-container no-image">
+                <img id="previewImage" alt="Foto hewan belum tersedia">
+                <span class="no-image-text">Foto hewan belum tersedia</span>
             </div>
 
             <div class="section-title">Informasi Ternak</div>
@@ -307,7 +562,11 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
         </div>
         <div class="btn-group-custom">
             <button type="button" class="btn-custom btn-cancel" onclick="closeDelete()">Batal</button>
-            <button type="button" class="btn-custom btn-delete" onclick="confirmDelete()">Hapus</button>
+            <form id="deleteHewanForm" action="data_hewan.php" method="POST">
+                <input type="hidden" name="aksi" value="hapus">
+                <input type="hidden" name="id_hewan" id="deleteIdHewan">
+                <button type="submit" class="btn-custom btn-delete">Hapus</button>
+            </form>
         </div>
     </div>
 </div>
@@ -336,7 +595,7 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
     <table>
         <thead>
             <tr>
-                <th>ID Hewan</th>
+                <th>Kode Hewan</th>
                 <th>Jenis Hewan</th>
                 <th>Berat</th>
                 <th>Kelamin</th>
@@ -356,6 +615,7 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
                     'kelamin' => $row['kelamin'],
                     'kandang' => $row['kandang'],
                     'tgl_lahir' => $row['tgl_lahir'],
+                    'foto' => $row['foto'],
                     'status' => $row['status'],
                     'usia' => usiaLabel($row['tgl_lahir']),
                     'status_label' => labelStatus($row['status']),
@@ -376,7 +636,7 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
                         <button type="button" class="edit" title="Edit" data-record="<?= $recordJson ?>" onclick="openEdit(this)">
                             <i class="fa fa-pen"></i>
                         </button>
-                        <button type="button" title="Hapus" onclick="openDelete('<?= htmlspecialchars($row['jenis'] . ' - ' . $row['id'], ENT_QUOTES) ?>')">
+                        <button type="button" title="Hapus" onclick="openDelete('<?= htmlspecialchars($row['jenis'] . ' - ' . $row['id'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['id'], ENT_QUOTES) ?>')">
                             <i class="fa fa-trash"></i>
                         </button>
                     </td>
@@ -396,6 +656,12 @@ $totalTidakProduktif = $totalHewan - $totalProduktif;
 </div>
 </div>
 
-<script src="../../public/js/dataHewan_admin.js"></script>
+<script src="../../public/js/adminPagination.js?v=2"></script>
+<script src="../../public/js/dataHewan_admin.js?v=2"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    setupAdminPagination('#dataTableBody', '.table-box .pagination', 5);
+});
+</script>
 </body>
 </html>

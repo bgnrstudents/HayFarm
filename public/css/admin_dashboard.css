@@ -144,6 +144,13 @@ p {
 }
 
 /* CARDS */
+.main-content > .container {
+    width: 100%;
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+}
+
 .cards {
     display: flex;
     gap: 20px;
@@ -179,25 +186,30 @@ body {
       background: white;
       border-radius: 15px;
       padding: 20px;
-      margin: 30px auto;
+      margin: 30px 0;
+      width: 100%;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
+    .row.g-4 > .col-md-3,
     .row.g-4 > .col-md-4 {
       display: flex;
     }
 
+    .row.g-4 > .col-md-3 .card,
     .row.g-4 > .col-md-4 .card {
       flex: 1;
       display: flex;
       flex-direction: column;
+      margin: 0;
     }
 
+    .row.g-4 > .col-md-3 .card-body,
     .row.g-4 > .col-md-4 .card-body {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 180px;
+      min-height: 132px;
     }
 
     .notif-card {
@@ -206,6 +218,23 @@ body {
 
     h3 {
       margin-bottom: 20px;
+    }
+
+    #chart {
+      min-height: 350px;
+    }
+
+    .chart-empty-state {
+      min-height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      text-align: center;
+      border: 1px dashed #d1d5db;
+      border-radius: 12px;
+      background: #f8fafc;
+      font-weight: 700;
     }
   /* Notifikasi */
 .notification-container {
@@ -282,8 +311,27 @@ body {
 }
 
 .card-vaksinasi {
-  background-color: #1b7b3e;
-  color: white;
+  background-color: #ecfdf5;
+  color: #14532d;
+  box-shadow: 0 1px 3px rgba(20,83,45,0.12);
+}
+
+.card-expired {
+  background-color: #fff1f2;
+  color: #7f1d1d;
+  box-shadow: 0 1px 3px rgba(127,29,29,0.12);
+}
+
+.card-birth {
+  background-color: #eff6ff;
+  color: #1e3a8a;
+  box-shadow: 0 1px 3px rgba(30,58,138,0.12);
+}
+
+.card-verification {
+  background-color: #fffbeb;
+  color: #78350f;
+  box-shadow: 0 1px 3px rgba(120,53,15,0.12);
 }
 
 .card-default {
@@ -301,10 +349,13 @@ body {
 }
 
 .card-vaksinasi .card-title {
-  color: white;
+  color: #14532d;
 }
 
-.card-default .card-title {
+.card-default .card-title,
+.card-expired .card-title,
+.card-birth .card-title,
+.card-verification .card-title {
   color: #333;
 }
 
@@ -314,10 +365,13 @@ body {
 }
 
 .card-vaksinasi .card-description {
-  color: rgba(255, 255, 255, 0.9);
+  color: #166534;
 }
 
-.card-default .card-description {
+.card-default .card-description,
+.card-expired .card-description,
+.card-birth .card-description,
+.card-verification .card-description {
   color: #666;
 }
 
@@ -331,7 +385,7 @@ body {
 }
 
 .card-vaksinasi .card-number-value {
-  color: white;
+  color: #15803d;
 }
 
 .card-number-label {
@@ -340,10 +394,13 @@ body {
 }
 
 .card-vaksinasi .card-number-label {
-  color: rgba(255, 255, 255, 0.9);
+  color: #166534;
 }
 
-.card-default .card-number-label {
+.card-default .card-number-label,
+.card-expired .card-number-label,
+.card-birth .card-number-label,
+.card-verification .card-number-label {
   color: #666;
 }
 
@@ -365,10 +422,13 @@ body {
 }
 
 .card-vaksinasi .card-arrow {
-  color: white;
+  color: #166534;
 }
 
-.card-default .card-arrow {
+.card-default .card-arrow,
+.card-expired .card-arrow,
+.card-birth .card-arrow,
+.card-verification .card-arrow {
   color: #666;
 }
 

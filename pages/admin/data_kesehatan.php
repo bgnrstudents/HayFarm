@@ -1,3 +1,193 @@
+<?php
+require_once __DIR__ . '/../../config/database.php';
+
+function labelJenisKesehatan(string $jenis): string
+{
+    return [
+        'sapi_perah' => 'Sapi Perah',
+        'sapi_po' => 'Sapi PO',
+        'kambing' => 'Kambing',
+        'domba' => 'Domba',
+    ][$jenis] ?? ucwords(str_replace('_', ' ', $jenis));
+}
+
+function labelStatusKesehatan(string $status): string
+{
+    return [
+        'sehat' => 'Sehat',
+        'perawatan' => 'Dalam Perawatan',
+        'observasi' => 'Observasi',
+    ][$status] ?? '-';
+}
+
+function classStatusKesehatan(string $status): string
+{
+    return [
+        'sehat' => 'sehat',
+        'perawatan' => 'rawat',
+        'observasi' => 'obs',
+    ][$status] ?? '';
+}
+
+function labelStatusIb(?string $status): string
+{
+    return [
+        'berhasil' => 'Berhasil',
+        'tdk_berhasil' => 'Tidak Berhasil',
+        '' => '-',
+        null => '-',
+    ][$status] ?? '-';
+}
+
+function labelHamil(?string $statusIb): string
+{
+    return match ($statusIb) {
+        'berhasil' => 'Hamil',
+        'tdk_berhasil' => 'Tidak Hamil',
+        default => '-',
+    };
+}
+
+function formatPerkiraanLahir(?string $tanggal, ?string $statusIb): string
+{
+    return $statusIb === 'berhasil' ? formatTanggalKesehatan($tanggal) : '-';
+}
+
+function formatTanggalKesehatan(?string $tanggal): string
+{
+    if (!$tanggal || $tanggal === '0000-00-00') {
+        return '-';
+    }
+
+    return date('d M Y', strtotime($tanggal));
+}
+
+function identitasHewan(array $row): string
+{
+    return 'ID ' . str_pad((string) $row['id_hewan'], 5, '0', STR_PAD_LEFT)
+        . ' - ' . labelJenisKesehatan($row['jenis_hewan'])
+        . ' - Kandang ' . $row['no_kandang'];
+}
+
+function nilaiKesehatanPost(string $key): string
+{
+    return trim($_POST[$key] ?? '');
+}
+
+function redirectKesehatan(string $status): void
+{
+    header("Location: data_kesehatan.php?status=$status");
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'tambah') {
+    $idHewan = (int) nilaiKesehatanPost('id_hewan');
+    $tglPemeriksaan = nilaiKesehatanPost('tgl_pemeriksaan') ?: date('Y-m-d');
+    $statusKesehatan = nilaiKesehatanPost('status');
+    $diagnosis = nilaiKesehatanPost('diagnosis');
+    $tindakan = nilaiKesehatanPost('tindakan');
+    $catatan = nilaiKesehatanPost('catatan');
+
+    if ($idHewan <= 0 || !in_array($statusKesehatan, ['sehat', 'perawatan', 'observasi'], true) || $diagnosis === '' || $tindakan === '') {
+        redirectKesehatan('gagal');
+    }
+
+    $stmt = mysqli_prepare(
+        $db,
+        'INSERT INTO data_kesehatan (id_hewan, tgl_pemeriksaan, status_kesehatan, diagnosis, tindakan, catatan)
+         VALUES (?, ?, ?, ?, ?, ?)'
+    );
+
+    if (!$stmt) {
+        redirectKesehatan('gagal');
+    }
+
+    mysqli_stmt_bind_param($stmt, 'isssss', $idHewan, $tglPemeriksaan, $statusKesehatan, $diagnosis, $tindakan, $catatan);
+    if (!mysqli_stmt_execute($stmt)) {
+        redirectKesehatan('gagal');
+    }
+
+    $tglIb = nilaiKesehatanPost('tgl_awal_ib');
+    $ibKe = (int) nilaiKesehatanPost('ib_ke');
+    $statusIb = nilaiKesehatanPost('status_ib');
+    $tglPerkiraan = nilaiKesehatanPost('perkiraan_tgl_lahir');
+
+    if ($tglIb !== '' && $ibKe > 0 && in_array($statusIb, ['berhasil', 'tdk_berhasil'], true)) {
+        if ($tglPerkiraan === '' && $statusIb === 'berhasil') {
+            $perkiraan = new DateTime($tglIb);
+            $perkiraan->modify('+9 months');
+            $tglPerkiraan = $perkiraan->format('Y-m-d');
+        }
+        $tglPerkiraan = $tglPerkiraan ?: '0000-00-00';
+
+        $stmtRepro = mysqli_prepare(
+            $db,
+            'INSERT INTO data_reproduksi (id_hewan, tgl_ib, ib_ke, tgl_perkiraan, status_ib)
+             VALUES (?, ?, ?, ?, ?)'
+        );
+
+        if ($stmtRepro) {
+            mysqli_stmt_bind_param($stmtRepro, 'isiss', $idHewan, $tglIb, $ibKe, $tglPerkiraan, $statusIb);
+            mysqli_stmt_execute($stmtRepro);
+        }
+    }
+
+    redirectKesehatan('berhasil');
+}
+
+$opsiHewan = [];
+$queryHewan = mysqli_query(
+    $db,
+    "SELECT id_hewan, jenis_hewan, no_kandang
+     FROM data_ternak
+     ORDER BY id_hewan ASC"
+);
+
+if ($queryHewan) {
+    while ($row = mysqli_fetch_assoc($queryHewan)) {
+        $opsiHewan[] = $row;
+    }
+}
+
+$dataKesehatan = [];
+$queryKesehatan = mysqli_query(
+    $db,
+    "SELECT
+        dk.id_kesehatan,
+        dk.id_hewan,
+        dk.tgl_pemeriksaan,
+        dk.status_kesehatan,
+        dk.diagnosis,
+        dk.tindakan,
+        dk.catatan,
+        dt.jenis_hewan,
+        dt.no_kandang,
+        dr.tgl_ib,
+        dr.ib_ke,
+        dr.tgl_perkiraan,
+        dr.status_ib
+     FROM data_kesehatan dk
+     INNER JOIN data_ternak dt ON dt.id_hewan = dk.id_hewan
+     LEFT JOIN data_reproduksi dr ON dr.id_reproduksi = (
+        SELECT dr2.id_reproduksi
+        FROM data_reproduksi dr2
+        WHERE dr2.id_hewan = dk.id_hewan
+        ORDER BY dr2.id_reproduksi DESC
+        LIMIT 1
+     )
+     ORDER BY dk.tgl_pemeriksaan DESC, dk.id_kesehatan DESC"
+);
+
+if ($queryKesehatan) {
+    while ($row = mysqli_fetch_assoc($queryKesehatan)) {
+        $dataKesehatan[] = $row;
+    }
+}
+
+$totalSehat = count(array_filter($dataKesehatan, fn($row) => $row['status_kesehatan'] === 'sehat'));
+$totalPerawatan = count(array_filter($dataKesehatan, fn($row) => $row['status_kesehatan'] === 'perawatan'));
+$totalObservasi = count(array_filter($dataKesehatan, fn($row) => $row['status_kesehatan'] === 'observasi'));
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +200,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="../../public/css/admin_dataKesehatan.css">
+<link rel="stylesheet" href="../../public/css/admin_dataKesehatan.css?v=2">
 </head>
 
 <body>
@@ -26,16 +216,16 @@
             <button class="modal-close-btn" onclick="closeTambah()"><i class="bi bi-x-lg"></i></button>
         </div>
 
-        <form id="tambahForm">
+        <form id="tambahForm" action="data_kesehatan.php" method="POST">
+            <input type="hidden" name="aksi" value="tambah">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Jenis Hewan <span class="text-danger">*</span></label>
-                    <select name="jenis_hewan" class="form-select" required>
-                        <option value="" disabled selected>Pilih Jenis</option>
-                        <option value="Sapi Perah">Sapi Perah</option>
-                        <option value="Sapi PO">Sapi PO</option>
-                        <option value="Kambing">Kambing</option>
-                        <option value="Domba">Domba</option>
+                    <label class="form-label">Pilih Hewan <span class="text-danger">*</span></label>
+                    <select name="id_hewan" class="form-select" required>
+                        <option value="" disabled selected>Pilih hewan dari Data Hewan</option>
+                        <?php foreach ($opsiHewan as $hewan): ?>
+                            <option value="<?= (int) $hewan['id_hewan'] ?>"><?= htmlspecialchars(identitasHewan($hewan)) ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -75,6 +265,32 @@
                     <label class="form-label">Catatan Tambahan</label>
                     <textarea name="catatan" class="form-control" rows="3" placeholder="Tambahkan catatan atau keterangan detail di sini..."></textarea>
                 </div>
+
+                <div class="col-12">
+                    <hr>
+                    <h6 class="fw-bold mb-1">Data Reproduksi / IB</h6>
+                    <small class="text-muted">Isi jika hewan sedang atau sudah menjalani inseminasi buatan.</small>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tanggal Awal IB</label>
+                    <input type="date" name="tgl_awal_ib" id="tambahTglIb" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">IB ke</label>
+                    <input type="number" name="ib_ke" class="form-control" min="1" placeholder="Contoh: 2">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Perkiraan Tanggal Lahir</label>
+                    <input type="date" name="perkiraan_tgl_lahir" id="tambahPerkiraanLahir" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status IB</label>
+                    <select name="status_ib" id="tambahStatusIb" class="form-select">
+                        <option value="">Belum ada IB</option>
+                        <option value="berhasil">Berhasil</option>
+                        <option value="tdk_berhasil">Tidak Berhasil</option>
+                    </select>
+                </div>
             </div>
 
             <div class="tips-box">
@@ -88,7 +304,7 @@
 
             <div class="btn-footer">
                 <button type="button" class="btn-kembali" onclick="closeTambah()">Batal</button>
-                <button type="button" class="btn-simpan" onclick="simpanTambah()">
+                <button type="submit" class="btn-simpan">
                     <i class="bi bi-save me-1"></i> Simpan Data
                 </button>
             </div>
@@ -118,7 +334,6 @@
 
         <form id="editKesehatanForm">
             <div class="tab-content">
-                <!-- Tab Kesehatan -->
                 <div class="tab-pane fade show active" id="kesehatan-content">
                     <div class="row">
                         <div class="col-md-4">
@@ -130,13 +345,12 @@
                             <input type="date" name="tanggal" id="editTanggal" class="form-control">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Jenis Hewan</label>
-                            <select name="jenis_hewan" id="editJenis" class="form-select">
+                            <label class="form-label">Hewan</label>
+                            <select name="id_hewan" id="editHewan" class="form-select">
                                 <option value="">Pilih...</option>
-                                <option value="Sapi Perah">Sapi Perah</option>
-                                <option value="Sapi PO">Sapi PO</option>
-                                <option value="Kambing">Kambing</option>
-                                <option value="Domba">Domba</option>
+                                <?php foreach ($opsiHewan as $hewan): ?>
+                                    <option value="<?= (int) $hewan['id_hewan'] ?>"><?= htmlspecialchars(identitasHewan($hewan)) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
@@ -168,7 +382,6 @@
                     <textarea name="keterangan" id="editKeterangan" class="form-control" rows="3" placeholder="Tambahkan keterangan..."></textarea>
                 </div>
 
-                <!-- Tab Reproduksi -->
                 <div class="tab-pane fade" id="reproduksi-content">
                     <div class="row">
                         <div class="col-md-6">
@@ -244,11 +457,10 @@
             </div>
             <div class="section-title">Informasi Tambahan</div>
             <div class="note-box-preview">
-                Sapi dalam pemantauan nutrisi tambahan untuk mendukung masa kehamilan. Nafsu makan stabil dan berat badan meningkat sesuai target.
+                Catatan kesehatan dan reproduksi ditampilkan sesuai data yang dipilih.
             </div>
             <div class="footer-actions">
                 <button class="btn-back" onclick="closePreview()">Kembali</button>
-                <button class="btn-save" onclick="showFlashMessage('Data berhasil disimpan.');closePreview();">Konfirmasi & Simpan</button>
             </div>
         </div>
     </div>
@@ -294,9 +506,9 @@
 
 <!-- STATS -->
 <div class="stats">
-    <div class="stat-card"><h4>Total Sehat</h4><h2>2</h2></div>
-    <div class="stat-card"><h4>Dalam Perawatan</h4><h2>1</h2></div>
-    <div class="stat-card"><h4>Observasi</h4><h2>2</h2></div>
+    <div class="stat-card"><h4>Total Sehat</h4><h2><?= $totalSehat ?></h2></div>
+    <div class="stat-card"><h4>Dalam Perawatan</h4><h2><?= $totalPerawatan ?></h2></div>
+    <div class="stat-card"><h4>Observasi</h4><h2><?= $totalObservasi ?></h2></div>
 </div>
 
 <!-- TABLE -->
@@ -304,71 +516,72 @@
 <table>
 <thead>
 <tr>
+    <th>Kode Hewan</th>
     <th>Jenis Hewan</th>
+    <th>Kandang</th>
     <th>Tanggal Pemeriksaan</th>
     <th>Status</th>
     <th>Diagnosa</th>
     <th>Tindakan</th>
     <th>Keterangan</th>
+    <th>Tanggal IB</th>
+    <th>IB Ke</th>
+    <th>Status IB</th>
+    <th>Status Hamil</th>
+    <th>Perkiraan Lahir</th>
     <th>Aksi</th>
 </tr>
 </thead>
-<tbody>
+<tbody id="kesehatanTableBody">
+<?php if (count($dataKesehatan) === 0): ?>
+<tr><td colspan="14" class="text-center text-muted py-4">Belum ada data kesehatan.</td></tr>
+<?php endif; ?>
+<?php foreach ($dataKesehatan as $row): ?>
+<?php
+$hewanLabel = identitasHewan($row);
+$kodeHewan = str_pad((string) $row['id_hewan'], 5, '0', STR_PAD_LEFT);
+$editJson = [
+    'id' => str_pad((string) $row['id_kesehatan'], 4, '0', STR_PAD_LEFT),
+    'id_hewan' => (string) $row['id_hewan'],
+    'tanggal' => $row['tgl_pemeriksaan'],
+    'status' => $row['status_kesehatan'],
+    'diagnosis' => $row['diagnosis'],
+    'tindakan' => $row['tindakan'],
+    'catatan' => $row['catatan'],
+    'tgl_ib' => $row['tgl_ib'] ?? '',
+    'ib_ke' => $row['ib_ke'] ?? '',
+    'status_reproduksi' => labelHamil($row['status_ib'] ?? null),
+    'tgl_perkiraan' => $row['tgl_perkiraan'] ?? '',
+    'info_tambahan' => '',
+];
+$recordJson = htmlspecialchars(json_encode($editJson), ENT_QUOTES, 'UTF-8');
+?>
 <tr>
-    <td>Sapi</td><td>25 Feb 2026</td>
-    <td><span class="status sehat">Sehat</span></td>
-    <td>-</td><td>Vaksin</td><td>Pemeriksaan rutin</td>
+    <td><?= htmlspecialchars($kodeHewan) ?></td>
+    <td><?= htmlspecialchars(labelJenisKesehatan($row['jenis_hewan'])) ?></td>
+    <td><?= htmlspecialchars($row['no_kandang']) ?></td>
+    <td><?= htmlspecialchars(formatTanggalKesehatan($row['tgl_pemeriksaan'])) ?></td>
+    <td><span class="status <?= classStatusKesehatan($row['status_kesehatan']) ?>"><?= labelStatusKesehatan($row['status_kesehatan']) ?></span></td>
+    <td><?= htmlspecialchars($row['diagnosis']) ?></td>
+    <td><?= htmlspecialchars($row['tindakan']) ?></td>
+    <td><?= htmlspecialchars($row['catatan']) ?></td>
+    <td><?= htmlspecialchars(formatTanggalKesehatan($row['tgl_ib'] ?? null)) ?></td>
+    <td><?= htmlspecialchars($row['ib_ke'] ?? '-') ?></td>
+    <td><?= htmlspecialchars(labelStatusIb($row['status_ib'] ?? null)) ?></td>
+    <td><?= htmlspecialchars(labelHamil($row['status_ib'] ?? null)) ?></td>
+    <td><?= htmlspecialchars(formatPerkiraanLahir($row['tgl_perkiraan'] ?? null, $row['status_ib'] ?? null)) ?></td>
     <td class="action">
         <i class="fa fa-eye" title="Lihat" onclick="openPreview()"></i>
-        <i class="fa fa-pen" title="Edit" onclick="openEdit('0001','2026-02-25','Sapi','sehat','-','Vaksin','Pemeriksaan rutin')"></i>
-        <i class="fa fa-trash" title="Hapus" onclick="openDelete('Sapi (Kandang 00004)')"></i>
+        <i class="fa fa-pen" title="Edit" data-record="<?= $recordJson ?>" onclick="openEdit(this)"></i>
+        <i class="fa fa-trash" title="Hapus" onclick="openDelete('<?= htmlspecialchars($hewanLabel, ENT_QUOTES) ?>')"></i>
     </td>
 </tr>
-<tr>
-    <td>Kambing</td><td>24 Feb 2026</td>
-    <td><span class="status rawat">Dalam Perawatan</span></td>
-    <td>Infeksi ringan</td><td>Antibiotik</td><td>Perlu kontrol</td>
-    <td class="action">
-        <i class="fa fa-eye" title="Lihat" onclick="openPreview()"></i>
-        <i class="fa fa-pen" title="Edit" onclick="openEdit('0002','2026-02-24','Kambing','perawatan','Infeksi ringan','Antibiotik','Perlu kontrol')"></i>
-        <i class="fa fa-trash" title="Hapus" onclick="openDelete('Kambing (Kandang 00005)')"></i>
-    </td>
-</tr>
-<tr>
-    <td>Domba</td><td>23 Feb 2026</td>
-    <td><span class="status obs">Observasi</span></td>
-    <td>Demam</td><td>Monitoring</td><td>Pantau 3 hari</td>
-    <td class="action">
-        <i class="fa fa-eye" title="Lihat" onclick="openPreview()"></i>
-        <i class="fa fa-pen" title="Edit" onclick="openEdit('0003','2026-02-23','Domba','observasi','Demam','Monitoring','Pantau 3 hari')"></i>
-        <i class="fa fa-trash" title="Hapus" onclick="openDelete('Domba (Kandang 00006)')"></i>
-    </td>
-</tr>
-<tr>
-    <td>Sapi</td><td>22 Feb 2026</td>
-    <td><span class="status sehat">Sehat</span></td>
-    <td>Vitamin</td><td>Vitamin</td><td>Kondisi stabil</td>
-    <td class="action">
-        <i class="fa fa-eye" title="Lihat" onclick="openPreview()"></i>
-        <i class="fa fa-pen" title="Edit" onclick="openEdit('0004','2026-02-22','Sapi','sehat','Vitamin','Vitamin','Kondisi stabil')"></i>
-        <i class="fa fa-trash" title="Hapus" onclick="openDelete('Sapi (Kandang 00008)')"></i>
-    </td>
-</tr>
-<tr>
-    <td>Kambing</td><td>21 Feb 2026</td>
-    <td><span class="status obs">Observasi</span></td>
-    <td>Nafsu makan turun</td><td>Suplemen</td><td>Pantau berat badan</td>
-    <td class="action">
-        <i class="fa fa-eye" title="Lihat" onclick="openPreview()"></i>
-        <i class="fa fa-pen" title="Edit" onclick="openEdit('0005','2026-02-21','Kambing','observasi','Nafsu makan turun','Suplemen','Pantau berat badan')"></i>
-        <i class="fa fa-trash" title="Hapus" onclick="openDelete('Kambing (Kandang 00010)')"></i>
-    </td>
-</tr>
+<?php endforeach; ?>
 </tbody>
 </table>
 
 <div class="pagination">
-    <span>Menampilkan 1-5 dari 5 data</span>
+    <span>Menampilkan <?= count($dataKesehatan) > 0 ? '1-' . count($dataKesehatan) : '0-0' ?> dari <?= count($dataKesehatan) ?> data</span>
     <div>
         <button class="page-btn">Sebelumnya</button>
         <button class="page-btn active-page">1</button>
@@ -381,7 +594,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="../../public/js/dataKesehatan_admin.js"></script>
+<script src="../../public/js/adminPagination.js?v=2"></script>
+<script src="../../public/js/dataKesehatan_admin.js?v=2"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    setupAdminPagination('#kesehatanTableBody', '.table-box .pagination', 5);
+});
+</script>
 
 </body>
 </html>

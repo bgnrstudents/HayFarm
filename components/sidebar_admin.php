@@ -1,6 +1,6 @@
 <?php
 $current = basename($_SERVER['PHP_SELF']);
-$loginUrl = '/hayfarm20/login.php';
+$loginUrl = '/HayFarm/login.php';
 $topMenu = [
     'dashboard.php' => ['icon' => 'fa-table-cells-large', 'label' => 'Dashboard'],
     'manajemen_produk.php' => ['icon' => 'fa-credit-card', 'label' => 'Manajemen Produk'],
