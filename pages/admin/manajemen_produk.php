@@ -1,6 +1,113 @@
 <?php
 require_once __DIR__ . '/../../config/database.php';
 
+function redirectProduk(string $status): void
+{
+    header("Location: manajemen_produk.php?status=$status");
+    exit;
+}
+
+function nilaiProdukPost(string $key): string
+{
+    return trim((string) ($_POST[$key] ?? ''));
+}
+
+function angkaProdukPost(string $key): int
+{
+    return (int) preg_replace('/\D/', '', nilaiProdukPost($key));
+}
+
+function statusProdukDb(string $jenis, string $status, string $tanggalKadaluarsa): string
+{
+    if ($jenis === 'susu' && $tanggalKadaluarsa !== '' && $tanggalKadaluarsa < date('Y-m-d')) {
+        return 'terjual';
+    }
+
+    return $status === 'Tidak Tersedia' ? 'terjual' : 'blm_terjual';
+}
+
+function satuanProdukDb(string $jenis): string
+{
+    return [
+        'hewan' => 'ekor',
+        'susu' => 'liter',
+        'rumput' => '',
+    ][$jenis] ?? '';
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $aksi = nilaiProdukPost('aksi');
+    $jenis = nilaiProdukPost('jenis_produk');
+    $nama = nilaiProdukPost('nama_produk');
+    $harga = angkaProdukPost('harga');
+    $stok = angkaProdukPost('stok');
+    $tanggalKadaluarsa = nilaiProdukPost('tgl_kadaluarsa');
+    $status = statusProdukDb($jenis, nilaiProdukPost('status_produk'), $tanggalKadaluarsa);
+    $satuan = satuanProdukDb($jenis);
+    $deskripsi = '';
+
+    if ($aksi === 'tambah') {
+        if (!in_array($jenis, ['hewan', 'rumput', 'susu'], true) || $nama === '' || $harga <= 0) {
+            redirectProduk('gagal');
+        }
+
+        if ($jenis !== 'susu') {
+            $tanggalKadaluarsa = '0000-00-00';
+        }
+
+        $stmt = mysqli_prepare(
+            $db,
+            'INSERT INTO data_produk (id_hewan, jenis_produk, nama_produk, harga, stok, satuan, tgl_kadaluarsa, deskripsi, status_produk)
+             VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        if (!$stmt) {
+            redirectProduk('gagal');
+        }
+        mysqli_stmt_bind_param($stmt, 'ssdissss', $jenis, $nama, $harga, $stok, $satuan, $tanggalKadaluarsa, $deskripsi, $status);
+        mysqli_stmt_execute($stmt);
+        redirectProduk(mysqli_stmt_affected_rows($stmt) > 0 ? 'berhasil' : 'gagal');
+    }
+
+    if ($aksi === 'edit') {
+        $idProduk = (int) nilaiProdukPost('id_produk');
+        if ($idProduk <= 0 || $idProduk >= 100000 || !in_array($jenis, ['hewan', 'rumput', 'susu'], true) || $nama === '' || $harga <= 0) {
+            redirectProduk('gagal');
+        }
+
+        if ($jenis !== 'susu') {
+            $tanggalKadaluarsa = '0000-00-00';
+        }
+
+        $stmt = mysqli_prepare(
+            $db,
+            'UPDATE data_produk
+             SET jenis_produk = ?, nama_produk = ?, harga = ?, stok = ?, satuan = ?, tgl_kadaluarsa = ?, status_produk = ?
+             WHERE id_produk = ?'
+        );
+        if (!$stmt) {
+            redirectProduk('gagal');
+        }
+        mysqli_stmt_bind_param($stmt, 'ssdisssi', $jenis, $nama, $harga, $stok, $satuan, $tanggalKadaluarsa, $status, $idProduk);
+        mysqli_stmt_execute($stmt);
+        redirectProduk(mysqli_stmt_affected_rows($stmt) >= 0 ? 'berhasil' : 'gagal');
+    }
+
+    if ($aksi === 'hapus') {
+        $idProduk = (int) nilaiProdukPost('id_produk');
+        if ($idProduk <= 0 || $idProduk >= 100000) {
+            redirectProduk('gagal');
+        }
+
+        $stmt = mysqli_prepare($db, 'DELETE FROM data_produk WHERE id_produk = ?');
+        if (!$stmt) {
+            redirectProduk('gagal');
+        }
+        mysqli_stmt_bind_param($stmt, 'i', $idProduk);
+        mysqli_stmt_execute($stmt);
+        redirectProduk(mysqli_stmt_affected_rows($stmt) > 0 ? 'berhasil' : 'gagal');
+    }
+}
+
 function labelJenisProduk(string $jenis): string
 {
     return [
@@ -13,6 +120,20 @@ function labelJenisProduk(string $jenis): string
 function labelStatusProduk(string $status): string
 {
     return $status === 'terjual' ? 'Tidak Tersedia' : 'Tersedia';
+}
+
+function statusProdukManajemen(string $jenis, string $status, ?string $tanggalKadaluarsa): string
+{
+    if (
+        $jenis === 'susu'
+        && $tanggalKadaluarsa
+        && $tanggalKadaluarsa !== '0000-00-00'
+        && $tanggalKadaluarsa < date('Y-m-d')
+    ) {
+        return 'Tidak Tersedia';
+    }
+
+    return labelStatusProduk($status);
 }
 
 function labelJenisHewanProduk(string $jenis): string
@@ -38,6 +159,15 @@ function satuanProduk(string $jenis, string $satuan): string
     ][$jenis] ?? '';
 }
 
+function tanggalProduksiSusu(?string $tanggalKadaluarsa): string
+{
+    if (!$tanggalKadaluarsa || $tanggalKadaluarsa === '0000-00-00') {
+        return '';
+    }
+
+    return date('Y-m-d', strtotime($tanggalKadaluarsa . ' -7 days'));
+}
+
 $produkData = [];
 $queryProduk = mysqli_query(
     $db,
@@ -57,10 +187,11 @@ if ($queryProduk) {
             'id' => (int) $row['id_produk'],
             'type' => labelJenisProduk($jenis),
             'name' => $row['nama_produk'],
-            'date' => $tanggal,
+            'date' => $jenis === 'susu' ? tanggalProduksiSusu($tanggal) : '',
+            'expiryDate' => $jenis === 'susu' ? $tanggal : '',
             'price' => 'Rp ' . number_format((float) $row['harga'], 0, ',', '.'),
             'stock' => (float) $row['stok'] . ' ' . satuanProduk($jenis, $row['satuan'] ?? ''),
-            'status' => labelStatusProduk($row['status_produk']),
+            'status' => statusProdukManajemen($jenis, $row['status_produk'], $tanggal),
             'image' => '',
         ];
     }
@@ -82,7 +213,8 @@ if ($queryHewanJual) {
             'type' => 'Hewan',
             'needs_price' => true,
             'name' => labelJenisHewanProduk($row['jenis_hewan']),
-            'date' => date('Y-m-d'),
+            'date' => '',
+            'expiryDate' => '',
             'price' => 'Rp 0',
             'stock' => '1 Ekor',
             'status' => 'Tersedia',
@@ -174,7 +306,8 @@ if ($queryHewanJual) {
                     <th>NO</th>
                     <th>Jenis Produk</th>
                     <th>Nama Produk</th>
-                    <th>Tanggal</th>
+                    <th>Tanggal Produksi</th>
+                    <th>Tanggal Kadaluwarsa</th>
                     <th>Harga</th>
                     <th>Stok</th>
                     <th>Status</th>
@@ -244,14 +377,8 @@ if ($queryHewanJual) {
                     <input type="hidden" id="edit-id-hewan">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Jenis Hewan <span class="required">*</span></label>
-                            <select class="form-select" id="edit-jenis-hewan" required>
-                                <option value="">Pilih jenis hewan</option>
-                                <option value="sapi">Sapi</option>
-                                <option value="kambing">Kambing</option>
-                                <option value="domba">Domba</option>
-                                <option value="kerbau">Kerbau</option>
-                            </select>
+                            <label class="form-label">Jenis Produk</label>
+                            <input type="text" class="form-input" value="Hewan" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nama Produk <span class="required">*</span></label>
@@ -268,25 +395,7 @@ if ($queryHewanJual) {
                             <input type="text" class="form-input" id="edit-harga-hewan" placeholder="Rp 20.000.000" required oninput="formatCurrencyInput(this)">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Jumlah/Stok <span class="required">*</span></label>
-                        <input type="number" class="form-input" id="edit-stok-hewan" placeholder="Contoh: 4" min="1" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label class="form-label">Foto Hewan</label>
-                        <div class="upload-wrapper">
-                            <input type="file" id="edit-file-hewan" class="file-input" hidden accept="image/*" onchange="previewEditImage(event, 'hewan')">
-                            <div class="upload-box" onclick="document.getElementById('edit-file-hewan').click()">
-                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
-                                <p class="upload-text">Klik untuk menambahkan foto</p>
-                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
-                            </div>
-                            <div class="image-preview" id="edit-preview-hewan" style="display: none;">
-                                <img id="edit-img-hewan" src="" alt="Preview">
-                                <button type="button" class="btn-remove" onclick="removeEditImage('hewan')">×</button>
-                            </div>
-                        </div>
-                    </div>
+                    <input type="hidden" id="edit-stok-hewan" value="1">
                     <div class="form-group full-width">
                         <label class="form-label">Status <span class="required">*</span></label>
                         <div class="status-divider"></div>
@@ -311,14 +420,8 @@ if ($queryHewanJual) {
                     <input type="hidden" id="edit-id-rumput">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Jenis Rumput <span class="required">*</span></label>
-                            <select class="form-select" id="edit-jenis-rumput" required>
-                                <option value="">Pilih jenis rumput</option>
-                                <option value="odot">Rumput Odot</option>
-                                <option value="gajah">Rumput Gajah</option>
-                                <option value="pakan">Rumput Pakan</option>
-                                <option value="lapangan">Rumput Lapangan</option>
-                            </select>
+                            <label class="form-label">Jenis Produk</label>
+                            <input type="text" class="form-input" value="Rumput" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nama Produk <span class="required">*</span></label>
@@ -333,21 +436,6 @@ if ($queryHewanJual) {
                         <div class="form-group">
                             <label class="form-label">Stok (Kg) <span class="required">*</span></label>
                             <input type="number" class="form-input" id="edit-stok-rumput" placeholder="Contoh: 500" min="0" required>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label class="form-label">Foto Produk</label>
-                        <div class="upload-wrapper">
-                            <input type="file" id="edit-file-rumput" class="file-input" hidden accept="image/*" onchange="previewEditImage(event, 'rumput')">
-                            <div class="upload-box" onclick="document.getElementById('edit-file-rumput').click()">
-                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
-                                <p class="upload-text">Klik untuk menambahkan foto</p>
-                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
-                            </div>
-                            <div class="image-preview" id="edit-preview-rumput" style="display: none;">
-                                <img id="edit-img-rumput" src="" alt="Preview">
-                                <button type="button" class="btn-remove" onclick="removeEditImage('rumput')">×</button>
-                            </div>
                         </div>
                     </div>
                     <div class="form-group full-width">
@@ -391,11 +479,11 @@ if ($queryHewanJual) {
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Tanggal Produksi <span class="required">*</span></label>
-                            <input type="date" class="form-input" id="edit-tgl-produksi-susu" required>
+                            <input type="date" class="form-input" id="edit-tgl-produksi-susu" required onchange="syncMilkExpiry('edit')" oninput="syncMilkExpiry('edit')">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tanggal Kadaluwarsa <span class="required">*</span></label>
-                            <input type="date" class="form-input" id="edit-tgl-expiry-susu" required>
+                            <input type="date" class="form-input" id="edit-tgl-expiry-susu" readonly required>
                         </div>
                     </div>
                     <div class="form-row">
@@ -406,21 +494,6 @@ if ($queryHewanJual) {
                         <div class="form-group">
                             <label class="form-label">Stok (Liter) <span class="required">*</span></label>
                             <input type="number" class="form-input" id="edit-stok-susu" placeholder="Contoh: 200" min="0" required>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label class="form-label">Foto Produk</label>
-                        <div class="upload-wrapper">
-                            <input type="file" id="edit-file-susu" class="file-input" hidden accept="image/*" onchange="previewEditImage(event, 'susu')">
-                            <div class="upload-box" onclick="document.getElementById('edit-file-susu').click()">
-                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
-                                <p class="upload-text">Klik untuk menambahkan foto</p>
-                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
-                            </div>
-                            <div class="image-preview" id="edit-preview-susu" style="display: none;">
-                                <img id="edit-img-susu" src="" alt="Preview">
-                                <button type="button" class="btn-remove" onclick="removeEditImage('susu')">×</button>
-                            </div>
                         </div>
                     </div>
                     <div class="form-group full-width">
@@ -456,18 +529,15 @@ if ($queryHewanJual) {
                 <div class="preview-id-badge" id="previewProductId">ID: -</div>
             </div>
 
-            <div class="preview-image-container">
-                <img id="previewProductImage" src="" alt="Preview produk">
-            </div>
-
             <p class="preview-section-title" id="previewSectionTitle">INFORMASI PRODUK</p>
 
             <div class="preview-info-grid">
                 <div class="preview-info-box"><span class="preview-label">Jenis Produk</span><span class="preview-value" id="previewProductType">-</span></div>
                 <div class="preview-info-box"><span class="preview-label">Nama Produk</span><span class="preview-value" id="previewProductName">-</span></div>
-                <div class="preview-info-box"><span class="preview-label">Tanggal</span><span class="preview-value" id="previewProductDate">-</span></div>
+                <div class="preview-info-box preview-date-info"><span class="preview-label" id="previewProductDateLabel">Tanggal</span><span class="preview-value" id="previewProductDate">-</span></div>
+                <div class="preview-info-box preview-expiry-info"><span class="preview-label">Tanggal Kadaluwarsa</span><span class="preview-value" id="previewProductExpiry">-</span></div>
                 <div class="preview-info-box"><span class="preview-label">Harga</span><span class="preview-value" id="previewProductPrice">-</span></div>
-                <div class="preview-info-box"><span class="preview-label">Stok</span><span class="preview-value" id="previewProductStock">-</span></div>
+                <div class="preview-info-box preview-stock-info"><span class="preview-label">Stok</span><span class="preview-value" id="previewProductStock">-</span></div>
                 <div class="preview-info-box">
                     <span class="preview-label">Status</span>
                     <div class="preview-status-pill" id="previewStatusWrap">
@@ -501,14 +571,8 @@ if ($queryHewanJual) {
                 <form id="add-form-hewan" class="form-section active" onsubmit="handleAddSubmit(event, 'hewan')">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Jenis Hewan <span class="required">*</span></label>
-                            <select class="form-select" id="add-jenis-hewan" required>
-                                <option value="">Pilih jenis hewan</option>
-                                <option value="sapi">Sapi</option>
-                                <option value="kambing">Kambing</option>
-                                <option value="domba">Domba</option>
-                                <option value="kerbau">Kerbau</option>
-                            </select>
+                            <label class="form-label">Jenis Produk</label>
+                            <input type="text" class="form-input" value="Hewan" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nama Produk <span class="required">*</span></label>
@@ -525,25 +589,7 @@ if ($queryHewanJual) {
                             <input type="text" class="form-input" id="add-harga-hewan" placeholder="Rp 20.000.000" required oninput="formatCurrencyInput(this)">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Jumlah/Stok <span class="required">*</span></label>
-                        <input type="number" class="form-input" id="add-stok-hewan" placeholder="Contoh: 4" min="1" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label class="form-label">Foto Hewan</label>
-                        <div class="upload-wrapper">
-                            <input type="file" id="add-file-hewan" class="file-input" hidden accept="image/*" onchange="previewAddImage(event, 'hewan')">
-                            <div class="upload-box" onclick="document.getElementById('add-file-hewan').click()">
-                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
-                                <p class="upload-text">Klik untuk menambahkan foto</p>
-                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
-                            </div>
-                            <div class="image-preview" id="add-preview-hewan" style="display: none;">
-                                <img id="add-img-hewan" src="" alt="Preview">
-                                <button type="button" class="btn-remove" onclick="removeAddImage('hewan')">×</button>
-                            </div>
-                        </div>
-                    </div>
+                    <input type="hidden" id="add-stok-hewan" value="1">
                     <div class="form-group full-width">
                         <label class="form-label">Status <span class="required">*</span></label>
                         <div class="status-divider"></div>
@@ -567,14 +613,8 @@ if ($queryHewanJual) {
                 <form id="add-form-rumput" class="form-section" onsubmit="handleAddSubmit(event, 'rumput')">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Jenis Rumput <span class="required">*</span></label>
-                            <select class="form-select" id="add-jenis-rumput" required>
-                                <option value="">Pilih jenis rumput</option>
-                                <option value="odot">Rumput Odot</option>
-                                <option value="gajah">Rumput Gajah</option>
-                                <option value="pakan">Rumput Pakan</option>
-                                <option value="lapangan">Rumput Lapangan</option>
-                            </select>
+                            <label class="form-label">Jenis Produk</label>
+                            <input type="text" class="form-input" value="Rumput" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nama Produk <span class="required">*</span></label>
@@ -589,21 +629,6 @@ if ($queryHewanJual) {
                         <div class="form-group">
                             <label class="form-label">Stok (Kg) <span class="required">*</span></label>
                             <input type="number" class="form-input" id="add-stok-rumput" placeholder="Contoh: 500" min="0" required>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label class="form-label">Foto Produk</label>
-                        <div class="upload-wrapper">
-                            <input type="file" id="add-file-rumput" class="file-input" hidden accept="image/*" onchange="previewAddImage(event, 'rumput')">
-                            <div class="upload-box" onclick="document.getElementById('add-file-rumput').click()">
-                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
-                                <p class="upload-text">Klik untuk menambahkan foto</p>
-                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
-                            </div>
-                            <div class="image-preview" id="add-preview-rumput" style="display: none;">
-                                <img id="add-img-rumput" src="" alt="Preview">
-                                <button type="button" class="btn-remove" onclick="removeAddImage('rumput')">×</button>
-                            </div>
                         </div>
                     </div>
                     <div class="form-group full-width">
@@ -646,11 +671,11 @@ if ($queryHewanJual) {
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Tanggal Produksi <span class="required">*</span></label>
-                            <input type="date" class="form-input" id="add-tgl-produksi-susu" required>
+                            <input type="date" class="form-input" id="add-tgl-produksi-susu" required onchange="syncMilkExpiry('add')" oninput="syncMilkExpiry('add')">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tanggal Kadaluwarsa <span class="required">*</span></label>
-                            <input type="date" class="form-input" id="add-tgl-expiry-susu" required>
+                            <input type="date" class="form-input" id="add-tgl-expiry-susu" readonly required>
                         </div>
                     </div>
                     <div class="form-row">
@@ -661,21 +686,6 @@ if ($queryHewanJual) {
                         <div class="form-group">
                             <label class="form-label">Stok (Liter) <span class="required">*</span></label>
                             <input type="number" class="form-input" id="add-stok-susu" placeholder="Contoh: 200" min="0" required>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label class="form-label">Foto Produk</label>
-                        <div class="upload-wrapper">
-                            <input type="file" id="add-file-susu" class="file-input" hidden accept="image/*" onchange="previewAddImage(event, 'susu')">
-                            <div class="upload-box" onclick="document.getElementById('add-file-susu').click()">
-                                <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
-                                <p class="upload-text">Klik untuk menambahkan foto</p>
-                                <span class="upload-hint">SVG, PNG, JPG (maks 5MB)</span>
-                            </div>
-                            <div class="image-preview" id="add-preview-susu" style="display: none;">
-                                <img id="add-img-susu" src="" alt="Preview">
-                                <button type="button" class="btn-remove" onclick="removeAddImage('susu')">×</button>
-                            </div>
                         </div>
                     </div>
                     <div class="form-group full-width">
@@ -725,6 +735,15 @@ if ($queryHewanJual) {
 <script>
 window.productData = <?= json_encode($produkData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 </script>
-<script src="../../public/js/manajemenProduk_admin.js?v=3"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    <?php if (($_GET['status'] ?? '') === 'berhasil'): ?>
+    showFlashMessage('Data produk berhasil disimpan.');
+    <?php elseif (($_GET['status'] ?? '') === 'gagal'): ?>
+    showFlashMessage('Data produk gagal disimpan. Periksa kembali isian data.', 'danger');
+    <?php endif; ?>
+});
+</script>
+<script src="../../public/js/manajemenProduk_admin.js?v=9"></script>
 </body>
 </html>

@@ -656,7 +656,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 </div>
 
-<script src="../../public/js/adminPagination.js?v=2"></script>
 <script src="../../public/js/dataHewan_admin.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {

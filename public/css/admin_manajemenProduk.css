@@ -265,8 +265,25 @@
     border: none;
     padding: 6px 10px;
     border-radius: 6px;
+    background: #f8fafc !important;
+    color: #1f2937 !important;
+    -webkit-text-fill-color: #1f2937;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 1 !important;
 }
-.active-page { background: #175D2B; color: white; }
+.page-btn:disabled {
+    background: #eef2f7 !important;
+    color: #1f2937 !important;
+    -webkit-text-fill-color: #1f2937;
+    opacity: 1 !important;
+    cursor: not-allowed;
+}
+.active-page {
+    background: #175D2B !important;
+    color: white !important;
+    -webkit-text-fill-color: white;
+}
 
 .Delete-overlay {
     position: fixed;

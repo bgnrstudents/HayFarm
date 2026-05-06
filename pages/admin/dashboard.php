@@ -14,9 +14,33 @@ function nilaiScalar(mysqli $db, string $sql): int
 
 $jumlahHewan = nilaiScalar($db, 'SELECT COUNT(*) FROM data_ternak');
 $hewanSakit = nilaiScalar($db, "SELECT COUNT(*) FROM data_kesehatan WHERE tgl_pemeriksaan = CURDATE() AND status_kesehatan <> 'sehat'");
-$jumlahPembeli = nilaiScalar($db, "SELECT COUNT(DISTINCT id_user) FROM transaksi WHERE status_transaksi = 'telah_dikonfirmasi'");
+$jumlahProduk = nilaiScalar($db, 'SELECT COUNT(*) FROM data_produk')
+    + nilaiScalar($db, "SELECT COUNT(*) FROM data_ternak WHERE status_hewan = 'tdk_produktif'");
 $berhasilDiverifikasi = nilaiScalar($db, "SELECT COUNT(*) FROM transaksi WHERE status_transaksi = 'telah_dikonfirmasi'");
 $menungguVerifikasi = nilaiScalar($db, "SELECT COUNT(*) FROM transaksi WHERE status_transaksi = 'menunggu_verifikasi'");
+$produkKedaluwarsa = nilaiScalar(
+    $db,
+    "SELECT COUNT(*)
+     FROM data_produk
+     WHERE jenis_produk = 'susu'
+       AND tgl_kadaluarsa <> '0000-00-00'
+       AND tgl_kadaluarsa <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)"
+);
+$hewanHamilBulanIni = nilaiScalar(
+    $db,
+    "SELECT COUNT(*)
+     FROM data_reproduksi
+     WHERE status_ib = 'berhasil'
+       AND YEAR(tgl_ib) = YEAR(CURDATE())
+       AND MONTH(tgl_ib) = MONTH(CURDATE())"
+);
+$vaksinasiDiperlukan = nilaiScalar(
+    $db,
+    "SELECT COUNT(*)
+     FROM data_kesehatan
+     WHERE tgl_pemeriksaan <= CURDATE()
+       AND tindakan LIKE '%vaksin%'"
+);
 
 $tahunSekarang = (int) date('Y');
 $tahunGrafik = (int) ($_GET['tahun'] ?? $tahunSekarang);
@@ -103,6 +127,26 @@ if ($queryGrafik) {
     <div class="col-md-3">
       <div class="card shadow-sm">
         <div class="card-body">
+          <h6 class="text-muted">Jumlah Produk</h6>
+          <h2 id="produk"><?= $jumlahProduk ?></h2>
+          <small class="text-muted">Dari manajemen produk</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="text-muted">Jumlah Diverifikasi</h6>
+          <h2><?= $berhasilDiverifikasi ?></h2>
+          <small class="text-muted">Masuk grafik transaksi</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
           <h6 class="text-muted">Jumlah Hewan</h6>
           <h2 id="hewan"><?= $jumlahHewan ?></h2>
           <small class="text-muted">Dari tabel data ternak</small>
@@ -116,26 +160,6 @@ if ($queryGrafik) {
           <h6 class="text-muted">Hewan Sakit per Hari</h6>
           <h2 id="sakit"><?= $hewanSakit ?></h2>
           <small class="text-muted">Status bukan sehat hari ini</small>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="text-muted">Jumlah Pembeli</h6>
-          <h2 id="pembeli"><?= $jumlahPembeli ?></h2>
-          <small class="text-muted">Pembeli transaksi terkonfirmasi</small>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="text-muted">Berhasil Diverifikasi</h6>
-          <h2><?= $berhasilDiverifikasi ?></h2>
-          <small class="text-muted">Transaksi sudah dikonfirmasi</small>
         </div>
       </div>
     </div>
@@ -177,7 +201,7 @@ if ($queryGrafik) {
         <div class="card-description">Hewan perlu vaksinasi segera</div>
       </div>
       <div class="card-number">
-        <div class="card-number-value">9</div>
+        <div class="card-number-value"><?= $vaksinasiDiperlukan ?></div>
         <div class="card-number-label">Hewan </div>
       </div>
       <div class="card-arrow">›</div>
@@ -193,23 +217,23 @@ if ($queryGrafik) {
         <div class="card-description">Perlu cek inventaris </div>
       </div>
       <div class="card-number">
-        <div class="card-number-value text-red">5</div>
+        <div class="card-number-value text-red"><?= $produkKedaluwarsa ?></div>
         <div class="card-number-label">Produk </div>
       </div>
       <div class="card-arrow">›</div>
     </a>
 
-    <!-- Card 3 - Kelahiran -->
+    <!-- Card 3 - Hamil -->
     <a class="notification-card card-birth" href="data_kesehatan.php">
       <div>
         <div class="card-title">
-          <span>Kelahiran bulan ini</span>
+          <span>Hewan hamil bulan ini</span>
           <span class="icon-alert"></span>
         </div>
-        <div class="card-description">Hewan baru lahir </div>
+        <div class="card-description">Terverifikasi dari data kesehatan</div>
       </div>
       <div class="card-number">
-        <div class="card-number-value text-green">7</div>
+        <div class="card-number-value text-green"><?= $hewanHamilBulanIni ?></div>
         <div class="card-number-label">Hewan </div>
       </div>
       <div class="card-arrow">›</div>

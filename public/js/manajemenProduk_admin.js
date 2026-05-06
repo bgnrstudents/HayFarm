@@ -34,6 +34,7 @@ const defaultProducts = [
 const products = Array.isArray(window.productData) && window.productData.length
     ? window.productData
     : defaultProducts;
+products.forEach(applyExpiryStatus);
 
 let activeFilter = { type: '', status: '' };
 let editingId = null;
@@ -44,6 +45,7 @@ const rowsPerPage = 5;
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
     updateStats();
+    setupMilkExpiryAutomation();
 
     const search = document.getElementById('tableSearch');
     if (search) {
@@ -90,6 +92,7 @@ function renderProducts() {
             <td>${product.type}</td>
             <td>${product.name}</td>
             <td>${formatDate(product.date)}</td>
+            <td>${formatDate(product.expiryDate)}</td>
             <td>${needsPriceInput(product) ? `<span class="price-needed">${product.price}</span>` : product.price}</td>
             <td>${product.stock}</td>
             <td><span class="status-badge ${product.status === 'Tersedia' ? 'status-tersedia' : 'status-tidak-tersedia'}">${product.status}</span></td>
@@ -104,7 +107,7 @@ function renderProducts() {
     `).join('');
 
     if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;">Data produk tidak ditemukan</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#777;">Data produk tidak ditemukan</td></tr>';
     }
 
     updateProductPagination(rows.length);
@@ -146,11 +149,12 @@ function setText(id, value) {
 }
 
 function formatDate(dateString) {
-    return new Date(`${dateString}T00:00:00`).toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-    });
+    if (!dateString) return '-';
+
+    const isoDate = normalizeDateValue(dateString);
+    if (!isoDate) return '-';
+
+    return isoToDisplayDate(isoDate);
 }
 
 function openFilterModal() {
@@ -182,6 +186,7 @@ function resetFilter() {
 function openAddModal() {
     document.getElementById('addProductModal')?.classList.add('active');
     switchAddTab('hewan');
+    syncMilkExpiry('add');
 }
 
 function closeAddModal() {
@@ -190,10 +195,16 @@ function closeAddModal() {
 
 function switchAddTab(type) {
     switchTabInModal('addProductModal', type, 'add-form');
+    if (type === 'susu') {
+        syncMilkExpiry('add');
+    }
 }
 
 function switchEditTab(type) {
     switchTabInModal('editModal', type, 'edit-form');
+    if (type === 'susu') {
+        syncMilkExpiry('edit');
+    }
 }
 
 function switchTabInModal(modalId, type, formPrefix) {
@@ -210,16 +221,105 @@ function switchTabInModal(modalId, type, formPrefix) {
 function handleAddSubmit(event, type) {
     event.preventDefault();
 
-    const product = readProductForm('add', type);
-    product.id = Date.now();
-    products.unshift(product);
+    try {
+        const form = event.target;
+        const validationMessage = validateProductForm(form, type, 'add');
+        if (validationMessage) {
+            notifyProductMessage(validationMessage, 'danger');
+            return;
+        }
 
-    renderProducts();
-    updateStats();
-    closeAddModal();
-    event.target.reset();
-    removeAddImage(type);
-    showFlashMessage('Produk baru berhasil ditambahkan.');
+        const product = applyExpiryStatus(readProductForm('add', type));
+        const addError = validateProductData(product);
+        if (addError) {
+            notifyProductMessage(addError, 'danger');
+            return;
+        }
+
+        submitProductToServer('tambah', product);
+    } catch (error) {
+        notifyProductMessage(getProductErrorMessage(error), 'danger');
+    }
+}
+
+function validateProductForm(form, type, mode = 'add') {
+    if (!form) {
+        return 'Form tambah produk tidak ditemukan. Muat ulang halaman lalu coba lagi.';
+    }
+
+    if (!['hewan', 'rumput', 'susu'].includes(type)) {
+        return 'Jenis produk tidak valid. Pilih tab produk yang tersedia lalu coba lagi.';
+    }
+
+    if (type === 'susu') {
+        syncMilkExpiry(mode);
+    }
+
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return 'Lengkapi semua kolom wajib dengan format yang benar sebelum menyimpan.';
+    }
+
+    const price = priceNumber(getValue(`${mode}-harga-${type}`));
+    if (price <= 0) {
+        return 'Harga produk harus lebih dari Rp 0.';
+    }
+
+    const stock = Number(getValue(`${mode}-stok-${type}`));
+    if (!Number.isFinite(stock) || stock < 0) {
+        return 'Stok produk harus berupa angka yang valid.';
+    }
+
+    if (type === 'hewan' && stock < 1) {
+        return 'Stok hewan minimal 1 ekor.';
+    }
+
+    if (type === 'susu' && !getDateInputIso(`${mode}-tgl-produksi-susu`)) {
+        return 'Tanggal produksi susu belum valid. Pilih tanggal dari kalender.';
+    }
+
+    if (type === 'susu' && !getDateInputIso(`${mode}-tgl-expiry-susu`)) {
+        return 'Tanggal kadaluwarsa susu belum valid. Pilih tanggal produksi ulang agar kadaluwarsa terisi otomatis.';
+    }
+
+    return '';
+}
+
+function validateProductData(product) {
+    const typeKey = { Hewan: 'hewan', Rumput: 'rumput', Susu: 'susu' }[product?.type];
+
+    if (!product?.name || product.name === defaultName(typeKey)) {
+        return 'Nama produk belum terisi dengan benar.';
+    }
+
+    if (!product?.type || !product?.price || !product?.stock || !product?.status) {
+        return 'Data produk belum lengkap. Periksa kembali isian form.';
+    }
+
+    return '';
+}
+
+function resetAddStatus(type) {
+    const statusInput = document.getElementById(`add-status-${type}`);
+    const statusWrap = statusInput?.closest('.form-group');
+    if (statusInput) statusInput.value = 'tersedia';
+    statusWrap?.querySelectorAll('.status-option').forEach(option => {
+        option.classList.toggle('active', option.classList.contains('available'));
+    });
+}
+
+function getProductErrorMessage(error) {
+    console.error('Gagal menambahkan produk:', error);
+    return error?.message || 'Produk gagal ditambahkan karena terjadi kesalahan sistem. Silakan coba lagi.';
+}
+
+function notifyProductMessage(message, type = 'success') {
+    if (typeof showFlashMessage === 'function') {
+        showFlashMessage(message, type);
+        return;
+    }
+
+    alert(message);
 }
 
 function openEditModal(id) {
@@ -231,6 +331,9 @@ function openEditModal(id) {
     switchEditTab(type);
     fillEditForm(product, type);
     configureEditRequiredFields(product, type);
+    if (type === 'susu') {
+        syncMilkExpiry('edit');
+    }
     document.getElementById('editModal')?.classList.add('active');
 }
 
@@ -241,32 +344,36 @@ function closeEditModal() {
 
 function handleEditSubmit(event, type) {
     event.preventDefault();
+    const validationMessage = validateProductForm(event.target, type, 'edit');
+    if (validationMessage) {
+        notifyProductMessage(validationMessage, 'danger');
+        return;
+    }
+
     const index = products.findIndex(item => item.id === editingId);
     if (index === -1) return;
 
-    const updatedProduct = { ...products[index], ...readProductForm('edit', type), id: editingId };
+    const updatedProduct = applyExpiryStatus({ ...products[index], ...readProductForm('edit', type), id: editingId });
     if (priceNumber(updatedProduct.price) > 0) {
         updatedProduct.needs_price = false;
     }
-    products[index] = updatedProduct;
-    renderProducts();
-    updateStats();
-    closeEditModal();
-    showFlashMessage('Perubahan produk berhasil disimpan.');
+    submitProductToServer('edit', updatedProduct);
 }
 
 function readProductForm(mode, type) {
     const label = { hewan: 'Hewan', rumput: 'Rumput', susu: 'Susu' }[type];
     const name = getValue(`${mode}-nama-${type}`) || defaultName(type);
     const price = getValue(`${mode}-harga-${type}`) || 'Rp 0';
-    const stockValue = getValue(`${mode}-stok-${type}`) || '0';
+    const stockValue = type === 'hewan' ? '1' : (getValue(`${mode}-stok-${type}`) || '0');
     const status = normalizeStatus(getValue(`${mode}-status-${type}`));
-    const date = getValue(`${mode}-tgl-produksi-${type}`) || new Date().toISOString().slice(0, 10);
+    const date = type === 'susu' ? getDateInputIso(`${mode}-tgl-produksi-susu`) : '';
+    const expiryDate = type === 'susu' ? getDateInputIso(`${mode}-tgl-expiry-susu`) : '';
 
     return {
         type: label,
         name,
         date,
+        expiryDate,
         price,
         stock: `${stockValue} ${stockUnit(type)}`,
         status,
@@ -291,12 +398,12 @@ function configureEditRequiredFields(product, type) {
 function fillEditForm(product, type) {
     setValue(`edit-nama-${type}`, product.name);
     setValue(`edit-harga-${type}`, product.price);
-    setValue(`edit-stok-${type}`, parseInt(product.stock, 10) || '');
+    setValue(`edit-stok-${type}`, type === 'hewan' ? 1 : (parseInt(product.stock, 10) || ''));
     setValue(`edit-status-${type}`, product.status.toLowerCase().replaceAll(' ', '-'));
 
     if (type === 'susu') {
-        setValue('edit-tgl-produksi-susu', product.date);
-        setValue('edit-tgl-expiry-susu', product.date);
+        setValue('edit-tgl-produksi-susu', normalizeDateValue(product.date));
+        setValue('edit-tgl-expiry-susu', addDays(product.date, 7));
     }
 
     const statusInput = document.getElementById(`edit-status-${type}`);
@@ -317,6 +424,19 @@ function setValue(id, value) {
 
 function normalizeStatus(value) {
     return value === 'tidak-tersedia' || value === 'tidak tersedia' ? 'Tidak Tersedia' : 'Tersedia';
+}
+
+function applyExpiryStatus(product) {
+    if (isExpiredMilkProduct(product)) {
+        product.status = 'Tidak Tersedia';
+    }
+
+    return product;
+}
+
+function isExpiredMilkProduct(product) {
+    const expiryDate = normalizeDateValue(product?.expiryDate);
+    return product?.type === 'Susu' && Boolean(expiryDate) && expiryDate < todayIsoDate();
 }
 
 function stockUnit(type) {
@@ -349,47 +469,6 @@ function selectStatusOption(element, inputId) {
     setValue(inputId, element.classList.contains('available') ? 'tersedia' : 'tidak-tersedia');
 }
 
-function previewAddImage(event, type) {
-    previewImage(event, `add-preview-${type}`, `add-img-${type}`);
-}
-
-function previewEditImage(event, type) {
-    previewImage(event, `edit-preview-${type}`, `edit-img-${type}`);
-}
-
-function previewImage(event, previewId, imageId) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = e => {
-        const preview = document.getElementById(previewId);
-        const image = document.getElementById(imageId);
-        if (preview && image) {
-            image.src = e.target.result;
-            preview.style.display = 'flex';
-        }
-    };
-    reader.readAsDataURL(file);
-}
-
-function removeAddImage(type) {
-    removeImage(`add-file-${type}`, `add-preview-${type}`, `add-img-${type}`);
-}
-
-function removeEditImage(type) {
-    removeImage(`edit-file-${type}`, `edit-preview-${type}`, `edit-img-${type}`);
-}
-
-function removeImage(fileId, previewId, imageId) {
-    const file = document.getElementById(fileId);
-    const preview = document.getElementById(previewId);
-    const image = document.getElementById(imageId);
-    if (file) file.value = '';
-    if (image) image.src = '';
-    if (preview) preview.style.display = 'none';
-}
-
 function openPreviewModal(id) {
     const product = products.find(item => item.id === id);
     if (!product) return;
@@ -400,16 +479,9 @@ function openPreviewModal(id) {
     setText('previewSectionTitle', `INFORMASI ${product.type.toUpperCase()}`);
     setText('previewProductType', product.type);
     setText('previewProductName', product.name);
-    setText('previewProductDate', formatDate(product.date));
     setText('previewProductPrice', product.price);
-    setText('previewProductStock', product.stock);
     setText('previewProductStatus', product.status);
-
-    const image = document.getElementById('previewProductImage');
-    if (image) {
-        image.src = product.image || defaultImage(product.type.toLowerCase());
-        image.alt = product.name;
-    }
+    renderPreviewByType(product);
 
     const statusWrap = document.getElementById('previewStatusWrap');
     if (statusWrap) {
@@ -418,6 +490,123 @@ function openPreviewModal(id) {
 
     document.getElementById('previewModal')?.classList.add('active');
     document.body.style.overflow = 'hidden';
+}
+
+function renderPreviewByType(product) {
+    const isMilk = product.type === 'Susu';
+    const showStock = isMilk;
+    const dateBox = document.querySelector('.preview-date-info');
+    const expiryBox = document.querySelector('.preview-expiry-info');
+    const stockBox = document.querySelector('.preview-stock-info');
+
+    if (dateBox) dateBox.style.display = isMilk ? '' : 'none';
+    if (expiryBox) expiryBox.style.display = isMilk ? '' : 'none';
+    if (stockBox) stockBox.style.display = showStock ? '' : 'none';
+
+    setText('previewProductDateLabel', 'Tanggal Produksi');
+    setText('previewProductDate', isMilk ? formatDate(product.date) : '-');
+    setText('previewProductExpiry', isMilk ? formatDate(product.expiryDate) : '-');
+    setText('previewProductStock', showStock ? product.stock : '-');
+}
+
+function setupMilkExpiryAutomation() {
+    bindMilkExpiry('add');
+    bindMilkExpiry('edit');
+}
+
+function bindMilkExpiry(mode) {
+    const production = document.getElementById(`${mode}-tgl-produksi-susu`);
+    const expiry = document.getElementById(`${mode}-tgl-expiry-susu`);
+    if (!production || !expiry) return;
+
+    if (mode === 'add' && !production.value) {
+        production.value = todayIsoDate();
+    }
+
+    production.addEventListener('change', () => syncMilkExpiry(mode));
+    production.addEventListener('input', () => syncMilkExpiry(mode));
+    syncMilkExpiry(mode);
+}
+
+function syncMilkExpiry(mode) {
+    const production = document.getElementById(`${mode}-tgl-produksi-susu`);
+    const expiry = document.getElementById(`${mode}-tgl-expiry-susu`);
+    if (!production || !expiry) return;
+
+    if (mode === 'add' && !production.value) {
+        production.value = todayIsoDate();
+    }
+
+    const productionDate = getDateInputIso(`${mode}-tgl-produksi-susu`);
+    expiry.value = productionDate ? addDays(productionDate, 7) : '';
+}
+
+function addDays(dateString, days) {
+    const isoDate = normalizeDateValue(dateString);
+    if (!isoDate) return '';
+
+    const [year, month, day] = isoDate.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() + days);
+    return dateToIsoDate(date);
+}
+
+function normalizeDateValue(value) {
+    const rawValue = String(value || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+        return isValidIsoDate(rawValue) ? rawValue : '';
+    }
+
+    const match = rawValue.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (!match) return '';
+
+    const [, day, month, year] = match;
+    const isoDate = `${year}-${month}-${day}`;
+    return isValidIsoDate(isoDate) ? isoDate : '';
+}
+
+function getDateInputIso(id) {
+    const input = document.getElementById(id);
+    if (!input) return '';
+
+    const value = normalizeDateValue(input.value);
+    if (value) return value;
+
+    if (input.valueAsDate instanceof Date && !Number.isNaN(input.valueAsDate.getTime())) {
+        return dateToIsoDate(input.valueAsDate);
+    }
+
+    return '';
+}
+
+function isoToDisplayDate(value) {
+    const isoDate = normalizeDateValue(value);
+    if (!isoDate) return '';
+
+    const [year, month, day] = isoDate.split('-');
+    return `${day}-${month}-${year}`;
+}
+
+function isValidIsoDate(value) {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return false;
+
+    const [, year, month, day] = match.map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.getFullYear() === year
+        && date.getMonth() === month - 1
+        && date.getDate() === day;
+}
+
+function todayIsoDate() {
+    return dateToIsoDate(new Date());
+}
+
+function dateToIsoDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 function closePreviewModal() {
@@ -456,6 +645,11 @@ function confirmProductDelete() {
     const index = products.findIndex(item => item.id === pendingDeleteProductId);
     if (index === -1) return;
 
+    if (pendingDeleteProductId < 100000) {
+        submitProductToServer('hapus', products[index]);
+        return;
+    }
+
     products.splice(index, 1);
     renderProducts();
     updateStats();
@@ -476,11 +670,40 @@ function needsPriceInput(product) {
     return Boolean(product.needs_price) && priceNumber(product.price) === 0;
 }
 
+function submitProductToServer(action, product) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'manajemen_produk.php';
+    form.style.display = 'none';
+
+    const fields = {
+        aksi: action,
+        id_produk: product.id || '',
+        jenis_produk: String(product.type || '').toLowerCase(),
+        nama_produk: product.name || '',
+        harga: priceNumber(product.price),
+        stok: parseInt(product.stock, 10) || 0,
+        tgl_kadaluarsa: product.type === 'Susu' ? normalizeDateValue(product.expiryDate) : '',
+        status_produk: product.status || 'Tersedia'
+    };
+
+    Object.entries(fields).forEach(([name, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
 function exportTableToCSV(filename) {
     const rows = getFilteredProducts();
     const csvRows = [
-        ['Jenis Produk', 'Nama Produk', 'Tanggal', 'Harga', 'Stok', 'Status'],
-        ...rows.map(product => [product.type, product.name, product.date, product.price, product.stock, product.status])
+        ['Jenis Produk', 'Nama Produk', 'Tanggal Produksi', 'Tanggal Kadaluwarsa', 'Harga', 'Stok', 'Status'],
+        ...rows.map(product => [product.type, product.name, product.date, product.expiryDate, product.price, product.stock, product.status])
     ];
     const csv = csvRows.map(row => row.map(cell => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

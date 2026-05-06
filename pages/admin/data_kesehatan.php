@@ -594,7 +594,6 @@ $recordJson = htmlspecialchars(json_encode($editJson), ENT_QUOTES, 'UTF-8');
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="../../public/js/adminPagination.js?v=2"></script>
 <script src="../../public/js/dataKesehatan_admin.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {

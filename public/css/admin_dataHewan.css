@@ -206,6 +206,16 @@ tbody tr:nth-child(even) td {
     border: none;
     padding: 6px 10px;
     border-radius: 6px;
+    background: #f8fafc;
+    color: #1f2937;
+    font-weight: 700;
+    cursor: pointer;
+}
+.page-btn:disabled {
+    background: #eef2f7;
+    color: #1f2937;
+    opacity: 1;
+    cursor: not-allowed;
 }
 .active-page { background: #175D2B; color: white; }
 

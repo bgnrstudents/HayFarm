@@ -4,18 +4,24 @@ const salesStatusText = document.getElementById('salesStatusText');
 const salesTotal = document.getElementById('salesTotal');
 const salesProof = document.getElementById('salesProof');
 const proofTitle = document.getElementById('proofTitle');
+const salesPaymentMethod = document.getElementById('salesPaymentMethod');
 let pendingVerificationFormId = null;
 let pendingVerificationActionId = null;
 
-function openSalesModal(status, orderId, customer, total) {
+function readOrderData(button) {
+    try {
+        return JSON.parse(button?.dataset?.order || '{}');
+    } catch (error) {
+        return {};
+    }
+}
+
+function openSalesModal(status, orderData = {}) {
     const config = {
         pending: {
             subtitle: 'Periksa bukti pembayaran sebelum konfirmasi',
             statusText: 'Menunggu Verifikasi',
             statusClass: 'waiting',
-            customer: customer || 'Pelanggan',
-            email: 'ahmad.ridwan@example.com',
-            total: total || 'Rp 0',
             rejected: false,
             showProof: true,
             actions: `
@@ -28,9 +34,6 @@ function openSalesModal(status, orderId, customer, total) {
             subtitle: 'Pesanan sudah diverifikasi',
             statusText: 'Diverifikasi',
             statusClass: 'verified',
-            customer: 'Siti Rahma',
-            email: 'siti.rahma@example.com',
-            total: 'Rp 28.500.000',
             rejected: false,
             showProof: true,
             actions: '<button class="sales-btn confirm" type="button" onclick="closeSalesModal()">Tutup</button>'
@@ -39,46 +42,54 @@ function openSalesModal(status, orderId, customer, total) {
             subtitle: 'Pesanan ditolak',
             statusText: 'Ditolak',
             statusClass: 'rejected',
-            customer: 'Dewi Lestari',
-            email: 'dewi.lestari@example.com',
-            total: 'Rp 12.500.000',
             rejected: true,
             showProof: false,
             actions: '<button class="sales-btn reject" type="button" onclick="closeSalesModal()">Tutup</button>'
         }
     }[status];
 
-    document.getElementById('salesOrderId').textContent = orderId || '#ORD';
+    const proofUrl = orderData.proofUrl || '';
+    const proofName = orderData.proofName || 'Bukti pembayaran belum tersedia';
+
+    document.getElementById('salesOrderId').textContent = orderData.orderId || '#ORD';
     document.getElementById('salesSubtitle').textContent = config.subtitle;
-    document.getElementById('salesCustomer').textContent = config.customer;
-    document.getElementById('salesEmail').textContent = config.email;
+    document.getElementById('salesCustomer').textContent = orderData.customer || 'Pelanggan';
+    document.getElementById('salesEmail').textContent = '-';
+    document.getElementById('salesPhone').textContent = orderData.phone || '-';
+    document.getElementById('salesAddress').textContent = orderData.address || '-';
     salesStatusText.textContent = config.statusText;
     salesStatusText.className = `sales-status-badge ${config.statusClass}`;
-    salesTotal.textContent = config.total;
+    salesTotal.textContent = orderData.total || 'Rp 0';
     salesTotal.className = `sales-total ${config.rejected ? 'rejected' : ''}`;
-    salesProof.style.display = config.showProof ? 'flex' : 'none';
+    if (salesPaymentMethod) {
+        salesPaymentMethod.textContent = orderData.method || '-';
+    }
+    salesProof.style.display = config.showProof && proofUrl ? 'flex' : 'none';
     proofTitle.style.display = config.showProof ? 'block' : 'none';
+    salesProof.onclick = proofUrl ? () => openSalesLightbox(proofUrl) : null;
+    salesProof.querySelector('img').src = proofUrl || '';
+    salesProof.querySelector('.sales-value').textContent = proofName;
     salesActions.innerHTML = config.actions;
     salesModal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
-function openPending(formId, actionId, orderId, customer, total) {
+function openPendingFromButton(button, formId, actionId) {
     pendingVerificationFormId = formId || null;
     pendingVerificationActionId = actionId || null;
-    openSalesModal('pending', orderId, customer, total);
+    openSalesModal('pending', readOrderData(button));
 }
 
-function openVerified() {
+function openVerifiedFromButton(button) {
     pendingVerificationFormId = null;
     pendingVerificationActionId = null;
-    openSalesModal('verified');
+    openSalesModal('verified', readOrderData(button));
 }
 
-function openRejected() {
+function openRejectedFromButton(button) {
     pendingVerificationFormId = null;
     pendingVerificationActionId = null;
-    openSalesModal('rejected');
+    openSalesModal('rejected', readOrderData(button));
 }
 
 function confirmVerification() {

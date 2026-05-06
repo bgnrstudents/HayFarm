@@ -58,6 +58,10 @@ $queryTransaksi = mysqli_query(
         t.id_transaksi,
         t.tgl_transaksi,
         t.nama_pembeli,
+        t.no_telp,
+        t.alamat,
+        t.metode_pembayaran,
+        t.bukti_pembayaran,
         t.jumlah_pembelian,
         t.total_tagihan,
         t.status_transaksi,
@@ -180,8 +184,23 @@ $totalTerverifikasi = array_sum(array_map(
 <tr><td colspan="8" class="text-center text-muted py-4">Belum ada transaksi.</td></tr>
 <?php endif; ?>
 <?php foreach ($dataTransaksi as $row): ?>
+<?php
+$kodePesanan = '#ORD-' . str_pad((string) $row['id_transaksi'], 3, '0', STR_PAD_LEFT);
+$buktiPembayaran = trim((string) ($row['bukti_pembayaran'] ?? ''));
+$buktiUrl = $buktiPembayaran !== '' ? '../../public/uploads/bukti_pembayaran/' . rawurlencode($buktiPembayaran) : '';
+$detailPesanan = [
+    'orderId' => $kodePesanan,
+    'customer' => $row['nama_pembeli'],
+    'phone' => $row['no_telp'] ?: '-',
+    'address' => $row['alamat'] ?: '-',
+    'method' => strtoupper((string) $row['metode_pembayaran']),
+    'total' => rupiah((float) $row['total_tagihan']),
+    'proofName' => $buktiPembayaran ?: 'Bukti pembayaran belum tersedia',
+    'proofUrl' => $buktiUrl,
+];
+?>
 <tr>
-<td>#ORD-<?= str_pad((string) $row['id_transaksi'], 3, '0', STR_PAD_LEFT) ?></td>
+<td><?= htmlspecialchars($kodePesanan) ?></td>
 <td><?= htmlspecialchars(date('d M Y', strtotime($row['tgl_transaksi']))) ?></td>
 <td><?= htmlspecialchars($row['nama_pembeli']) ?></td>
 <td><?= htmlspecialchars($row['produk']) ?></td>
@@ -197,13 +216,14 @@ $totalTerverifikasi = array_sum(array_map(
         <button
             class="btn-verif"
             type="button"
-            onclick="openPending('verifyForm<?= (int) $row['id_transaksi'] ?>', 'verifyAction<?= (int) $row['id_transaksi'] ?>', '#ORD-<?= str_pad((string) $row['id_transaksi'], 3, '0', STR_PAD_LEFT) ?>', '<?= htmlspecialchars($row['nama_pembeli'], ENT_QUOTES) ?>', '<?= htmlspecialchars(rupiah((float) $row['total_tagihan']), ENT_QUOTES) ?>')"
+            data-order='<?= htmlspecialchars(json_encode($detailPesanan), ENT_QUOTES) ?>'
+            onclick="openPendingFromButton(this, 'verifyForm<?= (int) $row['id_transaksi'] ?>', 'verifyAction<?= (int) $row['id_transaksi'] ?>')"
         >Verifikasi</button>
     </form>
 <?php elseif ($row['status_transaksi'] === 'telah_dikonfirmasi'): ?>
-    <button class="eye" type="button" onclick="openVerified()"><i class="fa fa-eye"></i></button>
+    <button class="eye" type="button" data-order='<?= htmlspecialchars(json_encode($detailPesanan), ENT_QUOTES) ?>' onclick="openVerifiedFromButton(this)"><i class="fa fa-eye"></i></button>
 <?php else: ?>
-    <button class="eye" type="button" onclick="openRejected()"><i class="fa fa-eye"></i></button>
+    <button class="eye" type="button" data-order='<?= htmlspecialchars(json_encode($detailPesanan), ENT_QUOTES) ?>' onclick="openRejectedFromButton(this)"><i class="fa fa-eye"></i></button>
 <?php endif; ?>
 </td>
 </tr>
@@ -269,7 +289,7 @@ $totalTerverifikasi = array_sum(array_map(
             <div class="sales-summary">
                 <div class="sales-summary-row">
                     <div class="sales-value"><i class="fas fa-credit-card"></i> Metode Pembayaran</div>
-                    <div class="sales-value">Transfer Bank</div>
+                    <div class="sales-value" id="salesPaymentMethod">Transfer Bank</div>
                 </div>
                 <div class="sales-summary-row sales-total-row">
                     <span class="sales-total-label">Total</span>
@@ -286,7 +306,6 @@ $totalTerverifikasi = array_sum(array_map(
     <img id="salesLightboxImage" src="" alt="Bukti transfer">
 </div>
 
-<script src="../../public/js/adminPagination.js?v=2"></script>
 <script src="../../public/js/verifikasiPenjualan_admin.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
