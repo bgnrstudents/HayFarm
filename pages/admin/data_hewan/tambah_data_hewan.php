@@ -68,8 +68,6 @@
                                 <option value="" selected disabled>Pilih Jenis</option>
                                 <option value="Sapi">Sapi Perah</option>
                                 <option value="Sapi PO">Sapi PO</option>
-                                <option value="Domba">Domba</option>
-                                <option value="Kambing">Kambing</option>
                             </select>
                         </div>
                         <div class="col-md-6">

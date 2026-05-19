@@ -234,8 +234,6 @@
                         <select class="form-select" required>
                             <option value="">Pilih jenis hewan</option>
                             <option value="sapi">Sapi</option>
-                            <option value="kambing">Kambing</option>
-                            <option value="domba">Domba</option>
                             <option value="kerbau">Kerbau</option>
                         </select>
                     </div>

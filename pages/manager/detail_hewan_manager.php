@@ -1,68 +1,121 @@
-<?php include '../../components/header_manager.php'; ?>
-<?php include '../../components/sidebar_manager.php'; ?>
-<?php include '../../components/topbar_manager.php'; ?>
+<?php
+require_once __DIR__ . '/manager_bootstrap.php';
+
+$pageTitle = 'Detail Hewan Ternak';
+$populationReport = manager_make_report('populasi');
+$healthReport = manager_make_report('kesehatan');
+
+$animals = $populationReport->getBaseRows();
+$selectedAnimalId = isset($_GET['id']) ? (int) $_GET['id'] : (int) ($animals[0]['id'] ?? 0);
+$animal = $animals[0] ?? [
+    'id' => 0,
+    'kode' => '-',
+    'nama' => 'Data tidak tersedia',
+    'jenis' => '-',
+    'berat' => '-',
+    'jenis_kelamin' => '-',
+    'tanggal_lahir' => '',
+    'umur' => '-',
+    'kandang' => '-',
+    'status_kesehatan' => '-',
+    'pemeriksaan_terakhir' => '',
+    'total_pemeriksaan' => 0,
+    'total_reproduksi' => 0,
+    'catatan_medis' => 'Belum ada data ternak.',
+    'gambar' => '../../public/images/bgheader_produk.png',
+];
+
+foreach ($animals as $candidate) {
+    if ((int) ($candidate['id'] ?? 0) === $selectedAnimalId) {
+        $animal = $candidate;
+        break;
+    }
+}
+
+$healthHistory = array_values(array_filter($healthReport->getBaseRows(), static function (array $record) use ($selectedAnimalId): bool {
+    return (int) ($record['id_hewan'] ?? 0) === $selectedAnimalId;
+}));
+
+$reproductionHistory = manager_get_reproduction_history($selectedAnimalId);
+
+include '../../components/manager/header_manager.php';
+include '../../components/manager/sidebar_manager.php';
+include '../../components/manager/topbar_manager.php';
+?>
 
 <div class="content-wrapper detail-wrapper">
-    <!-- PAGE HEADER -->
     <div class="detail-page-header">
         <div class="back-title">
             <a href="javascript:history.back()">&#8592;</a>
             Detail Hewan Ternak
         </div>
-        <button class="btn btn-success d-flex align-items-center gap-2" onclick="exportPDF()">
+        <button type="button" class="btn btn-success d-flex align-items-center gap-2" onclick="exportPDF()">
             <i class="fa fa-file-pdf"></i> Export PDF
         </button>
     </div>
 
-    <!-- TOP SECTION -->
     <div class="detail-top-section">
-
-        <!-- Card Info Hewan -->
         <div class="card-info-hewan">
-            <img src="../../public/images/bgheader_produk.png" alt="Foto Hewan">
-            <div class="info-grid">
-                <span class="info-label">ID Ternak</span>
-                <span class="info-value">: 0004</span>
+            <img src="<?= manager_escape($animal['gambar']) ?>"
+                alt="Foto <?= manager_escape($animal['nama']) ?>"
+                onerror="this.onerror=null;this.src='../../public/images/bgheader_produk.png';">
+
+            <div class="info-grid gap-2">
+
+                <span class="info-label">Kode Hewan</span>
+                <span class="info-value">: <?= manager_escape((string) $animal['kode']) ?></span>
+
                 <span class="info-label">Jenis</span>
-                <span class="info-value">: Sapi</span>
+                <span class="info-value">: <?= manager_escape($animal['jenis']) ?></span>
+
+                <span class="info-label">Berat (Kg)</span>
+                <span class="info-value">: <?= manager_escape((string) ($animal['berat'] ?? '-')) ?></span>
+
+                <span class="info-label">Jenis Kelamin</span>
+                <span class="info-value">: <?= manager_escape($animal['jenis_kelamin'] ?? $animal['kelamin'] ?? '-') ?></span>
+
+                <span class="info-label">Tanggal Lahir</span>
+                <span class="info-value">: <?= manager_escape(manager_format_date((string) ($animal['tanggal_lahir'] ?? $animal['tgl_lahir'] ?? ''))) ?>
+                </span>
+
                 <span class="info-label">Umur</span>
-                <span class="info-value">: 7 Tahun</span>
+                <span class="info-value">: <?= manager_escape($animal['umur']) ?></span>
+
                 <span class="info-label">Lokasi</span>
-                <span class="info-value">: Kandang 4</span>
+                <span class="info-value">: <?= manager_escape($animal['kandang']) ?></span>
+
                 <span class="info-label">Status</span>
-                <span class="info-value">: <span class="badge-sehat">Sehat</span></span>
+                <span class="info-value">:
+                    <span class="badge rounded-pill <?= manager_badge_class($animal['status_kesehatan']) ?>">
+                        <?= manager_escape($animal['status_kesehatan']) ?>
+                    </span>
+                </span>
+
             </div>
         </div>
 
-        <!-- Stats Kanan -->
         <div class="detail-stats-col">
             <div class="card-pemeriksaan-terakhir shadow-sm">
                 <small>Pemeriksaan Terakhir</small>
-                <div class="tanggal">20 Feb 2026</div>
+                <div class="tanggal"><?= manager_escape(manager_format_date((string) $animal['pemeriksaan_terakhir'])) ?></div>
             </div>
             <div class="stats-row">
                 <div class="card-stat shadow-sm">
                     <small>Total Pemeriksaan</small>
-                    <div class="stat-number">8</div>
+                    <div class="stat-number"><?= manager_escape((string) ($animal['total_pemeriksaan'] ?? 0)) ?></div>
                     <div class="stat-sub">Tahun Ini</div>
                 </div>
                 <div class="card-stat shadow-sm">
-                    <small>Total Vaksinasi</small>
-                    <div class="stat-number">5</div>
-                    <div class="stat-sub">Tahun Ini</div>
+                    <small>Total Reproduksi</small>
+                    <div class="stat-number"><?= manager_escape((string) ($animal['total_reproduksi'] ?? 0)) ?></div>
+                    <div class="stat-sub">Riwayat IB</div>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- BOTTOM SECTION -->
     <div class="detail-bottom-section">
-
-        <!-- Tabel Kiri -->
         <div class="detail-tables-col">
-
-            <!-- Riwayat Reproduksi -->
             <div class="card-table shadow-sm">
                 <h6>Riwayat Reproduksi</h6>
                 <div class="table-responsive">
@@ -70,30 +123,31 @@
                         <thead>
                             <tr>
                                 <th>Tanggal IB</th>
-                                <th>Petugas</th>
+                                <th>Perkiraan Lahir</th>
                                 <th>Hasil</th>
                                 <th>Keterangan</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>20 Feb 2026</td>
-                                <td>Drh. Andi</td>
-                                <td>Berhasil</td>
-                                <td>Bunting</td>
-                            </tr>
-                            <tr>
-                                <td>2 Des 2025</td>
-                                <td>Drh. Wiwin</td>
-                                <td>Tidak Berhasil</td>
-                                <td>IB Ke-1</td>
-                            </tr>
+                            <?php if ($reproductionHistory === []): ?>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Belum ada riwayat reproduksi.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($reproductionHistory as $record): ?>
+                                    <tr>
+                                        <td><?= manager_escape(manager_format_date((string) $record['tanggal_ib'])) ?></td>
+                                        <td><?= manager_escape($record['tgl_perkiraan'] ? manager_format_date((string) $record['tgl_perkiraan']) : '-') ?></td>
+                                        <td><?= manager_escape($record['hasil']) ?></td>
+                                        <td><?= manager_escape($record['keterangan']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Riwayat Pemeriksaan Lengkap -->
             <div class="card-table shadow-sm">
                 <h6>Riwayat Pemeriksaan Lengkap</h6>
                 <div class="table-responsive">
@@ -103,61 +157,49 @@
                                 <th>Tanggal</th>
                                 <th>Diagnosis</th>
                                 <th>Tindakan</th>
-                                <th>Petugas</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>20 Feb 2026</td>
-                                <td>Sehat</td>
-                                <td>Pemeriksaan Rutin</td>
-                                <td>Drh. Andi</td>
-                            </tr>
-                            <tr>
-                                <td>12 Feb 2026</td>
-                                <td>Infeksi Ringan</td>
-                                <td>Antibiotik</td>
-                                <td>Drh. Wiwin</td>
-                            </tr>
-                            <tr>
-                                <td>2 Feb 2026</td>
-                                <td>Demam</td>
-                                <td>Monitoring</td>
-                                <td>Drh. Andi</td>
-                            </tr>
+                            <?php if ($healthHistory === []): ?>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Belum ada riwayat pemeriksaan.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($healthHistory as $record): ?>
+                                    <tr>
+                                        <td><?= manager_escape(manager_format_date((string) $record['tanggal'])) ?></td>
+                                        <td><?= manager_escape($record['diagnosis']) ?></td>
+                                        <td><?= manager_escape($record['tindakan']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
-
         </div>
 
-        <!-- Catatan Medis Kanan -->
         <div class="card-catatan shadow-sm">
             <h6>Catatan Medis</h6>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-                dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                mollit anim id est laborum.
-            </p>
+            <p><?= manager_escape($animal['catatan_medis']) ?></p>
         </div>
-
     </div>
 
-    <!-- FOOTER -->
     <div class="detail-footer">
-        Terakhir Update : 25 Februari 2026
+        Terakhir Update : <?= manager_escape(manager_format_date((string) $animal['pemeriksaan_terakhir'], 'd-m-Y')) ?>
     </div>
-
 </div>
 
 <script>
-    function exportPDF() {
-        alert('Export PDF - ID Ternak: 0004');
-    }
+    window.exportPDF = function exportPDFDetail() {
+        const params = new URLSearchParams({
+            report: 'detail_hewan',
+            format: 'pdf',
+            animal_id: '<?= manager_escape((string) ($animal['id'] ?? 0)) ?>'
+        });
+
+        window.location.href = `../../pages/manager/export_report.php?${params.toString()}`;
+    };
 </script>
 
-<?php include '../../components/footer_manager.php'; ?>
+<?php include '../../components/manager/footer_manager.php'; ?>

@@ -1,117 +1,192 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-    const colors = {
-        primary: '#198754',
-        soft: '#d1e7dd',
-        warning: '#ffc107',
-        danger: '#dc3545',
-        gray: '#6c757d'
+    const pageData = window.managerDashboardData || {};
+    const palette = ['#198754', '#d1e7dd', '#ffc107', '#6c757d', '#0dcaf0', '#dc3545'];
+    const gridColor = 'rgba(25, 53, 34, 0.08)';
+    const labelColor = '#4f6b57';
+
+    const pickColors = function (length) {
+        return Array.from({ length }, function (_, index) {
+            return palette[index % palette.length];
+        });
     };
 
-    //TOTAL HEWAN
+    const buildLegend = function (chart) {
+        const data = chart.data;
+        return data.labels.map(function (label, index) {
+            const value = data.datasets[0].data[index];
+            return {
+                text: label + ' (' + value + ')',
+                fillStyle: data.datasets[0].backgroundColor[index],
+                strokeStyle: data.datasets[0].backgroundColor[index],
+                index: index
+            };
+        });
+    };
+
+    const baseLegend = {
+        position: 'bottom',
+        labels: {
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 16,
+            boxWidth: 10,
+            color: labelColor
+        }
+    };
+
+    const buildAxis = function (currency) {
+        return {
+            ticks: {
+                color: labelColor,
+                padding: 10,
+                callback: currency ? function (value) {
+                    const intVal = Math.round(Number(value) || 0);
+                    return 'Rp ' + intVal.toLocaleString('id-ID');
+                } : function (value) {
+                    const intVal = Math.round(Number(value) || 0);
+                    return intVal;
+                }
+            },
+            grid: {
+                color: gridColor,
+                drawBorder: false
+            }
+        };
+    };
+
     const statusCtx = document.getElementById('dashboardStatusChart');
     if (statusCtx) {
-        new Chart(statusCtx, {  
+        const labels = pageData.population?.labels || ['Sapi Perah', 'Sapi PO'];
+        const values = pageData.population?.values || [0, 0];
+        new Chart(statusCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Sapi', 'Kambing', 'Domba'],
+                labels: labels,
                 datasets: [{
-                    data: [50, 40, 30],
-                    backgroundColor: [
-                        colors.primary,
-                        colors.soft,
-                        colors.warning,
-                        colors.gray
-                    ],
+                    data: values,
+                    backgroundColor: pickColors(labels.length),
                     borderWidth: 0
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 cutout: '50%',
-                radius:'80%',
+                radius: '88%',
                 plugins: {
                     legend: {
-                        position: 'bottom',
+                        ...baseLegend,
                         labels: {
-                            padding: 20,
-                            boxWidth: 12,
-                            generateLabels: function(chart) {
-                                const data = chart.data;
-                                return data.labels.map((label, i) => {
-                                    const value = data.datasets[0].data[i];
-                                    return {
-                                        text: `${label} (${value})`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        strokeStyle: data.datasets[0].backgroundColor[i],
-                                        index: i
-                                    };
-                                });
+                            ...baseLegend.labels,
+                            generateLabels: buildLegend
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const trendCtx = document.getElementById('dashboardTrendChart');
+    if (trendCtx) {
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: pageData.healthTrend?.labels || [],
+                datasets: [{
+                    data: pageData.healthTrend?.values || [],
+                    borderColor: '#198754',
+                    backgroundColor: '#d1e7dd',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+                ,
+                elements: {
+                    line: {
+                        borderWidth: 3,
+                        tension: 0.4
+                    },
+                    point: {
+                        radius: 4,
+                        hoverRadius: 6,
+                        backgroundColor: '#198754'
+                    }
+                },
+                scales: {
+                    x: buildAxis(false),
+                    y: {
+                        ...buildAxis(false),
+                        beginAtZero: true,
+                        ticks: {
+                            ...buildAxis(false).ticks,
+                            stepSize: 1,
+                            precision: 0,
+                            callback: function (value) {
+                                return Number(value).toFixed(0);
                             }
                         }
                     }
                 }
             }
         });
-    }  
-
-    //KESEHATAN HEWAN
-    const trendCtx = document.getElementById('dashboardTrendChart');
-    if (trendCtx) {
-        new Chart(trendCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
-                datasets: [{
-                    data: [50, 60, 55, 70, 65, 80],
-                    borderColor: colors.primary,
-                    backgroundColor: colors.soft,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
     }
 
-    //REPRO CHART
     const reproCtx = document.getElementById('dashboardReproChart');
     if (reproCtx) {
+        const labels = pageData.reproduction?.labels || [];
         new Chart(reproCtx, {
             type: 'bar',
             data: {
-                labels: ['Tidak Produktif', 'Bunting'],
+                labels: labels,
                 datasets: [{
-                    data: [4, 6],
-                    backgroundColor: [
-                        colors.gray,
-                        colors.primary
-                    ],
+                    data: pageData.reproduction?.values || [],
+                    backgroundColor: pickColors(labels.length),
                     borderRadius: 8
                 }]
             },
             options: {
-                plugins: {
-                    legend: { display: false }
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+                ,
+                scales: {
+                    x: buildAxis(false),
+                    y: {
+                        ...buildAxis(false),
+                        beginAtZero: true,
+                        ticks: {
+                            ...buildAxis(false).ticks,
+                            stepSize: 1,
+                            precision: 0,
+                            callback: function (value) {
+                                return Number(value).toFixed(0);
+                            }
+                        }
+                    }
                 }
             }
         });
     }
 
-    // Trend Penjualan 6 Bulan Terakhir
-    const trendCtx2 = document.getElementById('dashboardTrendChartKesehatan');
-    if (trendCtx2) {
-        new Chart(trendCtx2, {
+    const salesTrendCtx = document.getElementById('dashboardTrendChartKesehatan');
+    // Alias canvas dashboard trend penjualan
+    const salesTrendCtx2 = document.getElementById('dashboardTrendChartPenjualan');
+
+    if (salesTrendCtx || salesTrendCtx2) {
+        const canvas = salesTrendCtx2 || salesTrendCtx;
+        new Chart(canvas, {
             type: 'line',
             data: {
-                labels: ['Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb'], // ← label X = bulan
+                labels: pageData.salesTrend?.labels || [],
                 datasets: [{
-                    data: [5000000, 10000000, 17500000, 13500000, 10500000, 25000000],
-                    borderColor: colors.primary,
-                    pointBackgroundColor: colors.warning, 
+                    data: pageData.salesTrend?.values || [],
+                    borderColor: '#198754',
+                    pointBackgroundColor: '#ffc107',
                     pointRadius: 6,
                     backgroundColor: 'transparent',
                     fill: false,
@@ -119,19 +194,48 @@ document.addEventListener("DOMContentLoaded", function () {
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rp. ' + value.toLocaleString('id-ID');
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function (items) {
+                                const item = items && items.length ? items[0] : null;
+                                return item?.label ?? '';
                             },
-                            stepSize: 5000000  
+                            label: function (context) {
+                                const value = context.parsed?.y ?? 0;
+                                const intVal = Math.round(Number(value) || 0);
+                                return 'Total pembelian: Rp ' + intVal.toLocaleString('id-ID');
+                            }
                         }
                     }
+                },
+                elements: {
+                    line: {
+                        borderWidth: 3,
+                        tension: 0.35
+                    },
+                    point: {
+                        radius: 5,
+                        hoverRadius: 7
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: labelColor,
+                            padding: 10
+                        },
+                        grid: {
+                            color: gridColor,
+                            drawBorder: false
+                        }
+                    },
+                    y: buildAxis(true)
                 }
+
             }
         });
     }

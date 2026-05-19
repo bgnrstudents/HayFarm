@@ -42,8 +42,6 @@
                             <option value="">Pilih...</option>
                             <option value="Sapi Perah">Sapi Perah</option>
                             <option value="Sapi PO">Sapi PO</option>
-                            <option value="Kambing">Kambing</option>
-                            <option value="Domba">Domba</option>
                         </select>
                     </div>
                 </div>

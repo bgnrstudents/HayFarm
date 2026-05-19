@@ -1,20 +1,3 @@
-<?php
-$id = $_GET['id'] ?? '00004';
-$jenis = $_GET['jenis'] ?? 'Sapi Perah';
-$berat = $_GET['berat'] ?? '450 Kg';
-$kelamin = $_GET['kelamin'] ?? 'Betina';
-$kandang = $_GET['kandang'] ?? 'A-01';
-$tglLahir = $_GET['tgl_lahir'] ?? '2021-03-15';
-$status = $_GET['status'] ?? 'produktif';
-
-$status = $status === 'tidak_produktif' ? 'tidak_produktif' : 'produktif';
-$statusLabel = $status === 'produktif' ? 'Produktif' : 'Tidak Produktif';
-
-$tanggalObj = new DateTime($tglLahir);
-$hariIni = new DateTime();
-$usia = $tanggalObj->diff($hariIni);
-$usiaLabel = $usia->y > 0 ? $usia->y . ' Tahun' : max($usia->m, 1) . ' Bulan';
-?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -287,8 +270,6 @@ $usiaLabel = $usia->y > 0 ? $usia->y . ' Tahun' : max($usia->m, 1) . ' Bulan';
                     <select name="jenis_hewan" class="form-select">
                         <option value="Sapi Perah" <?= $jenis === 'Sapi Perah' ? 'selected' : '' ?>>Sapi Perah</option>
                         <option value="Sapi PO" <?= $jenis === 'Sapi PO' ? 'selected' : '' ?>>Sapi PO</option>
-                        <option value="Kambing" <?= $jenis === 'Kambing' ? 'selected' : '' ?>>Kambing</option>
-                        <option value="Domba" <?= $jenis === 'Domba' ? 'selected' : '' ?>>Domba</option>
                     </select>
                 </div>
                 <div class="col-md-6">
@@ -337,7 +318,7 @@ $usiaLabel = $usia->y > 0 ? $usia->y . ' Tahun' : max($usia->m, 1) . ' Bulan';
         </form>
     </div>
 </div>
-
+ 
 <script>
 document.getElementById('currentDate').textContent =
     new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });

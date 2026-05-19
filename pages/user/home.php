@@ -1,4 +1,9 @@
 <?php
+$homeFeaturedImages = [
+    'hewan' => 'public/images/bgheader_produk.png',
+    'susu' => 'public/images/susu.jpg',
+    'rumput' => 'public/images/rumput.jpg',
+];
 ?>
 <!-- HERO SECTION -->
 <section id="hero" class="hero-section">
@@ -58,7 +63,7 @@
                 </p>
                 <p>Kami fokus hanya mengedepankan produk berkualitas, tetapi juga memberikan pembelajaran bagi mahasiswa dan masyarakat. Dengan pengalaman kami peternakan yang senantiasa, kami terus tingkat proses produksi di lapangan.</p>
                 <div class="con-btn-home2 text-end mt-5">
-                    <a href="index.php?page=user/chekout" class="btn-home2 text-center">
+                    <a href="index.php?page=user/tentang_kami" class="btn-home2 text-center">
                         Lihat Selengkapnya <i class="fa-solid fa-arrow-right"></i>
                     </a>
                 </div>
@@ -73,11 +78,11 @@
             <h2>Produk Unggulan</h2>
             <p>Kualitas terbaik dari peternakan modern yang mengintegrasikan pendidikan, riset dan teknologi.</p>
         </div>
-
         <!-- Produk Cards - Flexbox -->
         <div class="produk-grid">
             <div class="produk-card">
-                <img src="public/images/bghome.png" alt="Sapi Perah">
+                <img src="<?= htmlspecialchars($homeFeaturedImages['hewan']) ?>" alt="Sapi Perah"
+                    onerror="this.onerror=null;this.src='public/images/bgheader_produk.png';">
                 <div class="card-body">
                     <h5>Sapi Perah</h5>
                     <p>Kami menawarkan sapi perah berkualitas tinggi, termasuk sapi PO (Peranakan Ongole) yang menjadi keunggulan produk kami.</p>
@@ -85,7 +90,8 @@
             </div>
 
             <div class="produk-card">
-                <img src="public/images/bghome.png" alt="Susu Segar">
+                <img src="<?= htmlspecialchars($homeFeaturedImages['susu']) ?>" alt="Susu Segar"
+                    onerror="this.onerror=null;this.src='public/images/bgheader_produk.png';">
                 <div class="card-body">
                     <h5>Susu Segar</h5>
                     <p>Produk unggulan yang diproduksi dalam sistem modern untuk kualitas susu yang baik.</p>
@@ -93,7 +99,8 @@
             </div>
 
             <div class="produk-card">
-                <img src="public/images/bghome.png" alt="Rumput Segar">
+                <img src="<?= htmlspecialchars($homeFeaturedImages['rumput']) ?>" alt="Rumput Segar"
+                    onerror="this.onerror=null;this.src='public/images/bgheader_produk.png';">
                 <div class="card-body">
                     <h5>Rumput Segar</h5>
                     <p>Rumput pilihan yang dipanen setiap hari untuk menjamin kesegaran dan kandungan gizi maksimal.</p>
@@ -102,7 +109,7 @@
         </div>
 
         <div class="text-center mt-5">
-            <a href="index.php?page=user/riwayat_pesanan" class="btn-produk">
+            <a href="index.php?page=user/produk" class="btn-produk">
                 Lihat Selengkapnya <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
