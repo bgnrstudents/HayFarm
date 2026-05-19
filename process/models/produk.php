@@ -310,11 +310,38 @@ class Produk
             if ($stmt->execute()) {
                 return ['status' => true, 'message' => 'Produk berhasil dihapus'];
             }
-            return ['status' => false, 'message' => 'Gagal: ' . $stmt->error];
+
+            // Safety net: jika masih gagal, jangan bocorkan error DB mentah
+            return $this->mapDeleteDbErrorToBusinessMessage($stmt->error);
         } catch (Exception $e) {
-            return ['status' => false, 'message' => 'Error: ' . $e->getMessage()];
+            // Safety net: jangan pernah bocorkan raw exception message SQL ke UI
+            return $this->mapDeleteDbErrorToBusinessMessage($e->getMessage());
         }
     }
+
+    private function mapDeleteDbErrorToBusinessMessage(string $rawError): array
+    {
+        $lower = strtolower($rawError);
+
+        // Pola umum MySQL FK error
+        $isFk = str_contains($lower, 'foreign key constraint fails')
+            || str_contains($lower, 'cannot delete or update a parent row')
+            || str_contains($lower, 'errno: 1451')
+            || (str_contains($lower, 'detail_transaksi') && str_contains($lower, 'id_produk'));
+
+        if ($isFk) {
+            return [
+                'status' => false,
+                'message' => 'Produk tidak dapat dihapus karena sudah digunakan dalam transaksi.',
+            ];
+        }
+
+        return [
+            'status' => false,
+            'message' => 'Terjadi kesalahan pada sistem. Silakan coba lagi.',
+        ];
+    }
+
 
     private function isSupportedAnimalId($id_hewan): bool
     {

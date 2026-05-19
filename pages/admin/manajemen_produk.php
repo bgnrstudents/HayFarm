@@ -140,7 +140,34 @@ $produkData = array_map(function ($row) {
                 </div>
                 <div class="table-actions">
                     <button class="btn-filter"><i class="fa-solid fa-filter"></i> Filter</button>
-                    <button class="btn-export" onclick="exportLaporanProduk('produk_data.csv')"><i class="fa-solid fa-download"></i> Export</button>
+                    <?php
+                        // Mapping filter UI -> parameter export
+                        $status_filter = $_GET['status_filter'] ?? '';
+                        $jenis_filter = $_GET['jenis_filter'] ?? '';
+
+                        $statusParam = '';
+                        if ($status_filter === 'tersedia') {
+                            $statusParam = 'tersedia';
+                        } elseif ($status_filter === 'tidak_tersedia') {
+                            $statusParam = 'tidak_tersedia';
+                        }
+
+                        $jenisParam = '';
+                        if (!empty($jenis_filter)) {
+                            $jenisParam = strtolower((string)$jenis_filter);
+                        }
+
+                        $queryParams = [];
+                        if ($statusParam !== '') $queryParams[] = 'status=' . urlencode($statusParam);
+                        if ($jenisParam !== '') $queryParams[] = 'jenis=' . urlencode($jenisParam);
+
+                        $exportUrl = '../../export_laporan_produk.php' . (!empty($queryParams) ? ('?' . implode('&', $queryParams)) : '');
+                    ?>
+
+                    <button onclick="window.location.href='<?= $exportUrl ?>'"
+                        class="btn-add">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
                     <button class="btn-add" onclick="openAddModal()">
                         <i class="fa-solid fa-plus"></i> Tambah Produk
                     </button>
@@ -232,7 +259,7 @@ $produkData = array_map(function ($row) {
                                 <label class="form-label">Pilih Hewan <span class="required">*</span></label>
                                 <select class="form-select" id="edit-id-hewan" onchange="var parts = this.options[this.selectedIndex].text.split(' - '); document.getElementById('edit-nama-hewan').value = parts.length > 1 ? parts[1] : '';" required>
                                     <option value="">Pilih Hewan</option>
-                                    <?php foreach ($listHewan as $h): ?>    
+                                    <?php foreach ($listHewan as $h): ?>
                                         <option value="<?= (int)$h['id_hewan'] ?>">
                                             <?= htmlspecialchars($h['kode_hewan']) ?> - <?= ucwords(str_replace('_', ' ', $h['jenis_hewan'])) ?>
                                         </option>

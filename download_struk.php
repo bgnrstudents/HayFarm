@@ -45,8 +45,8 @@ try {
     $stmtDetail->bind_param("i", $id_transaksi);
     $stmtDetail->execute();
     $details = $stmtDetail->get_result()->fetch_all(MYSQLI_ASSOC);
-
-    $tanggal = date('d M Y • H:i', strtotime($transaksi['tgl_transaksi'] . ' WIB'));
+    date_default_timezone_set('Asia/Jakarta');
+    $tanggal = date('d/m/Y H:i:s', strtotime($transaksi['tgl_transaksi'] . ' WIB'));
     $total_formatted = 'Rp ' . number_format((float)$transaksi['total_tagihan'], 0, ',', '.');
     $total_terbilang = terbilang((int)$transaksi['total_tagihan']);
 
@@ -98,15 +98,16 @@ try {
 
             <div class="section">
                 <div class="section-title">DATA PEMBELI</div>
-                <div class="row"><span class="label">Nama</span><span class="value">' . esc($transaksi['nama_pembeli']) . '</span></div>
-                <div class="row"><span class="label">WhatsApp</span><span class="value">' . esc($transaksi['no_telp']) . '</span></div>
-                <div class="row"><span class="label">Alamat</span><span class="value">' . esc($transaksi['alamat']) . '</span></div>
+                <div class="row"><span class="label">Nama : </span><span class="value">' . esc($transaksi['nama_pembeli']) . '</span></div>
+                <div class="row"><span class="label">WhatsApp : </span><span class="value">' . esc($transaksi['no_telp']) . '</span></div>
+                <div class="row"><span class="label">Alamat : </span><span class="value">' . esc($transaksi['alamat']) . '</span></div>
             </div>
 
             <div class="section">
                 <div class="section-title">DETAIL PRODUK</div>
                 <table>';
-    
+
+
     foreach ($details as $item) {
         $nama_item = esc($item['nama_produk']);
         if ($item['jenis_produk'] === 'hewan' && !empty($item['kode_hewan'])) {
@@ -158,17 +159,18 @@ try {
 
     $filename = "Struk_HayFarm_" . $id_transaksi . ".pdf";
     $dompdf->stream($filename, ["Attachment" => true]);
-
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
 
-function esc($str) {
+function esc($str)
+{
     return htmlspecialchars($str ?? '', ENT_QUOTES, 'UTF-8');
 }
 
 // Fungsi Terbilang
-function terbilang($angka) {
+function terbilang($angka)
+{
     $angka = abs($angka);
     $baca = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
     if ($angka < 12) return $baca[$angka];
@@ -181,4 +183,3 @@ function terbilang($angka) {
     elseif ($angka < 1000000000) return terbilang(floor($angka / 1000000)) . " Juta" . terbilang($angka % 1000000);
     return "";
 }
-?>

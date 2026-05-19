@@ -148,8 +148,18 @@ class Keranjang
             $item['jumlah'] = $this->normalJumlah($item['jumlah']);
             $item['harga'] = (float) $item['harga'];
             $item['sub_total'] = (float) $item['sub_total'];
+
+            // Debug singkat untuk root-cause gambar tertukar di keranjang
+            // (akan tampil ke error_log server, aman karena tidak mengubah output UI)
+            // Jika log terlalu banyak, nanti kita batasi untuk satu id_user tertentu.
             $item['gambar'] = $this->getGambarProduk($item);
+            error_log('[Keranjang::getItems gambar] id_user=' . (int)$id_user
+                . ' id_produk=' . (int)($item['id_produk'] ?? 0)
+                . ' jenis_produk=' . ($item['jenis_produk'] ?? '')
+                . ' foto_hewan=' . ($item['foto_hewan'] ?? '')
+                . ' gambar=' . ($item['gambar'] ?? ''));
         }
+
 
         return $items;
     }
@@ -230,9 +240,17 @@ class Keranjang
         $jenis = $produk['jenis_produk'] ?? '';
         $foto  = trim((string) ($produk['foto_hewan'] ?? ''));
 
-        // 1. Produk Non-Hewan (path fixed)
-        if ($jenis === 'susu') return 'public/images/farel_perah.jpg';
-        if ($jenis === 'rumput') return 'public/images/bgheader_produk.png';
+        // 1. Produk Non-Hewan
+        // BUGFIX: rumput/susu seharusnya tidak mengambil gambar ternak.
+        // Kita jadikan mapping gambar berdasarkan jenis_produk saja (sesuai tampilan katalog).
+        if ($jenis === 'susu') {
+            return 'public/images/susu.jpg';
+        }
+
+        if ($jenis === 'rumput') {
+            return 'public/images/rumput.jpg';
+        }
+
 
         // 2. Produk Hewan
         if ($jenis === 'hewan' && $foto !== '') {

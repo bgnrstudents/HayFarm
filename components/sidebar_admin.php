@@ -271,11 +271,15 @@ $bottomMenu = [
 </style>
 
 <script>
-    function showFlashMessage(message, type = 'success', options = {}) {
+function showFlashMessage(message, type = 'success', options = {}) {
         const container = document.getElementById('flashMessageContainer');
         if (!container) return;
 
-        const titles = { success: 'Berhasil', danger: 'Gagal', warning: 'Perhatian', info: 'Info' };
+        // Normalisasi type agar kompatibel dengan seluruh handler/page
+        if (type === 'error') type = 'danger';
+        if (type === 'fail') type = 'danger';
+
+        const titles = { success: 'Berhasil', danger: 'Terjadi Kesalahan', warning: 'Perhatian', info: 'Info' };
         const icons = { success: 'check', danger: 'x', warning: '!', info: 'i' };
         const flash = document.createElement('div');
 
@@ -288,6 +292,7 @@ $bottomMenu = [
             </div>
             <button class="flash-close" type="button" aria-label="Tutup">&times;</button>
         `;
+
 
         container.appendChild(flash);
         requestAnimationFrame(() => flash.classList.add('show'));

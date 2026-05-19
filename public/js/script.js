@@ -516,7 +516,7 @@ function buildWhatsAppMessage(orderData) {
 
 Nama: ${namaUser}
 Produk: ${produktList}
-Total: Rp ${totalAmount}
+Total: ${totalAmount}
 Metode: ${metode.toUpperCase()}
 
 Mohon bantuannya untuk memproses pesanan.`;

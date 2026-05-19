@@ -190,8 +190,9 @@ try {
             if ($result['status']) {
                 $_SESSION['flash_type'] = 'success';
             } else {
-                $_SESSION['flash_type'] = 'error';
+                $_SESSION['flash_type'] = 'danger';
             }
+
             $_SESSION['flash_message'] = $result['message'];
             break;
 
@@ -199,8 +200,23 @@ try {
             throw new Exception("Aksi tidak dikenali.");
     }
 } catch (Exception $e) {
-    $_SESSION['flash_type'] = 'error';
-    $_SESSION['flash_message'] = $e->getMessage();
+            $_SESSION['flash_type'] = 'danger';
+
+            // Safety net: jangan pernah tampilkan raw error/SQL message ke admin
+            $raw = (string)$e->getMessage();
+            $lower = strtolower($raw);
+
+            $isSqlLeak = str_contains($lower, 'mysql') ||
+                str_contains($lower, 'foreign key constraint fails') ||
+                str_contains($lower, 'cannot delete or update a parent row') ||
+                str_contains($lower, 'errno: 1451') ||
+                str_contains($lower, 'detail_transaksi');
+
+            $_SESSION['flash_message'] = $isSqlLeak
+                ? 'Terjadi kesalahan pada sistem. Silakan coba lagi.'
+                : $raw;
 }
 
 safe_redirect('/HayFarm/pages/admin/manajemen_produk.php');
+
+

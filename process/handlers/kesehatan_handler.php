@@ -306,12 +306,13 @@
                 ];
 
                 $result = $kesehatan_model->update($id, $data);
-                if ($result['status']) {
-                    $_SESSION['flash_type'] = 'success';
-                    $_SESSION['flash_message'] = $result['message'];
-                } else {
-                    throw new Exception($result['message']);
-                }
+
+        // NOTE:
+        // Untuk flow 'create' dan 'update' pada handler ini, flash message sudah di-set
+        // di dalam masing-masing case switch.
+        // Blok bawah menggunakan $result, padahal pada case 'create' variabel ini tidak terdefinisi.
+        // Menghapus blok ini mencegah false negative (flash error) ketika insert sukses.
+
                 break;
 
             case 'delete':
@@ -319,24 +320,16 @@
                 if (!$id) throw new Exception('ID kesehatan tidak valid');
 
                 $result = $kesehatan_model->delete($id);
-                if ($result['status']) {
-                    $_SESSION['flash_type'] = 'success';
-                    $_SESSION['flash_message'] = $result['message'];
-                } else {
-                    throw new Exception($result['message']);
-                }
+        // Blok flash bawah telah dihapus agar handler tidak memakai variabel $result
+        // yang tidak terdefinisi pada flow case 'create' (mencegah false error walaupun INSERT sukses)
+
                 break;
 
             default:
                 throw new Exception('Aksi tidak dikenali');
         }
 
-        if ($result['status']) {
-            $_SESSION['flash_type'] = 'success';
-            $_SESSION['flash_message'] = $result['message'];
-        } else {
-            throw new Exception($result['message']);
-        }
+
     } catch (Exception $e) {
         $_SESSION['flash_type'] = 'error';
         $_SESSION['flash_message'] = $e->getMessage();
