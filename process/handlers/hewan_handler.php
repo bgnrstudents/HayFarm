@@ -199,7 +199,7 @@ try {
                 $stmt->bind_param("i", $id);
                 $stmt->execute();
 
-                // 3. Update Status Produk -> 'terjual' (Agar tidak tampil di katalog user)
+                // 3. Update Status Produk
                 $stmt = $connection->prepare("
                     UPDATE data_produk 
                     SET status_produk = 'terjual' 
@@ -232,7 +232,6 @@ try {
             break;
     }
 } catch (Exception $e) {
-    // Tangkap error dan simpan ke session flash
     $_SESSION['flash_type'] = 'error';
     $_SESSION['flash_message'] = $e->getMessage();
 }

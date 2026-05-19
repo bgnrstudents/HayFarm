@@ -101,7 +101,6 @@ class Produk
     // Read Single
     public function getById($id)
     {
-        // ✅ SIMPEL: Ambil data produk murni berdasarkan ID, tanpa join ribet
         $query = "SELECT * FROM " . $this->table . " WHERE id_produk = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $id);
@@ -128,7 +127,6 @@ class Produk
             }
 
 
-            // ✅ TAMBAH VALIDASI: Cegah produk hewan duplikat
             if ($data['jenis_produk'] === 'hewan' && !empty($id_hewan)) {
                 $stmt_check = $this->conn->prepare("SELECT id_produk FROM " . $this->table . " WHERE id_hewan = ? AND jenis_produk = 'hewan'");
                 $stmt_check->bind_param("i", $id_hewan);
@@ -137,7 +135,6 @@ class Produk
                     return ['status' => false, 'message' => 'Hewan ini sudah memiliki produk. Tidak dapat membuat produk duplikat.'];
                 }
             }
-            // Di method create() & update(), TAMBahkan sebelum query INSERT/UPDATE:
             if ($data['jenis_produk'] === 'susu' && !empty($data['tgl_kadaluarsa'])) {
                 $today = date('Y-m-d');
                 if ($data['tgl_kadaluarsa'] < $today) {

@@ -20,6 +20,7 @@ class Hewan
         $result = $stmt->get_result();
         return $result->fetch_all(MYSQLI_ASSOC);
     }
+    
     // Method khusus dropdown: hanya sapi tidak produktif yang boleh dijual sebagai produk hewan
     public function getAvailableForProduct()
     {
@@ -45,7 +46,7 @@ class Hewan
         $query = "SELECT * FROM " . $this->table . " 
               WHERE id_hewan = ? 
               AND jenis_hewan IN ('sapi_perah', 'sapi_po')
-              AND (is_deleted IS NULL OR is_deleted = 0)";  // ✅ Tambahkan ini
+              AND (is_deleted IS NULL OR is_deleted = 0)"; 
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $id);
         $stmt->execute();

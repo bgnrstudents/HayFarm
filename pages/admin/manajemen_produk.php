@@ -1,5 +1,4 @@
 <?php
-// opcache_invalidate(__FILE__, true); 
 session_start();
 if (!isset($_SESSION['login'], $_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'manager'])) {
     header('Location: ../../login.php');
@@ -11,14 +10,11 @@ require_once '../../process/models/produk.php';
 $database = new Database();
 $db = $database->getConnection();
 $produk = new Produk($db);
-// Cek parameter filter status dari URL
 $status_filter = $_GET['status_filter'] ?? null;
 
-// Ambil parameter filter dari URL (GET)
 $status_filter = $_GET['status_filter'] ?? null;
 $jenis_filter = $_GET['jenis_filter'] ?? null; // ✅ TAMBAH INI
 
-// Panggil model dengan 2 parameter filter
 $dataRaw = $produk->getAll($status_filter, $jenis_filter);
 
 require_once '../../process/models/hewan.php';
@@ -236,7 +232,7 @@ $produkData = array_map(function ($row) {
                                 <label class="form-label">Pilih Hewan <span class="required">*</span></label>
                                 <select class="form-select" id="edit-id-hewan" onchange="var parts = this.options[this.selectedIndex].text.split(' - '); document.getElementById('edit-nama-hewan').value = parts.length > 1 ? parts[1] : '';" required>
                                     <option value="">Pilih Hewan</option>
-                                    <?php foreach ($listHewan as $h): ?>
+                                    <?php foreach ($listHewan as $h): ?>    
                                         <option value="<?= (int)$h['id_hewan'] ?>">
                                             <?= htmlspecialchars($h['kode_hewan']) ?> - <?= ucwords(str_replace('_', ' ', $h['jenis_hewan'])) ?>
                                         </option>
