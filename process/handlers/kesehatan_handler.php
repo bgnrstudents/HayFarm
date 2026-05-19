@@ -81,22 +81,50 @@
                         $new_id_kesehatan = $connection->insert_id;
 
                         // Normalisasi status_ib
-                        $status_ib_raw = $_POST['status_ib'] ?? '';
+                        $status_ib_raw = trim($_POST['status_ib'] ?? '');
                         $status_ib_normalized = match ($status_ib_raw) {
                             'berhasil' => 'berhasil',
                             'tdk_berhasil', 'tidak_berhasil' => 'tdk_berhasil',
                             'proses' => 'proses',
+                            '' => null,
                             default => null
                         };
+
+                        // Default alur: jika tanggal IB diisi tapi status kosong => proses
+                        if ($status_ib_normalized === null) {
+                            $status_ib_normalized = 'proses';
+                        }
+
+                        // Kalkulasi tgl_perkiraan (fallback) = tgl_ib + 283 hari
+                        $tgl_ib = $_POST['tgl_ib'];
+
+                        $tgl_perkiraan_input = $_POST['tgl_perkiraan'] ?? null;
+                        $tgl_perkiraan_hitung = null;
+                        try {
+                            $dt = new DateTime($tgl_ib);
+                            $dt->modify('+283 days');
+                            $tgl_perkiraan_hitung = $dt->format('Y-m-d');
+                        } catch (Exception $e) {
+                            $tgl_perkiraan_hitung = null;
+                        }
+
+                        // Realistic alur:
+                        // - berhasil => simpan tgl_perkiraan
+                        // - proses / tdk_berhasil => tidak simpan (NULL)
+                        $tgl_perkiraan_final = null;
+                        if ($status_ib_normalized === 'berhasil') {
+                            $tgl_perkiraan_final = !empty($tgl_perkiraan_input) ? $tgl_perkiraan_input : $tgl_perkiraan_hitung;
+                        }
 
                         $data_reproduksi = [
                             'id_kesehatan' => $new_id_kesehatan,
                             'id_hewan' => (int)$_POST['id_hewan'],
-                            'tgl_ib' => $_POST['tgl_ib'],
+                            'tgl_ib' => $tgl_ib,
                             'ib_ke' => (int)$_POST['ib_ke'],
-                            'tgl_perkiraan' => $_POST['tgl_perkiraan'] ?? null,
+                            'tgl_perkiraan' => $tgl_perkiraan_final,
                             'status_ib' => $status_ib_normalized
                         ];
+
 
                         $result_reproduksi = $reproduksi_model->create($data_reproduksi);
                         if (!$result_reproduksi['status']) throw new Exception($result_reproduksi['message']);
@@ -157,31 +185,99 @@
 
                     if ($existing_reproduksi) {
                         // ✅ UPDATE existing reproduksi
+                        $status_ib_raw = trim($_POST['status_ib'] ?? '');
+                        $status_ib_normalized = match ($status_ib_raw) {
+                            'berhasil' => 'berhasil',
+                            'tdk_berhasil', 'tidak_berhasil' => 'tdk_berhasil',
+                            'proses' => 'proses',
+                            '' => null,
+                            default => null
+                        };
+
+                        // Default alur: jika tanggal IB diisi tapi status kosong => proses
+                        if ($status_ib_normalized === null) {
+                            $status_ib_normalized = 'proses';
+                        }
+
+                        $tgl_ib = $_POST['tgl_ib'];
+                        $tgl_perkiraan_input = $_POST['tgl_perkiraan'] ?? null;
+                        $tgl_perkiraan_hitung = null;
+                        try {
+                            $dt = new DateTime($tgl_ib);
+                            $dt->modify('+283 days');
+                            $tgl_perkiraan_hitung = $dt->format('Y-m-d');
+                        } catch (Exception $e) {
+                            $tgl_perkiraan_hitung = null;
+                        }
+
+                        // Realistic alur:
+                        // - berhasil => simpan tgl_perkiraan
+                        // - proses / tdk_berhasil => tidak simpan (NULL)
+                        $tgl_perkiraan_final = null;
+                        if ($status_ib_normalized === 'berhasil') {
+                            $tgl_perkiraan_final = !empty($tgl_perkiraan_input) ? $tgl_perkiraan_input : $tgl_perkiraan_hitung;
+                        }
+
                         $data_reproduksi = [
                             'id_kesehatan' => $id,
                             'id_hewan' => (int)($_POST['id_hewan'] ?? 0),
-                            'tgl_ib' => $_POST['tgl_ib'],
+                            'tgl_ib' => $tgl_ib,
                             'ib_ke' => (int)$_POST['ib_ke'],
-                            'tgl_perkiraan' => $_POST['tgl_perkiraan'] ?? null,
-                            'status_ib' => $_POST['status_ib'] ?? null
+                            'tgl_perkiraan' => $tgl_perkiraan_final,
+                            'status_ib' => $status_ib_normalized
                         ];
+
 
                         $result_reproduksi = $reproduksi_model->update($id, $data_reproduksi);
                         if (!$result_reproduksi['status']) throw new Exception($result_reproduksi['message']);
                     } else {
                         // ✅ CREATE baru jika belum ada
+                        $status_ib_raw = trim($_POST['status_ib'] ?? '');
+                        $status_ib_normalized = match ($status_ib_raw) {
+                            'berhasil' => 'berhasil',
+                            'tdk_berhasil', 'tidak_berhasil' => 'tdk_berhasil',
+                            'proses' => 'proses',
+                            '' => null,
+                            default => null
+                        };
+
+                        // Default alur: jika tanggal IB diisi tapi status kosong => proses
+                        if ($status_ib_normalized === null) {
+                            $status_ib_normalized = 'proses';
+                        }
+
+                        $tgl_ib = $_POST['tgl_ib'];
+                        $tgl_perkiraan_input = $_POST['tgl_perkiraan'] ?? null;
+                        $tgl_perkiraan_hitung = null;
+                        try {
+                            $dt = new DateTime($tgl_ib);
+                            $dt->modify('+283 days');
+                            $tgl_perkiraan_hitung = $dt->format('Y-m-d');
+                        } catch (Exception $e) {
+                            $tgl_perkiraan_hitung = null;
+                        }
+
+                        // Realistic alur:
+                        // - berhasil => simpan tgl_perkiraan
+                        // - proses / tdk_berhasil => tidak simpan (NULL)
+                        $tgl_perkiraan_final = null;
+                        if ($status_ib_normalized === 'berhasil') {
+                            $tgl_perkiraan_final = !empty($tgl_perkiraan_input) ? $tgl_perkiraan_input : $tgl_perkiraan_hitung;
+                        }
+
                         $data_reproduksi = [
                             'id_kesehatan' => $id,
                             'id_hewan' => (int)($_POST['id_hewan'] ?? 0),
-                            'tgl_ib' => $_POST['tgl_ib'],
+                            'tgl_ib' => $tgl_ib,
                             'ib_ke' => (int)$_POST['ib_ke'],
-                            'tgl_perkiraan' => $_POST['tgl_perkiraan'] ?? null,
-                            'status_ib' => $_POST['status_ib'] ?? null
+                            'tgl_perkiraan' => $tgl_perkiraan_final,
+                            'status_ib' => $status_ib_normalized
                         ];
 
                         $result_reproduksi = $reproduksi_model->create($data_reproduksi);
                         if (!$result_reproduksi['status']) throw new Exception($result_reproduksi['message']);
                     }
+
                 }
 
                 $_SESSION['flash_type'] = 'success';

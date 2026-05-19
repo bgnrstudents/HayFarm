@@ -127,7 +127,7 @@ function esc($str)
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jenis Hewan *</label>
-                        <select name="jenis_hewan" class="form-select" required>
+<select name="jenis_hewan" id="tambahJenisHewan" class="form-select" required>
                             <option value="" disabled selected>Pilih jenis hewan</option>
                             <option value="sapi_perah">Sapi Perah</option>
                             <option value="sapi_po">Sapi PO</option>
@@ -146,7 +146,7 @@ function esc($str)
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jenis Kelamin *</label>
-                        <select name="jenis_kelamin" class="form-select" required>
+<select name="jenis_kelamin" id="tambahJenisKelamin" class="form-select" required>
                             <option value="" disabled selected>Pilih</option>
                             <option value="jantan">Jantan</option>
                             <option value="betina">Betina</option>
@@ -248,6 +248,7 @@ function esc($str)
                             <option value="jantan">Jantan</option>
                             <option value="betina">Betina</option>
                         </select>
+                        <small class="text-muted d-block mt-1" id="editKelaminHint">Untuk Sapi Perah otomatis Betina.</small>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Nomor Kandang</label>
@@ -262,6 +263,7 @@ function esc($str)
                             max="<?= date('Y-m-d') ?>"
                             min="2020-01-01">
                     </div>
+
                     <div class="col-md-12">
                         <label class="form-label">Ganti Foto</label>
                         <input type="file" name="foto_hewan" class="form-control" accept="image/jpeg,image/png,image/webp">

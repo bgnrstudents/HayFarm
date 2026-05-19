@@ -14,7 +14,7 @@ class Hewan
     {
         $query = "SELECT * FROM " . $this->table . " 
                   WHERE jenis_hewan IN ('sapi_perah', 'sapi_po') AND (is_deleted IS NULL OR is_deleted = 0)
-                  ORDER BY id_hewan ASC";
+                  ORDER BY id_hewan DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $result = $stmt->get_result();

@@ -79,6 +79,45 @@ class Kesehatan
             if (empty($data['tgl_pemeriksaan'])) return ['status' => false, 'message' => 'Tanggal pemeriksaan wajib diisi'];
             if (empty($data['status_kesehatan'])) return ['status' => false, 'message' => 'Status kesehatan wajib dipilih'];
 
+            // Pastikan format tanggal valid (Y-m-d) agar perbandingan tidak rusak
+            $tglPemeriksaan = $data['tgl_pemeriksaan'];
+            $tglCheckOk = !empty($tglPemeriksaan) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $tglPemeriksaan);
+            if (!$tglCheckOk) return ['status' => false, 'message' => 'Format tanggal pemeriksaan tidak valid'];
+
+
+            // =============================
+            // VALIDASI RELASI KE TANGGAL LAHIR HEWAN
+            // Requirement: tgl_pemeriksaan tidak boleh < tgl_lahir hewan
+            // + sesuai request: jika data IB ada, maka tgl_ib & tgl_perkiraan juga tidak boleh < tgl_lahir
+            // =============================
+            $idHewan = (int)$data['id_hewan'];
+            $stmtTglLahir = $this->conn->prepare("SELECT tgl_lahir FROM data_ternak WHERE id_hewan = ? LIMIT 1");
+            $stmtTglLahir->bind_param("i", $idHewan);
+            $stmtTglLahir->execute();
+            $resultTglLahir = $stmtTglLahir->get_result()->fetch_assoc();
+            $stmtTglLahir->close();
+
+            $tglLahir = !empty($resultTglLahir['tgl_lahir']) ? $resultTglLahir['tgl_lahir'] : null;
+
+            if (!empty($tglLahir)) {
+                if ($data['tgl_pemeriksaan'] < $tglLahir) {
+                    return ['status' => false, 'message' => 'Tanggal pemeriksaan tidak boleh lebih awal dari tanggal lahir hewan'];
+                }
+
+                // Jika handler ikut mengirim data reproduksi (tgl_ib/tgl_perkiraan)
+                $tglIb = $data['tgl_ib'] ?? null;
+                $tglPerkiraan = $data['tgl_perkiraan'] ?? null;
+
+                if (!empty($tglIb) && $tglIb < $tglLahir) {
+                    return ['status' => false, 'message' => 'Tanggal IB tidak boleh lebih awal dari tanggal lahir hewan'];
+                }
+
+                if (!empty($tglPerkiraan) && $tglPerkiraan < $tglLahir) {
+                    return ['status' => false, 'message' => 'Tanggal perkiraan lahir tidak boleh lebih awal dari tanggal lahir hewan'];
+                }
+            }
+
+
             // Validasi tanggal tidak masa depan
             if ($data['tgl_pemeriksaan'] > date('Y-m-d')) {
                 return ['status' => false, 'message' => 'Tanggal pemeriksaan tidak boleh di masa depan'];
@@ -86,6 +125,7 @@ class Kesehatan
 
             // Validasi conditional: diagnosis & tindakan wajib jika status bukan 'sehat'
             if ($data['status_kesehatan'] !== 'sehat') {
+
                 if (empty(trim((string)($data['diagnosis'] ?? '')))) {
                     return ['status' => false, 'message' => 'Diagnosis wajib diisi untuk status ' . $data['status_kesehatan']];
                 }
@@ -188,6 +228,35 @@ class Kesehatan
 
             $bind_hewan = $targetAnimalId;
             $bind_tgl = $data['tgl_pemeriksaan'] ?? $check['tgl_pemeriksaan'];
+
+            // =============================
+            // VALIDASI RELASI KE TANGGAL LAHIR HEWAN (untuk update)
+            // - tgl_pemeriksaan tidak boleh < tgl_lahir
+            // - jika data IB ikut dikirim: tgl_ib & tgl_perkiraan juga tidak boleh < tgl_lahir
+            // =============================
+            $stmtTglLahir = $this->conn->prepare("SELECT tgl_lahir FROM data_ternak WHERE id_hewan = ? LIMIT 1");
+            $stmtTglLahir->bind_param("i", $targetAnimalId);
+            $stmtTglLahir->execute();
+            $resultTglLahir = $stmtTglLahir->get_result()->fetch_assoc();
+            $stmtTglLahir->close();
+
+            $tglLahir = !empty($resultTglLahir['tgl_lahir']) ? $resultTglLahir['tgl_lahir'] : null;
+            if (!empty($tglLahir)) {
+                if ($bind_tgl < $tglLahir) {
+                    return ['status' => false, 'message' => 'Tanggal pemeriksaan tidak boleh lebih awal dari tanggal lahir hewan'];
+                }
+
+                $tglIb = $data['tgl_ib'] ?? null;
+                $tglPerkiraan = $data['tgl_perkiraan'] ?? null;
+                if (!empty($tglIb) && $tglIb < $tglLahir) {
+                    return ['status' => false, 'message' => 'Tanggal IB tidak boleh lebih awal dari tanggal lahir hewan'];
+                }
+
+                if (!empty($tglPerkiraan) && $tglPerkiraan < $tglLahir) {
+                    return ['status' => false, 'message' => 'Tanggal perkiraan lahir tidak boleh lebih awal dari tanggal lahir hewan'];
+                }
+            }
+
             $bind_diagnosis = trim((string)($data['diagnosis'] ?? $check['diagnosis']));
             $bind_tindakan = trim((string)($data['tindakan'] ?? $check['tindakan']));
             $bind_catatan = $data['catatan'] ?? $check['catatan'];

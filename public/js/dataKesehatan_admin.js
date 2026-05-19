@@ -86,6 +86,60 @@ function closeOverlay(id) {
   }
 }
 
+// =====================================================
+// 🧮 SECTION 2.5: IB BUSINESS HELPERS (283 hari)
+// =====================================================
+function formatISODate(dateObj) {
+  // dateObj: Date
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const dd = String(dateObj.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function hitungPerkiraanLahirDariTglIB(tglIb) {
+  if (!tglIb) return '';
+  const dt = new Date(tglIb + 'T00:00:00');
+  if (Number.isNaN(dt.getTime())) return '';
+  dt.setDate(dt.getDate() + 283);
+  return formatISODate(dt);
+}
+
+function ensureStatusIbProsesJikaTglIbAda(tglIbEl, statusIbEl) {
+  if (!tglIbEl || !statusIbEl) return;
+  const tglIb = (tglIbEl.value || '').trim();
+  if (!tglIb) return;
+  const currentStatus = (statusIbEl.value || '').trim();
+  // Jika kosong, default proses
+  if (!currentStatus) statusIbEl.value = 'proses';
+}
+
+function wireAutoCalcTglPerkiraan(formPrefix) {
+  const tglIbEl = document.getElementById(`${formPrefix}TglIb`);
+  const tglPerkiraanEl = document.getElementById(`${formPrefix}TglPerkiraan`);
+  const statusIbEl = document.getElementById(`${formPrefix}StatusIb`);
+
+  if (!tglIbEl || !tglPerkiraanEl) return;
+
+  // set default status ketika tgl_ib diisi
+  ensureStatusIbProsesJikaTglIbAda(tglIbEl, statusIbEl);
+
+  // Auto-calc saat tgl_ib berubah (tgl_perkiraan tetap editable)
+  tglIbEl.addEventListener('change', function () {
+    ensureStatusIbProsesJikaTglIbAda(tglIbEl, statusIbEl);
+    const calculated = hitungPerkiraanLahirDariTglIB(tglIbEl.value);
+    if (calculated) {
+      tglPerkiraanEl.value = calculated;
+    } else {
+      tglPerkiraanEl.value = '';
+    }
+  });
+
+  // Saat user mengubah status, kita tidak memaksa readonly, tapi biarkan input bebas.
+  // Back-end yang akan memastikan tgl_perkiraan hanya disimpan saat status=berhasil.
+}
+
+
 function closeModalOutside(event, overlayId) {
   if (event.target.id === overlayId) closeOverlay(overlayId);
 }
@@ -113,8 +167,12 @@ function openTambah() {
   updateStatusButtons("#tambahOverlay", "sehat");
   document.getElementById("tambahStatusValue").value = "sehat";
   updateFieldRequirements("sehat", "tambah");
+
+  // Default IB: jika admin isi tgl_ib, status akan di-proses otomatis via handler wireAutoCalc
+
   openOverlay("tambahOverlay");
 }
+
 
 function closeTambah() {
   closeOverlay("tambahOverlay");
@@ -148,6 +206,8 @@ function fillEditForm(record) {
   if (!record) return;
 
   // ✅ Cari animal SEKALI saja
+
+
   const animal = window.animalsData?.find(
     (a) => String(a.id_hewan) === String(record.id_hewan),
   );
@@ -469,8 +529,13 @@ function checkReproduksiVisibility(modalId, selectId, sectionId = null) {
 // =====================================================
 
 function initEventListeners() {
+  // IB auto-calc wiring
+  wireAutoCalcTglPerkiraan('tambah');
+  wireAutoCalcTglPerkiraan('edit');
+
   // Form Submission: Loading State
   ["tambahForm", "editKesehatanForm", "deleteKesehatanForm"].forEach(
+
     (formId) => {
       const form = document.getElementById(formId);
       if (form) {

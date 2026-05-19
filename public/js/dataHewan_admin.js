@@ -136,6 +136,31 @@ function updateStatusButtons(scopeSelector, status) {
 }
 
 // --- MODAL: TAMBAH ---
+function applyJenisHewanRuleToTambahForm() {
+  const jenisHewanEl = document.getElementById("tambahJenisHewan") || document.querySelector('#tambahOverlay select[name="jenis_hewan"]');
+  const kelaminEl = document.getElementById("tambahJenisKelamin") || document.querySelector('#tambahOverlay select[name="jenis_kelamin"]');
+
+  if (!jenisHewanEl || !kelaminEl) return;
+
+  const jenisHewanRaw = jenisHewanEl.value;
+  const jenisHewan = String(jenisHewanRaw || "").trim().toLowerCase();
+
+  // Sapi Perah hanya Betina
+  if (jenisHewan === "sapi_perah") {
+    kelaminEl.value = "betina";
+
+    const jantanOpt = kelaminEl.querySelector('option[value="jantan"]');
+    if (jantanOpt) jantanOpt.disabled = true;
+
+    const betinaOpt = kelaminEl.querySelector('option[value="betina"]');
+    if (betinaOpt) betinaOpt.disabled = false;
+  } else {
+    // Sapi PO: izinkan jantan/betina
+    const jantanOpt = kelaminEl.querySelector('option[value="jantan"]');
+    if (jantanOpt) jantanOpt.disabled = false;
+  }
+}
+
 function openTambah() {
   const form = document.getElementById("tambahForm");
   if (form) form.reset();
@@ -145,12 +170,32 @@ function openTambah() {
   const hiddenStatus = document.getElementById("tambahStatusValue");
   if (hiddenStatus) hiddenStatus.value = "produktif";
 
+  // pastikan rule langsung ikut nilai dropdown setelah reset
+  applyJenisHewanRuleToTambahForm();
+
   openOverlay("tambahOverlay");
 }
 
 function closeTambah() {
   closeOverlay("tambahOverlay");
 }
+
+// bind rule untuk dropdown tambah (tanpa nambah bug baru)
+document.addEventListener("DOMContentLoaded", function () {
+  const jenisHewanTambah = document.getElementById("tambahJenisHewan") || document.querySelector('#tambahOverlay select[name="jenis_hewan"]');
+  const kelaminTambah = document.getElementById("tambahJenisKelamin") || document.querySelector('#tambahOverlay select[name="jenis_kelamin"]');
+
+  if (jenisHewanTambah && kelaminTambah) {
+    // jalankan sekali saat halaman siap
+    applyJenisHewanRuleToTambahForm();
+
+    // update saat jenis hewan diganti
+    jenisHewanTambah.addEventListener("change", function () {
+      applyJenisHewanRuleToTambahForm();
+    });
+  }
+});
+
 
 function selectTambahStatus(status, element) {
   document
@@ -162,7 +207,45 @@ function selectTambahStatus(status, element) {
   if (hiddenStatus) hiddenStatus.value = status;
 }
 
+
 // --- MODAL: EDIT ---
+function applyJenisHewanRuleToEditForm() {
+  const jenisHewanEl = document.getElementById("editJenisHewan");
+  const kelaminEl = document.getElementById("editJenisKelamin");
+  const hintEl = document.getElementById("editKelaminHint");
+
+  if (!jenisHewanEl || !kelaminEl) return;
+
+  const jenisHewanRaw = jenisHewanEl.value;
+  const jenisHewan = String(jenisHewanRaw || "").trim().toLowerCase();
+
+  // Rule:
+  // - Sapi Perah  => otomatis Betina (disable pilihan jantan)
+  // - Sapi PO      => pilihan jantan/betina (enable)
+  if (jenisHewan === "sapi_perah") {
+    // paksa nilai kelamin betina + disable option jantan
+    kelaminEl.value = "betina";
+
+    const jantanOpt = kelaminEl.querySelector('option[value="jantan"]');
+    if (jantanOpt) jantanOpt.disabled = true;
+
+    const betinaOpt = kelaminEl.querySelector('option[value="betina"]');
+    if (betinaOpt) betinaOpt.disabled = false;
+  } else if (jenisHewan === "sapi_po") {
+    const jantanOpt = kelaminEl.querySelector('option[value="jantan"]');
+    if (jantanOpt) jantanOpt.disabled = false;
+
+    // jangan paksa kelamin, biarkan nilai dari record/admin
+  }
+
+  if (hintEl) {
+    hintEl.textContent =
+      jenisHewan === "sapi_perah"
+        ? "Untuk Sapi Perah otomatis Betina."
+        : "Untuk Sapi PO boleh Jantan atau Betina.";
+  }
+}
+
 function fillEditForm(record) {
   if (!record) return;
 
@@ -212,6 +295,9 @@ function fillEditForm(record) {
 
   // 5. Visual Button State
   updateStatusButtons("#editOverlay", statusVal);
+
+  // Apply jenis-hewan rule after values are filled
+  applyJenisHewanRuleToEditForm();
 }
 
 function openEdit(trigger) {
@@ -221,6 +307,21 @@ function openEdit(trigger) {
     openOverlay("editOverlay");
   }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  const jenisHewanEl = document.getElementById("editJenisHewan");
+  const kelaminEl = document.getElementById("editJenisKelamin");
+
+  if (jenisHewanEl) {
+    jenisHewanEl.addEventListener("change", function () {
+      // Ensure correct kelamin option when jenis changes
+      applyJenisHewanRuleToEditForm();
+    });
+  }
+
+  // Run once on load (covers cases edit modal opened later)
+  applyJenisHewanRuleToEditForm();
+});
 
 function closeEdit() {
   closeOverlay("editOverlay");
