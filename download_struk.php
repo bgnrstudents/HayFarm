@@ -50,6 +50,29 @@ try {
     $total_formatted = 'Rp ' . number_format((float)$transaksi['total_tagihan'], 0, ',', '.');
     $total_terbilang = terbilang((int)$transaksi['total_tagihan']);
 
+// Ambil logo untuk ditampilkan di PDF (Dompdf paling aman pakai base64)
+    $logoCandidates = [
+        __DIR__ . '/public/images/logo.png',
+        __DIR__ . '/public/images/logo_hayfarm.png',
+        __DIR__ . '/public/images/logo/logo1.png',
+        __DIR__ . '/public/images/logo/logo2.png',
+    ];
+
+    $logoPath = '';
+    foreach ($logoCandidates as $candidate) {
+        $candidateReal = realpath($candidate);
+        if ($candidateReal && file_exists($candidateReal)) {
+            $logoPath = $candidateReal;
+            break;
+        }
+    }
+
+    $logoBase64 = '';
+    if ($logoPath) {
+        $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($logoPath));
+    }
+
+
     $metode = strtoupper($transaksi['metode_pembayaran'] === 'transfer' ? 'Transfer Bank' : 'COD');
     $status = ($transaksi['status_transaksi'] === 'telah_dikonfirmasi') ? 'LUNAS' : 'MENUNGGU VERIFIKASI';
     $status_color = ($transaksi['status_transaksi'] === 'telah_dikonfirmasi') ? '#10B981' : '#F59E0B';
@@ -64,9 +87,9 @@ try {
             body { font-family: Arial, sans-serif; margin: 0; padding: 15px; background: #fff; color: #333; font-size: 13px; }
             .struk { max-width: 380px; margin: 0 auto; border: 2px solid #166534; border-radius: 12px; padding: 15px; }
             .header { text-align: center; border-bottom: 2px solid #166534; padding-bottom: 10px; margin-bottom: 15px; }
-            .logo { width: 70px; height: 70px; margin-bottom: 8px; }
-            .brand { font-size: 22px; font-weight: bold; color: #166534; margin: 0; }
+            .logo { height: 70px; margin-bottom: 8px; }
             .address { font-size: 11px; color: #444; line-height: 1.3; margin-top: 5px; }
+            .real-time { font-size: 11px; color: #555; margin-top: 6px; }
             .date { font-size: 12px; color: #555; margin-top: 8px; }
             .section { margin: 12px 0; }
             .section-title { font-size: 12px; font-weight: bold; color: #166534; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-bottom: 8px; }
@@ -86,14 +109,14 @@ try {
     <body>
         <div class="struk">
             <div class="header">
-                <img src="public/images/logo.png" class="logo" alt="Hay Farm">
-                <div class="brand">HAY FARM</div>
+                <img src="' . ($logoBase64 !== '' ? $logoBase64 : (__DIR__ . '/public/images/logo_hayfarm.png')) . '" class="logo" alt="Hay Farm">
+
                 <div class="address">
                     Jalan Mastrip, Kelurahan Sumbersari<br>
                     Kecamatan Sumbersari, Kabupaten Jember<br>
                     Jawa Timur
                 </div>
-                <div class="date">' . $tanggal . '</div>
+                <div class="date">' . date('d/m/Y') . '</div>
             </div>
 
             <div class="section">
@@ -148,6 +171,7 @@ try {
 
     // Konfigurasi Dompdf
     $options = new Options();
+    $options->set('isRemoteEnabled', true);
     $options->setDefaultFont('Arial');
     $dompdf = new Dompdf($options);
     $dompdf->loadHtml($html);

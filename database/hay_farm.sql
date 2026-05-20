@@ -186,6 +186,7 @@ CREATE TABLE `transaksi` (
   `jumlah_pembelian` float NOT NULL,
   `bukti_pembayaran` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `tgl_transaksi` date NOT NULL,
+  `tgl_verifikasi` datetime DEFAULT NULL,
   `total_tagihan` float NOT NULL,
   `status_transaksi` enum('menunggu_verifikasi','telah_dikonfirmasi','dibatalkan') COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

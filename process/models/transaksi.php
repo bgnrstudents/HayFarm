@@ -402,15 +402,40 @@ class Transaksi
                 throw new Exception('Transaksi sudah diproses sebelumnya');
             }
 
-            $stmt = $this->conn->prepare(
-                "UPDATE transaksi
-                 SET status_transaksi = ?
-                 WHERE id_transaksi = ?"
-            );
-            $stmt->bind_param('si', $status, $id_transaksi);
+            if ($status === 'telah_dikonfirmasi') {
+                $stmt = $this->conn->prepare(
+                    "UPDATE transaksi
+                     SET status_transaksi = ?,
+                         tgl_verifikasi = NOW()
+                     WHERE id_transaksi = ?"
+                );
 
-            if (!$stmt->execute()) {
-                throw new Exception('Gagal update status: ' . $stmt->error);
+                if ($stmt === false) {
+                    // Fallback untuk database yang belum memiliki kolom tgl_verifikasi
+                    $stmt = $this->conn->prepare(
+                        "UPDATE transaksi
+                         SET status_transaksi = ?
+                         WHERE id_transaksi = ?"
+                    );
+                }
+
+                if ($stmt === false) {
+                    throw new Exception('Gagal menyiapkan query update status: ' . $this->conn->error);
+                }
+
+                $stmt->bind_param('si', $status, $id_transaksi);
+            } else {
+                $stmt = $this->conn->prepare(
+                    "UPDATE transaksi
+                     SET status_transaksi = ?
+                     WHERE id_transaksi = ?"
+                );
+                $stmt->bind_param('si', $status, $id_transaksi);
+            }
+
+            if ($stmt === false || !$stmt->execute()) {
+                $errorMessage = $stmt === false ? $this->conn->error : $stmt->error;
+                throw new Exception('Gagal update status: ' . $errorMessage);
             }
 
             if ($status === 'dibatalkan') {
