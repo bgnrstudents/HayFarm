@@ -299,10 +299,10 @@ class Transaksi
 
         // Cek Jenis Produk
         if (($produk['jenis_produk'] ?? '') === 'susu') {
-            return 'public/images/farel_perah.jpg';
+            return 'public/images/susu.jpg';
         }
         if (($produk['jenis_produk'] ?? '') === 'rumput') {
-            return 'public/images/bgheader_produk.png';
+            return 'public/images/rumput.jpg';
         }
 
         // Cek Foto Hewan
@@ -311,7 +311,7 @@ class Transaksi
             if (str_starts_with($foto, 'public/') || str_starts_with($foto, 'uploads/')) {
                 return $foto;
             }
-            return 'public/' . $foto; // Asumsi path relatif
+            return 'uploads/hewan/' . $foto; // Asumsi path relatif untuk hewan
         }
 
         return $default;
