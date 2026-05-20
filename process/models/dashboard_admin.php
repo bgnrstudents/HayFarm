@@ -106,14 +106,17 @@ class Dashboard
     }
 
     /**
-     * Notifikasi: Vaksinasi diperlukan (hewan dengan status 'perawatan' atau 'observasi')
+     * Notifikasi: Vaksinasi diperlukan (hewan dengan status kesehatan perawatan)
      */
     public function getVaccinationNeededCount(): int
     {
         $stmt = $this->conn->prepare("
-            SELECT COUNT(DISTINCT id_hewan) as c 
-            FROM data_kesehatan 
-            WHERE status_kesehatan IN ('perawatan', 'observasi')
+            SELECT COUNT(DISTINCT k.id_hewan) as c
+            FROM data_kesehatan k
+            INNER JOIN data_ternak t ON k.id_hewan = t.id_hewan
+            WHERE k.status_kesehatan = 'perawatan'
+              AND (k.is_deleted IS NULL OR k.is_deleted = 0)
+              AND (t.is_deleted IS NULL OR t.is_deleted = 0)
         ");
         $stmt->execute();
         return (int) $stmt->get_result()->fetch_assoc()['c'];
