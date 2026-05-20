@@ -77,6 +77,7 @@ try {
                 'id_hewan'       => ($_POST['jenis_produk'] === 'hewan' && !empty($_POST['id_hewan'])) ? (int)$_POST['id_hewan'] : null,
                 'harga'          => floatval($_POST['harga']),
                 'stok'           => (int)$_POST['stok'],
+                'tgl_produksi'   => ($_POST['jenis_produk'] === 'susu' && !empty($_POST['tgl_produksi'])) ? $_POST['tgl_produksi'] : null,
                 'tgl_kadaluarsa' => !empty($_POST['tgl_kadaluarsa']) ? $_POST['tgl_kadaluarsa'] : '2099-12-31',
                 'status_produk'  => $status_db,
             ];
@@ -150,8 +151,10 @@ try {
 
             // ✅ NORMALISASI tgl_kadaluarsa: hanya susu yang butuh, lainnya default
             if ($_POST['jenis_produk'] === 'susu' && !empty($_POST['tgl_kadaluarsa'])) {
+                $data['tgl_produksi'] = !empty($_POST['tgl_produksi']) ? $_POST['tgl_produksi'] : null;
                 $data['tgl_kadaluarsa'] = $_POST['tgl_kadaluarsa'];
             } else {
+                $data['tgl_produksi'] = null;
                 $data['tgl_kadaluarsa'] = '2099-12-31'; // Default untuk non-susu atau kosong
             }
 
@@ -172,6 +175,16 @@ try {
             }
 
             $result = $produk_model->update($id, $data);
+
+            if ($result['status'] && ($_POST['jenis_produk'] ?? '') === 'hewan' && !empty($_POST['id_hewan']) && isset($_POST['berat_badan']) && $_POST['berat_badan'] !== '') {
+                $berat_badan = (float) $_POST['berat_badan'];
+                if ($berat_badan > 0) {
+                    $stmt_update_berat = $connection->prepare("UPDATE data_ternak SET berat_badan = ? WHERE id_hewan = ?");
+                    $id_hewan_update = (int) $_POST['id_hewan'];
+                    $stmt_update_berat->bind_param('di', $berat_badan, $id_hewan_update);
+                    $stmt_update_berat->execute();
+                }
+            }
 
             // ✅ Debug: log result jika gagal
             if (!$result['status']) {

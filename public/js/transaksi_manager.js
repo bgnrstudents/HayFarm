@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                                 return String(value);
                             },
-                            autoSkip: true,
+                            autoSkip: false,
                             maxRotation: 0,
                             minRotation: 0
                         },

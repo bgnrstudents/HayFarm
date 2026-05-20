@@ -115,23 +115,9 @@ abstract class AbstractManagerReport
 
     public function getMonthOptions(): array
     {
-        $months = [];
-
-        foreach ($this->getBaseRows() as $row) {
-            $date = $this->getDateValue($row);
-            if (!$date || !strtotime($date)) {
-                continue;
-            }
-
-            $month = (int) date('n', strtotime($date));
-            $months[$month] = self::monthName($month);
-        }
-
-        ksort($months);
-
         $options = [['value' => '', 'label' => 'Semua Bulan']];
-        foreach ($months as $value => $label) {
-            $options[] = ['value' => (string) $value, 'label' => $label];
+        for ($month = 1; $month <= 12; $month++) {
+            $options[] = ['value' => (string) $month, 'label' => self::monthName($month)];
         }
 
         return $options;
@@ -150,10 +136,16 @@ abstract class AbstractManagerReport
             $years[(int) date('Y', strtotime($date))] = true;
         }
 
-        krsort($years);
+        $currentYear = (int) date('Y');
+        if ($years === []) {
+            $years[$currentYear] = true;
+        }
+
+        $minYear = min(array_keys($years));
+        $maxYear = max($currentYear, max(array_keys($years)));
 
         $options = [['value' => '', 'label' => 'Semua Tahun']];
-        foreach (array_keys($years) as $year) {
+        for ($year = $maxYear; $year >= $minYear; $year--) {
             $options[] = ['value' => (string) $year, 'label' => (string) $year];
         }
 

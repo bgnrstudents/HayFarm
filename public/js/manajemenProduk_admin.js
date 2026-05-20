@@ -73,6 +73,7 @@ function renderProducts() {
             <td>${product.name}</td>
             <td>${formatDate(product.date)}</td>
             <td>${formatDate(product.expiryDate)}</td>
+            <td>${product.type === "Hewan" && product.beratBadan ? `${product.beratBadan} kg` : "-"}</td>
             <td>${needsPriceInput(product) ? `<span class="price-needed">${product.price}</span>` : product.price}</td>
             <td>${product.stock}</td>
             <td><span class="status-badge ${product.status === "Tersedia" ? "status-tersedia" : "status-tidak-tersedia"}">${product.status}</span></td>
@@ -454,11 +455,13 @@ function readProductForm(mode, type) {
   const expiryDate =
     type === "susu" ? getDateInputIso(`${mode}-tgl-expiry-susu`) : "";
   const idHewan = type === "hewan" ? getValue(`${mode}-id-hewan`) : "";
+  const beratBadan = type === "hewan" ? getValue(`${mode}-berat-hewan`) : "";
 
   const data = {
     type: label,
     name,
     idHewan,
+    beratBadan,
     date,
     expiryDate,
     price,
@@ -494,6 +497,9 @@ function fillEditForm(product, type) {
     setValue(`edit-id-hewan`, product.idHewan);
   }
   setValue(`edit-harga-${type}`, product.price);
+  if (type === "hewan") {
+    setValue("edit-berat-hewan", product.beratBadan || "");
+  }
   setValue(
     `edit-stok-${type}`,
     type === "hewan" ? 1 : parseInt(product.stock, 10) || "",
@@ -505,7 +511,7 @@ function fillEditForm(product, type) {
 
   if (type === "susu") {
     setValue("edit-tgl-produksi-susu", normalizeDateValue(product.date));
-    setValue("edit-tgl-expiry-susu", addDays(product.date, 7));
+    setValue("edit-tgl-expiry-susu", normalizeDateValue(product.expiryDate));
   }
 
   const statusInput = document.getElementById(`edit-status-${type}`);
@@ -746,6 +752,10 @@ function renderPreviewByType(product) {
     );
     setText("previewNoKandang", product.noKandang || "-");
     setText(
+      "previewBeratBadan",
+      product.beratBadan ? `${product.beratBadan} kg` : "-",
+    );
+    setText(
       "previewTglLahir",
       product.tglLahir ? formatDate(product.tglLahir) : "-",
     );
@@ -781,9 +791,9 @@ function bindMilkExpiry(mode) {
     production.value = todayIsoDate();
   }
 
-  production.addEventListener("change", () => syncMilkExpiry(mode));
-  production.addEventListener("input", () => syncMilkExpiry(mode));
-  syncMilkExpiry(mode);
+  if (!expiry.value) {
+    syncMilkExpiry(mode);
+  }
 }
 
 function syncMilkExpiry(mode) {
@@ -796,7 +806,9 @@ function syncMilkExpiry(mode) {
   }
 
   const productionDate = getDateInputIso(`${mode}-tgl-produksi-susu`);
-  expiry.value = productionDate ? addDays(productionDate, 7) : "";
+  if (!expiry.value) {
+    expiry.value = productionDate ? addDays(productionDate, 7) : "";
+  }
 }
 
 function addDays(dateString, days) {
@@ -955,8 +967,12 @@ function submitProductToServer(action, product) {
     id_hewan: product.idHewan || "",
     harga: priceNumber(product.price),
     stok: parseInt(product.stock, 10) || 0,
+    tgl_produksi:
+      product.type === "Susu" ? normalizeDateValue(product.date) : "",
     tgl_kadaluarsa:
       product.type === "Susu" ? normalizeDateValue(product.expiryDate) : "",
+    berat_badan:
+      product.type === "Hewan" ? product.beratBadan || "" : "",
     status_produk: product.status || "Tersedia",
   };
 

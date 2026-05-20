@@ -39,10 +39,13 @@ function normalizeAdminProductImage(?string $foto): string
 }
 
 $produkData = array_map(function ($row) {
-    // Determine production date for milk based on expiry (-7 days)
     $date = '';
-    if ($row['jenis_produk'] === 'susu' && !empty($row['tgl_kadaluarsa'])) {
-        $date = date('Y-m-d', strtotime($row['tgl_kadaluarsa'] . ' -7 days'));
+    if ($row['jenis_produk'] === 'susu') {
+        if (!empty($row['tgl_produksi'])) {
+            $date = $row['tgl_produksi'];
+        } elseif (!empty($row['tgl_kadaluarsa']) && $row['tgl_kadaluarsa'] !== '2099-12-31') {
+            $date = date('Y-m-d', strtotime($row['tgl_kadaluarsa'] . ' -7 days'));
+        }
     }
 
     $image = '';
@@ -56,6 +59,7 @@ $produkData = array_map(function ($row) {
         'kodeHewan'  => $row['kode_hewan'] ?? '',
         'jenisHewan' => $row['jenis_hewan'] ?? '',
         'statusHewan' => $row['status_hewan'] ?? '',
+        'beratBadan' => isset($row['berat_badan']) ? (float)$row['berat_badan'] : null,
         'noKandang'  => $row['no_kandang'] ?? '-',
         'tglLahir'   => $row['tgl_lahir'] ?? '',
         'type' => ucwords($row['jenis_produk']),
@@ -183,6 +187,7 @@ $produkData = array_map(function ($row) {
                         <th>Nama Produk</th>
                         <th>Tanggal Produksi</th>
                         <th>Tanggal Kadaluwarsa</th>
+                        <th>BB</th>
                         <th>Harga</th>
                         <th>Stok</th>
                         <th>Status</th>
@@ -435,6 +440,10 @@ $produkData = array_map(function ($row) {
                     <div class="preview-info-box preview-hewan-only" style="display: none;">
                         <span class="preview-label">No. Kandang</span>
                         <span class="preview-value" id="previewNoKandang">-</span>
+                    </div>
+                    <div class="preview-info-box preview-hewan-only" style="display: none;">
+                        <span class="preview-label">Berat Badan</span>
+                        <span class="preview-value" id="previewBeratBadan">-</span>
                     </div>
                     <div class="preview-info-box preview-hewan-only" style="display: none;">
                         <span class="preview-label">Tanggal Lahir</span>
