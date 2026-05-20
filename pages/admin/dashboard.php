@@ -100,10 +100,10 @@ $menungguVerifikasi = $dashboard->getPendingVerificationCount();
             <a class="notification-card card-birth" href="data_kesehatan.php">
                 <div>
                     <div class="card-title">
-                        <span>Hewan hamil bulan ini</span>
+                        <span>Hewan hamil</span>
                         <span class="icon-alert"></span>
                     </div>
-                    <div class="card-description">Terverifikasi dari data kesehatan</div>
+                    <div class="card-description">Status IB berhasil dari data kesehatan</div>
                 </div>
                 <div class="card-number">
                     <div class="card-number-value text-green"><?= $hewanHamilBulanIni ?></div>
