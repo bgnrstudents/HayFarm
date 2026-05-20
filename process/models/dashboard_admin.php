@@ -39,13 +39,12 @@ class Dashboard
         $stmt->execute();
         $stats['jumlah_hewan'] = (int) $stmt->get_result()->fetch_assoc()['c'];
 
-        // Hewan Sakit per Hari dari Data Kesehatan Hewan
+        // Hewan Sakit per Hari dari Data Kesehatan Hewan (status dalam perawatan)
         $stmt = $this->conn->prepare("
             SELECT COUNT(DISTINCT k.id_hewan) as c
             FROM data_kesehatan k
             INNER JOIN data_ternak t ON k.id_hewan = t.id_hewan
-            WHERE k.status_kesehatan != 'sehat'
-              AND k.tgl_pemeriksaan = CURDATE()
+            WHERE k.status_kesehatan = 'perawatan'
               AND (k.is_deleted IS NULL OR k.is_deleted = 0)
               AND (t.is_deleted IS NULL OR t.is_deleted = 0)
         ");
