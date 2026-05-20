@@ -11,6 +11,72 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    const formatMonthLabels = function (labels) {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const monthMap = {
+            'januari': 1, 'februari': 2, 'maret': 3, 'april': 4, 'mei': 5, 'juni': 6,
+            'juli': 7, 'agustus': 8, 'september': 9, 'oktober': 10, 'november': 11, 'desember': 12,
+            'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'mei': 5, 'jun': 6,
+            'jul': 7, 'agu': 8, 'aug': 8, 'sep': 9, 'okt': 10, 'oct': 10, 'nov': 11, 'des': 12, 'dec': 12
+        };
+
+        return labels.map(function (label) {
+            if (label === null || label === undefined) return '';
+            const s = String(label).trim();
+
+            // ISO-like: 2026-03 or 2026-03-01
+            const isoMatch = s.match(/^(\d{4})-(\d{2})/);
+            if (isoMatch) {
+                const year = isoMatch[1];
+                const month = parseInt(isoMatch[2], 10);
+                if (month >= 1 && month <= 12) return monthNames[month - 1] + '-' + year.slice(2);
+            }
+
+            // Patterns like "Januari 2026" or "Jan 2026"
+            const wordYear = s.match(/([A-Za-zÀ-ÖØ-öø-ÿ]+)\s+(\d{4})/);
+            if (wordYear) {
+                const mon = wordYear[1].toLowerCase();
+                const year = wordYear[2];
+                const mIdx = monthMap[mon];
+                if (mIdx) return monthNames[mIdx - 1] + '-' + year.slice(2);
+            }
+
+            // If single numeric month like 3 or 03
+            const numeric = Number(s);
+            if (!Number.isNaN(numeric) && numeric >= 1 && numeric <= 12) {
+                return monthNames[numeric - 1];
+            }
+
+            // Fallback: return original shorted if contains year at end (e.g., "Maret-2026")
+            const dashYear = s.match(/([A-Za-zÀ-ÖØ-öø-ÿ]+)[\-\s]?(\d{2,4})$/);
+            if (dashYear) {
+                const mon = dashYear[1].toLowerCase();
+                const yr = dashYear[2];
+                const mIdx = monthMap[mon];
+                if (mIdx) return monthNames[mIdx - 1] + '-' + (yr.length === 4 ? yr.slice(2) : yr);
+            }
+
+            return s;
+        });
+    };
+
+    const formatReproLabels = function (labels) {
+        const map = {
+            'berhasil': 'Berhasil',
+            'tdk_berhasil': 'Tidak Berhasil',
+            'tidak_berhasil': 'Tidak Berhasil',
+            'proses': 'Proses IB',
+            'proses_ib': 'Proses IB',
+            '': 'Belum Ada'
+        };
+
+        return labels.map(function (label) {
+            if (label === null || label === undefined) return '';
+            const key = String(label).trim().toLowerCase();
+            return map[key] || (key.charAt(0).toUpperCase() + key.slice(1));
+        });
+    };
+
     const buildLegend = function (chart) {
         const data = chart.data;
         return data.labels.map(function (label, index) {
@@ -92,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
         new Chart(trendCtx, {
             type: 'line',
             data: {
-                labels: pageData.healthTrend?.labels || [],
+                labels: formatMonthLabels(pageData.healthTrend?.labels || []),
                 datasets: [{
                     data: pageData.healthTrend?.values || [],
                     borderColor: '#198754',
@@ -118,7 +184,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 scales: {
-                    x: buildAxis(false),
+                    x: {
+                        type: 'category',
+                        ticks: {
+                            color: labelColor,
+                            padding: 10
+                        },
+                        grid: {
+                            color: gridColor,
+                            drawBorder: false
+                        }
+                    },
                     y: {
                         ...buildAxis(false),
                         beginAtZero: true,
@@ -138,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const reproCtx = document.getElementById('dashboardReproChart');
     if (reproCtx) {
-        const labels = pageData.reproduction?.labels || [];
+        const labels = formatReproLabels(pageData.reproduction?.labels || []);
         new Chart(reproCtx, {
             type: 'bar',
             data: {
@@ -155,7 +231,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 plugins: { legend: { display: false } }
                 ,
                 scales: {
-                    x: buildAxis(false),
+                    x: {
+                        type: 'category',
+                        ticks: {
+                            color: labelColor,
+                            padding: 10
+                        },
+                        grid: {
+                            color: gridColor,
+                            drawBorder: false
+                        }
+                    },
                     y: {
                         ...buildAxis(false),
                         beginAtZero: true,

@@ -10,6 +10,56 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    const formatReproLabels = function (labels) {
+        const map = {
+            'berhasil': 'Berhasil',
+            'tdk_berhasil': 'Tidak Berhasil',
+            'tidak_berhasil': 'Tidak Berhasil',
+            'proses': 'Proses IB',
+            'proses_ib': 'Proses IB',
+            '': 'Belum Ada'
+        };
+
+        return labels.map(function (label) {
+            if (label === null || label === undefined) return '';
+            const key = String(label).trim().toLowerCase();
+            return map[key] || (key.charAt(0).toUpperCase() + key.slice(1));
+        });
+    };
+
+    const formatMonthLabels = function (labels) {
+        const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        return labels.map(function (label) {
+            if (label === null || label === undefined) return '';
+            const s = String(label).trim();
+
+            // ISO-like: 2026-03 or 2026-03-01
+            const isoMatch = s.match(/^(\d{4})-(\d{2})/);
+            if (isoMatch) {
+                const year = isoMatch[1];
+                const month = parseInt(isoMatch[2], 10);
+                if (month >= 1 && month <= 12) return monthNames[month - 1] + '-' + year.slice(2);
+            }
+
+            const wordYear = s.match(/([A-Za-zÀ-ÖØ-öø-ÿ]+)\s+(\d{4})/);
+            if (wordYear) {
+                const mon = wordYear[1].toLowerCase();
+                const year = wordYear[2];
+                const map = { 'jan':1,'feb':2,'mar':3,'apr':4,'mei':5,'jun':6,'jul':7,'agu':8,'sep':9,'okt':10,'nov':11,'des':12 };
+                const mIdx = map[mon.slice(0,3)] || map[mon];
+                if (mIdx) return monthNames[mIdx - 1] + '-' + year.slice(2);
+            }
+
+            // If single numeric month like 3 or 03
+            const numeric = Number(s);
+            if (!Number.isNaN(numeric) && numeric >= 1 && numeric <= 12) {
+                return monthNames[numeric - 1];
+            }
+
+            return s;
+        });
+    };
+
     const buildLegend = function (chart) {
         const data = chart.data;
         return data.labels.map(function (label, index) {
@@ -39,10 +89,18 @@ document.addEventListener('DOMContentLoaded', function () {
             color: labelColor,
             padding: 10,
             callback: function (value) {
-                const n = Number(value);
-                if (!Number.isFinite(n)) return 0;
-                return parseInt(n, 10);
+                if (value === null || value === undefined) return '';
+
+                const strValue = String(value).trim();
+                const idx = parseInt(strValue, 10);
+                if (!Number.isNaN(idx) && String(idx) === strValue) {
+                    const monthLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+                    return monthLabels[idx] ?? strValue;
+                }
+
+                return strValue;
             }
+
         },
         grid: {
             color: gridColor,
@@ -51,13 +109,20 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     const integerYAxis = {
-        ...baseAxis,
-        beginAtZero: true,
         ticks: {
-            ...baseAxis.ticks,
+            color: labelColor,
+            padding: 10,
             stepSize: 1,
-            precision: 0
+            precision: 0,
+            callback: function (value) {
+                return Number(value).toFixed(0);
+            }
         },
+        grid: {
+            color: gridColor,
+            drawBorder: false
+        },
+        beginAtZero: true,
         suggestedMin: 0
     };
 
@@ -94,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const reproCtx = document.getElementById('populasiReproChart');
     if (reproCtx) {
-        const labels = pageData.reproduction?.labels || [];
+        const labels = formatReproLabels(pageData.reproduction?.labels || []);
         const rawValues = pageData.reproduction?.values || [];
         const values = rawValues.map(function (v) {
             const n = Number(v);
@@ -117,7 +182,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: baseAxis,
+                    x: {
+                        type: 'category',
+                        ticks: {
+                            color: labelColor,
+                            padding: 10
+                        },
+                        grid: {
+                            color: gridColor,
+                            drawBorder: false
+                        }
+                    },
                     y: integerYAxis
                 }
             }
@@ -126,37 +201,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const trendCtx = document.getElementById('populasiTrendChart');
     if (trendCtx) {
+        const trendDatasets = (pageData.trend?.datasets || []).map(function (ds, index) {
+            return {
+                label: ds.label || '',
+                data: (ds.data || []).map(function (v) {
+                    const n = Number(v);
+                    if (!Number.isFinite(n)) return 0;
+                    return parseInt(n, 10);
+                }),
+                borderColor: palette[index % palette.length],
+                backgroundColor: 'transparent',
+                fill: false,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            };
+        });
+
         new Chart(trendCtx, {
-            type: 'line',
+            type: 'bar',
             data: {
-                labels: pageData.trend?.labels || [],
-                datasets: [{
-                    data: (pageData.trend?.values || []).map(function (v) {
-                        const n = Number(v);
-                        if (!Number.isFinite(n)) return 0;
-                        return parseInt(n, 10);
-                    }),
-                    borderColor: '#198754',
-                    backgroundColor: '#d1e7dd',
-                    fill: true,
-                    tension: 0.4
-                }]
+                labels: formatMonthLabels(pageData.trend?.labels || []),
+                datasets: trendDatasets.map(function (dataset) {
+                    return {
+                        ...dataset,
+                        backgroundColor: dataset.borderColor,
+                        borderColor: dataset.borderColor,
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.75,
+                        fill: true
+                    };
+                })
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                elements: {
-                    line: {
-                        borderWidth: 3,
-                        tension: 0.4
-                    },
-                    point: {
-                        radius: 4,
-                        hoverRadius: 6,
-                        backgroundColor: '#198754'
-                    }
-                },
+                plugins: { legend: { display: true } },
                 scales: {
                     x: baseAxis,
                     y: integerYAxis

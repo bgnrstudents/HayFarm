@@ -571,37 +571,96 @@ final class PopulationReport extends AbstractManagerReport
     {
         $rows = $this->getRows();
         $statusCounts = [];
-        $reproductionCounts = [];
 
         foreach ($rows as $row) {
             $statusCounts[$row['status_populasi']] = ($statusCounts[$row['status_populasi']] ?? 0) + 1;
+        }
 
-            // Status reproduksi hanya dihitung jika benar-benar ada data reproduksi
-            $reproStatus = $row['status_reproduksi'] ?? null;
-            if ($reproStatus === null || $reproStatus === '') {
+        $reproductionModel = new Reproduksi($this->db);
+        $reproductionCounts = [];
+
+        foreach ($reproductionModel->getAll() as $row) {
+            $status = trim((string) ($row['status_ib'] ?? ''));
+            if ($status === '') {
                 continue;
             }
 
-            $reproductionCounts[$reproStatus] = ($reproductionCounts[$reproStatus] ?? 0) + 1;
-        }
+            $timestamp = $row['tgl_ib'] && strtotime($row['tgl_ib']) ? strtotime($row['tgl_ib']) : null;
+            if ($this->filters->month !== null && ($timestamp === null || (int) date('n', $timestamp) !== $this->filters->month)) {
+                continue;
+            }
+            if ($this->filters->year !== null && ($timestamp === null || (int) date('Y', $timestamp) !== $this->filters->year)) {
+                continue;
+            }
 
+            $reproductionCounts[$status] = ($reproductionCounts[$status] ?? 0) + 1;
+        }
 
         return [
             'status' => ['labels' => array_keys($statusCounts), 'values' => array_values($statusCounts)],
-            // paksa nilai chart reproduksi integer (menghindari decimal/double)
+            // Status reproduksi dihitung dari data IB (`tgl_ib`) sesuai filter periode
             'reproduction' => [
                 'labels' => array_keys($reproductionCounts),
                 'values' => array_map(static fn($v): int => (int) $v, array_values($reproductionCounts)),
             ],
-            // Trend penjualan = uang masuk (total_tagihan) dari transaksi yang sudah terverifikasi (telah_dikonfirmasi)
-            'trend' => $this->buildLastSixMonthTrend(
-                $rows,
-                static fn(array $row): float => ((string) ($row['status'] ?? $row['status_transaksi'] ?? '')) === 'Selesai'
-                    ? (float) ($row['total_harga_raw'] ?? 0)
-                    : 0
-            ),
+            'trend' => $this->buildPopulationTrend($rows),
+        ];
+    }
 
+    protected function buildPopulationTrend(array $rows): array
+    {
+        $groups = [];
+        $types = [];
 
+        foreach ($rows as $row) {
+            $date = $this->getDateValue($row);
+            if (!$date || !strtotime($date)) {
+                continue;
+            }
+
+            $yearMonth = date('Y-m', strtotime($date));
+            $jenis = trim((string) ($row['jenis'] ?? ''));
+            if ($jenis === '') {
+                continue;
+            }
+
+            $groups[$yearMonth][$jenis] = ($groups[$yearMonth][$jenis] ?? 0) + 1;
+            $types[$jenis] = true;
+        }
+
+        ksort($groups);
+        $groups = array_slice($groups, -6, null, true);
+
+        $preferredOrder = ['Sapi Perah', 'Sapi PO'];
+        $typeKeys = array_values(array_unique(array_merge(
+            array_values(array_intersect($preferredOrder, array_keys($types))),
+            array_values(array_diff(array_keys($types), $preferredOrder))
+        )));
+
+        $labels = [];
+        $datasets = [];
+        $rawData = [];
+
+        foreach ($groups as $yearMonth => $counts) {
+            $year = substr($yearMonth, 0, 4);
+            $month = (int) substr($yearMonth, 5, 2);
+            $labels[] = sprintf('%s-%s', substr(self::monthName($month), 0, 3), substr($year, -2));
+
+            foreach ($typeKeys as $type) {
+                $rawData[$type][] = $counts[$type] ?? 0;
+            }
+        }
+
+        foreach ($typeKeys as $type) {
+            $datasets[] = [
+                'label' => $type,
+                'data' => $rawData[$type] ?? [],
+            ];
+        }
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
         ];
     }
 
@@ -689,7 +748,7 @@ final class PopulationReport extends AbstractManagerReport
 
     protected function getDateValue(array $row): ?string
     {
-        return $row['tgl_lahir'] ?? null;
+        return $row['tanggal_lahir'] ?? $row['tgl_lahir'] ?? null;
     }
 
     protected function getCategoryValuesForRow(array $row): array
