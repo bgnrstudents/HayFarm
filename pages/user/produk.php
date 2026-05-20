@@ -228,6 +228,9 @@ foreach ($dataRaw as $row) {
                         <button class="btn btn-filter-apply w-100">
                             Terapkan Filter
                         </button>
+                        <button class="btn btn-filter-reset w-100 mt-2" type="button">
+                            Reset Filter
+                        </button>
 
                         <div class="logo-sidebar mt-4 text-center">
                             <img src="public/images/logo_hayfarm.png" alt="Logo HayFarm" class="img-fluid" style="max-width: 160px; opacity: 0.75;">
@@ -839,6 +842,7 @@ foreach ($dataRaw as $row) {
             document.querySelectorAll('.quantity-control').forEach(syncQuantityState);
 
             const btnApply = document.querySelector('.btn-filter-apply');
+            const btnReset = document.querySelector('.btn-filter-reset');
             const cards = document.querySelectorAll('#product-grid .col');
 
             const fw0 = document.getElementById('fw0');
@@ -935,8 +939,22 @@ foreach ($dataRaw as $row) {
                 }
             }
 
+            function resetFilter() {
+                if (fw0) fw0.checked = true;
+                fwOthers.forEach(cb => {
+                    if (cb) cb.checked = false;
+                });
+
+                if (priceSelect) priceSelect.value = '';
+                if (st1) st1.checked = true;
+                if (st2) st2.checked = false;
+
+                applyFilter();
+            }
+
             // Jalankan filter saat tombol ditekan
             if (btnApply) btnApply.addEventListener('click', applyFilter);
+            if (btnReset) btnReset.addEventListener('click', resetFilter);
 
             // Karena default di HTML 'fw0' checked, rapikan dulu onload
             if (fw0 && fw0.checked) fwOthers.forEach(cb => {

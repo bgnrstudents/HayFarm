@@ -178,6 +178,22 @@ body {
   color: #fff;
 }
 
+.btn-filter-reset {
+  background-color: #eef4ef;
+  color: var(--color-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 50px;
+  padding: 10px 0;
+  border: 1px solid #c8dece;
+  transition: all 0.25s ease;
+}
+
+.btn-filter-reset:hover {
+  background-color: #dfece2;
+  color: var(--color-secondary);
+}
+
 .filter-toggle-btn {
   display: flex;
   align-items: center;
