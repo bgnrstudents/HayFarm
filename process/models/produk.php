@@ -7,6 +7,17 @@ class Produk
     public function __construct($db)
     {
         $this->conn = $db;
+        $this->ensureProductionDateColumn();
+    }
+
+    private function ensureProductionDateColumn(): void
+    {
+        $result = $this->conn->query("SHOW COLUMNS FROM " . $this->table . " LIKE 'tgl_produksi'");
+        if ($result && $result->num_rows > 0) {
+            return;
+        }
+
+        $this->conn->query("ALTER TABLE " . $this->table . " ADD COLUMN tgl_produksi date NULL AFTER satuan");
     }
 
     // Read All
@@ -29,7 +40,7 @@ class Produk
 
         // Query dengan data kesehatan terbaru per hewan.
         $query = "SELECT p.*, 
-                     t.foto_hewan, t.kode_hewan, t.tgl_lahir, t.no_kandang, t.jenis_hewan, t.status_hewan,
+                     t.foto_hewan, t.kode_hewan, t.tgl_lahir, t.no_kandang, t.jenis_hewan, t.status_hewan, t.berat_badan,
                      kh.status_kesehatan as status_kesehatan_terakhir,
                      kh.tgl_pemeriksaan as tgl_pemeriksaan_terakhir,
                      kh.catatan as catatan_kesehatan_terakhir
@@ -74,7 +85,7 @@ class Produk
     public function getAllForUserView(): array
     {
         $query = "SELECT p.*, 
-                     t.foto_hewan, t.kode_hewan, t.tgl_lahir, t.no_kandang, t.jenis_hewan, t.status_hewan,
+                     t.foto_hewan, t.kode_hewan, t.tgl_lahir, t.no_kandang, t.jenis_hewan, t.status_hewan, t.berat_badan,
                      kh.status_kesehatan as status_kesehatan_terakhir,
                      kh.tgl_pemeriksaan as tgl_pemeriksaan_terakhir,
                      kh.catatan as catatan_kesehatan_terakhir
@@ -145,6 +156,7 @@ class Produk
             $stok = isset($data['stok']) ? (int)$data['stok'] : 1;
             $satuan = $data['satuan'] ?? '';
             $tgl_kadaluarsa = !empty($data['tgl_kadaluarsa']) ? $data['tgl_kadaluarsa'] : '2099-12-31';
+            $tgl_produksi = ($data['jenis_produk'] === 'susu' && !empty($data['tgl_produksi'])) ? $data['tgl_produksi'] : null;
             $deskripsi = $data['deskripsi'] ?? '';
 
             $raw_status = $data['status_produk'] ?? 'tersedia';
@@ -167,20 +179,21 @@ class Produk
 
             // Insert Query
             $query = "INSERT INTO " . $this->table . " 
-                      (id_hewan, jenis_produk, nama_produk, harga, stok, satuan, tgl_kadaluarsa, deskripsi, status_produk) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                      (id_hewan, jenis_produk, nama_produk, harga, stok, satuan, tgl_produksi, tgl_kadaluarsa, deskripsi, status_produk) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $stmt = $this->conn->prepare($query);
 
             // i=integer, s=string, d=double (untuk float)
             $stmt->bind_param(
-                "issdissss",
+                "issdisssss",
                 $id_hewan,
                 $data['jenis_produk'],
                 $data['nama_produk'],
                 $data['harga'],
                 $stok,
                 $satuan,
+                $tgl_produksi,
                 $tgl_kadaluarsa,
                 $deskripsi,
                 $status_produk
@@ -219,6 +232,11 @@ class Produk
             }
 
             // ✅ Bind variables untuk prepared statement (hindari reference issue)
+            $bind_tgl_produksi = $data['tgl_produksi'] ?? ($check['tgl_produksi'] ?? null);
+            if (($data['jenis_produk'] ?? $check['jenis_produk']) !== 'susu' || $bind_tgl_produksi === '') {
+                $bind_tgl_produksi = null;
+            }
+
             $bind_id_hewan = isset($data['id_hewan']) ? $data['id_hewan'] : $check['id_hewan'];
             $bind_jenis = $data['jenis_produk'] ?? $check['jenis_produk'];
             $bind_nama = $data['nama_produk'] ?? $check['nama_produk'];
@@ -245,6 +263,7 @@ class Produk
                   harga = ?, 
                   stok = ?, 
                   satuan = ?, 
+                  tgl_produksi = ?, 
                   tgl_kadaluarsa = ?, 
                   deskripsi = ?, 
                   status_produk = ? 
@@ -258,13 +277,14 @@ class Produk
 
             // ✅ Bind parameter: PERHATIKAN tgl_kadaluarsa pakai $bind_tgl (bukan $bind['...'])
             $stmt->bind_param(
-                "issdissssi",
+                "issdisssssi",
                 $bind_id_hewan,      // i
                 $bind_jenis,         // s
                 $bind_nama,          // s
                 $bind_harga,         // d
                 $bind_stok,          // i
                 $bind_satuan,        // s
+                $bind_tgl_produksi,  // s
                 $bind_tgl,           // s ✅ PAKAI VARIABEL YANG SUDAH DINORMALISASI
                 $bind_desc,          // s
                 $status_produk,      // s
@@ -398,3 +418,4 @@ class Produk
         return $stmt->get_result()->num_rows > 0;
     }
 }
+

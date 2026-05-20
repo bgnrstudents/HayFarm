@@ -443,13 +443,14 @@ function esc($str)
                         <th>Tindakan</th>
                         <th>IB ke-</th>
                         <th>Status IB</th>
+                        <th>Perkiraan Lahir</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="kesehatanTableBody">
                     <?php if (empty($dataKesehatan)): ?>
                         <tr>
-                            <td colspan="9" class="text-center py-4">Belum ada data kesehatan.</td>
+                            <td colspan="10" class="text-center py-4">Belum ada data kesehatan.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($dataKesehatan as $row): ?>
@@ -492,6 +493,7 @@ function esc($str)
                                 <td><?= labelStatustindakan($row['tindakan']) ?></td>
                                 <td><?= esc($row['ib_ke'] ?? '-') ?></td>
                                 <td><?= labelStatusIB($row['status_ib']) ?></td>
+                                <td><?= formatTanggal($row['tgl_perkiraan'] ?? null) ?></td>
                                 <td class="action">
                                     <button type="button" title="Lihat" data-record="<?= $recordJson ?>" onclick="openPreview(this)">
                                         <i class="fa fa-eye"></i>

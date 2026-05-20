@@ -58,6 +58,7 @@ CREATE TABLE `data_produk` (
   `harga` float NOT NULL,
   `stok` int NOT NULL,
   `satuan` enum('liter','ton','ekor','') COLLATE utf8mb4_general_ci NOT NULL,
+  `tgl_produksi` date DEFAULT NULL,
   `tgl_kadaluarsa` date NOT NULL,
   `deskripsi` text COLLATE utf8mb4_general_ci NOT NULL,
   `status_produk` enum('terjual','blm_terjual') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
@@ -67,10 +68,10 @@ CREATE TABLE `data_produk` (
 -- Dumping data for table `data_produk`
 --
 
-INSERT INTO `data_produk` (`id_produk`, `id_hewan`, `jenis_produk`, `nama_produk`, `harga`, `stok`, `satuan`, `tgl_kadaluarsa`, `deskripsi`, `status_produk`) VALUES
-(20, NULL, 'susu', 'Susu Segar Premium', 12000, 40, 'liter', '2026-05-14', '', 'blm_terjual'),
-(22, NULL, 'rumput', 'Rumput Odot', 20000, 85, 'ton', '2099-12-31', '', 'blm_terjual'),
-(23, 23, 'hewan', 'Sapi Po', 20000000, 1, 'ekor', '2099-12-31', '', 'terjual');
+INSERT INTO `data_produk` (`id_produk`, `id_hewan`, `jenis_produk`, `nama_produk`, `harga`, `stok`, `satuan`, `tgl_produksi`, `tgl_kadaluarsa`, `deskripsi`, `status_produk`) VALUES
+(20, NULL, 'susu', 'Susu Segar Premium', 12000, 40, 'liter', NULL, '2026-05-14', '', 'blm_terjual'),
+(22, NULL, 'rumput', 'Rumput Odot', 20000, 85, 'ton', NULL, '2099-12-31', '', 'blm_terjual'),
+(23, 23, 'hewan', 'Sapi Po', 20000000, 1, 'ekor', NULL, '2099-12-31', '', 'terjual');
 
 
 CREATE TABLE `data_reproduksi` (
